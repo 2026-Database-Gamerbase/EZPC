@@ -28,22 +28,22 @@
   </tr>
   <tr height="30px">
     <td align="center">
-      <a href="https://github.com/cse2348">
+      <a href="https://github.com/EPSIHYEON">
         <b>박시현</b>
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/gyesswhat">
+      <a href="https://github.com/HongYeonLee">
         <b>이홍연</b>
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/parksuny">
+      <a href="https://github.com/CinnaPie">
         <b>장은서</b>
       </a>
     </td>
     <td align="center">
-      <a href="https://github.com/HongYeonLee">
+      <a href="https://github.com/ChunHajin">
         <b>천하진</b>
       </a>
     </td>
