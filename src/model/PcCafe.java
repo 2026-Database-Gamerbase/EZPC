@@ -1,4 +1,4 @@
-package pccafe;
+package model;
 
 public class PcCafe {
     private String pcId;

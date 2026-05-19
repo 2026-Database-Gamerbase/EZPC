@@ -1,7 +1,11 @@
-package pccafe;
+package service;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import dao.PcCafeDAO;
+import dao.PcCafeDAOImpl;
+import model.PcCafe;
 
 public class PcCafeService {
     private final PcCafeDAO pcCafeDAO;

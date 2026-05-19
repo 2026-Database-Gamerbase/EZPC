@@ -1,8 +1,10 @@
-package eventschedule;
+package dao;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+
+import model.EventSchedule;
 
 public interface EventScheduleDAO {
     void insert(EventSchedule eventSchedule) throws SQLException;

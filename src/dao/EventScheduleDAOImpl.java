@@ -1,6 +1,7 @@
-package eventschedule;
+package dao;
 
 import db.DatabaseConnector;
+import model.EventSchedule;
 
 import java.sql.Connection;
 import java.sql.Date;

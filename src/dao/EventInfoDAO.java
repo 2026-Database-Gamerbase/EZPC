@@ -1,7 +1,9 @@
-package eventinfo;
+package dao;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import model.EventInfo;
 
 public interface EventInfoDAO {
     void insert(EventInfo eventInfo) throws SQLException;
