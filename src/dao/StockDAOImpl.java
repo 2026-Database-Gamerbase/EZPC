@@ -1,8 +1,6 @@
 package dao;
 
 import model.Stock;
-import db.DatabaseConnector;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,21 +10,20 @@ import java.util.List;
 
 public class StockDAOImpl implements StockDAO {
 
-    private Connection getConnection() throws SQLException {
-        return DatabaseConnector.getConnection();
+    private final Connection conn;
+
+    public StockDAOImpl(Connection conn) {
+        this.conn = conn;
     }
 
     @Override
     public void insertStock(Stock stock) {
         String sql = "INSERT INTO stock (pc_cafe_id, food_name, stock_quantity) VALUES (?, ?, ?)";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, stock.getPcCafeId());
             pstmt.setString(2, stock.getFoodName());
             pstmt.setInt(3, stock.getStockQuantity());
             pstmt.executeUpdate();
-            
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -35,9 +32,7 @@ public class StockDAOImpl implements StockDAO {
     @Override
     public Stock getStock(String pcCafeId, String foodName) {
         String sql = "SELECT * FROM stock WHERE pc_cafe_id = ? AND food_name = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, pcCafeId);
             pstmt.setString(2, foodName);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -59,9 +54,7 @@ public class StockDAOImpl implements StockDAO {
     public List<Stock> getStocksByCafe(String pcCafeId) {
         List<Stock> stockList = new ArrayList<>();
         String sql = "SELECT * FROM stock WHERE pc_cafe_id = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, pcCafeId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -82,14 +75,11 @@ public class StockDAOImpl implements StockDAO {
     @Override
     public void updateStockQuantity(String pcCafeId, String foodName, int newQuantity) {
         String sql = "UPDATE stock SET stock_quantity = ? WHERE pc_cafe_id = ? AND food_name = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, newQuantity);
             pstmt.setString(2, pcCafeId);
             pstmt.setString(3, foodName);
             pstmt.executeUpdate();
-            
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -98,13 +88,10 @@ public class StockDAOImpl implements StockDAO {
     @Override
     public void deleteStock(String pcCafeId, String foodName) {
         String sql = "DELETE FROM stock WHERE pc_cafe_id = ? AND food_name = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, pcCafeId);
             pstmt.setString(2, foodName);
             pstmt.executeUpdate();
-            
         } catch (SQLException e) {
             e.printStackTrace();
         }

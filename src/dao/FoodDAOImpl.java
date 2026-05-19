@@ -1,7 +1,6 @@
 package dao;
 
 import model.Food;
-import db.DatabaseConnector;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,15 +11,16 @@ import java.util.List;
 
 public class FoodDAOImpl implements FoodDAO {
     
-    private Connection getConnection() throws SQLException {
-        return DatabaseConnector.getConnection();
+    private final Connection conn;
+
+    public FoodDAOImpl(Connection conn) {
+        this.conn = conn;
     }
 
     @Override
     public void insertFood(Food food) {
         String sql = "INSERT INTO food (food_name, price) VALUES (?, ?)";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, food.getFoodName());
             pstmt.setInt(2, food.getPrice());
@@ -34,8 +34,7 @@ public class FoodDAOImpl implements FoodDAO {
     @Override
     public void updateFood(Food food) {
         String sql = "UPDATE food SET price = ? WHERE food_name = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, food.getPrice());
             pstmt.setString(2, food.getFoodName());
@@ -49,8 +48,7 @@ public class FoodDAOImpl implements FoodDAO {
     @Override
     public void deleteFood(String foodName) {
         String sql = "DELETE FROM food WHERE food_name = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, foodName);
             pstmt.executeUpdate();
@@ -63,8 +61,7 @@ public class FoodDAOImpl implements FoodDAO {
     @Override
     public Food getFoodByName(String foodName) {
         String sql = "SELECT * FROM food WHERE food_name = ?";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, foodName);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -85,8 +82,7 @@ public class FoodDAOImpl implements FoodDAO {
     public List<Food> getAllFoods() {
         List<Food> foodList = new ArrayList<>();
         String sql = "SELECT * FROM food";
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
             
             while (rs.next()) {
@@ -101,5 +97,4 @@ public class FoodDAOImpl implements FoodDAO {
         }
         return foodList;
     }
-
 }
