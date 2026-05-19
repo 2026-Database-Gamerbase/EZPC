@@ -1,8 +1,12 @@
-package eventschedule;
+package service;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
+
+import dao.EventScheduleDAO;
+import dao.EventScheduleDAOImpl;
+import model.EventSchedule;
 
 public class EventScheduleService {
     private final EventScheduleDAO eventScheduleDAO;

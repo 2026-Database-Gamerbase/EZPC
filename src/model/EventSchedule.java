@@ -1,4 +1,4 @@
-package eventschedule;
+package model;
 
 import java.time.LocalDate;
 

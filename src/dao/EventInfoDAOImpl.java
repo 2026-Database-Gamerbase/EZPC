@@ -1,6 +1,7 @@
-package eventinfo;
+package dao;
 
 import db.DatabaseConnector;
+import model.EventInfo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

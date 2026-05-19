@@ -1,6 +1,7 @@
-package pccafe;
+package dao;
 
 import db.DatabaseConnector;
+import model.PcCafe;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

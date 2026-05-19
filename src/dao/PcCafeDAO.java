@@ -1,7 +1,9 @@
-package pccafe;
+package dao;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import model.PcCafe;
 
 public interface PcCafeDAO {
     void insert(PcCafe pcCafe) throws SQLException;

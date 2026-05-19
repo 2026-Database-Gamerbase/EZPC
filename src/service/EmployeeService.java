@@ -1,7 +1,11 @@
-package employee;
+package service;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import dao.EmployeeDAO;
+import dao.EmployeeDAOImpl;
+import model.Employee;
 
 public class EmployeeService {
     private final EmployeeDAO employeeDAO;

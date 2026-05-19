@@ -1,4 +1,4 @@
-package eventinfo;
+package model;
 
 public class EventInfo {
     private String eventType;

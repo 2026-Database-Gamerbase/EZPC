@@ -1,7 +1,9 @@
-package employee;
+package dao;
 
 import java.sql.SQLException;
 import java.util.List;
+
+import model.Employee;
 
 public interface EmployeeDAO {
     int insert(Employee employee) throws SQLException;

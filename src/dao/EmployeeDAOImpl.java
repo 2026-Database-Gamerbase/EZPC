@@ -1,6 +1,7 @@
-package employee;
+package dao;
 
 import db.DatabaseConnector;
+import model.Employee;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
