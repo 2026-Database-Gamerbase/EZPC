@@ -10,8 +10,8 @@ import java.util.List;
 public class FoodService {
     private final FoodDAO foodDAO;
 
-    public FoodService() {
-        this.foodDAO = new FoodDAOImpl();
+    public FoodService(FoodDAO foodDAO) {
+        this.foodDAO = foodDAO;
     }
 
     /**

@@ -8,10 +8,10 @@ import java.util.List;
 
 
 public class StockService {
-    private final StockDAO stockDAO;
+	private final StockDAO stockDAO;
 
-    public StockService() {
-        this.stockDAO = new StockDAOImpl();
+    public StockService(StockDAO stockDAO) {
+        this.stockDAO = stockDAO;
     }
 
     /**

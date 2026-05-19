@@ -8,14 +8,13 @@ import java.util.List;
 
 
 public class OrderService {
-    private final OrderDAO orderDAO;
+	private final OrderDAO orderDAO;
     private final StockService stockService;
-
-    public OrderService() {
-        this.orderDAO = new OrderDAOImpl();
-        this.stockService = new StockService();
+    
+    public OrderService(OrderDAO orderDAO, StockService stockService) {
+        this.orderDAO = orderDAO;
+        this.stockService = stockService;
     }
-
     /**
      손님 음식 주문 처리 및 재고 차감 연동
      
