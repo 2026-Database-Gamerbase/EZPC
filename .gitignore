@@ -26,7 +26,7 @@ replay_pid*
 .classpath
 .project
 .settings/
-src/DatabaseConnector.java
+src/db/DatabaseConnector.java
 
 src/db/DatabaseConnector.java
 /.metadata/
