@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dao.EventInfoDAO;
-import dao.EventInfoDAOImpl;
+import daoImpl.EventInfoDAOImpl;
 import model.EventInfo;
 
 public class EventInfoService {

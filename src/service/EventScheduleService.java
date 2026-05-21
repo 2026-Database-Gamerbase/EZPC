@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import dao.EventScheduleDAO;
-import dao.EventScheduleDAOImpl;
+import daoImpl.EventScheduleDAOImpl;
 import model.EventSchedule;
 
 public class EventScheduleService {

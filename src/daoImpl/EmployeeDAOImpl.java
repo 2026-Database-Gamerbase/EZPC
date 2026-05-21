@@ -1,4 +1,4 @@
-package dao;
+package daoImpl;
 
 import db.DatabaseConnector;
 import model.Employee;
@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import dao.EmployeeDAO;
 
 public class EmployeeDAOImpl implements EmployeeDAO {
     @Override

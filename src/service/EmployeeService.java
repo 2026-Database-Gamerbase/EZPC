@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dao.EmployeeDAO;
-import dao.EmployeeDAOImpl;
+import daoImpl.EmployeeDAOImpl;
 import model.Employee;
 
 public class EmployeeService {

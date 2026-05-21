@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dao.GradeDAO;
-import dao.GradeDAOImpl;
+import daoImpl.GradeDAOImpl;
 import model.Grade;
 
 public class GradeService {

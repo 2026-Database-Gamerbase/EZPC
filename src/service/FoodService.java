@@ -1,7 +1,7 @@
 package service;
 
 import dao.FoodDAO;
-import dao.FoodDAOImpl;
+import daoImpl.FoodDAOImpl;
 import model.Food;
 
 import java.util.List;

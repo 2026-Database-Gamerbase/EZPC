@@ -1,7 +1,7 @@
 package service;
 
 import dao.OrderDAO;
-import dao.OrderDAOImpl;
+import daoImpl.OrderDAOImpl;
 import model.Order;
 
 import java.util.List;
