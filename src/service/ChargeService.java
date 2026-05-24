@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dao.ChargeDAO;
-import dao.ChargeDAOImpl;
+import daoImpl.ChargeDAOImpl;
 import model.Charge;
 
 public class ChargeService {

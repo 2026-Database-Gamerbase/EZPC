@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dao.TicketDAO;
-import dao.TicketDAOImpl;
+import daoImpl.TicketDAOImpl;
 import model.Ticket;
 
 public class TicketService {

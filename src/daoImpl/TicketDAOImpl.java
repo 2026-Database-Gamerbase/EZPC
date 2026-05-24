@@ -1,4 +1,4 @@
-package dao;
+package daoImpl;
 
 import db.DatabaseConnector;
 import model.Ticket;
@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import dao.TicketDAO;
 
 public class TicketDAOImpl implements TicketDAO {
     @Override

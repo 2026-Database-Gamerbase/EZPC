@@ -1,4 +1,4 @@
-package dao;
+package daoImpl;
 
 import model.Food;
 
@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import dao.FoodDAO;
 
 public class FoodDAOImpl implements FoodDAO {
     

@@ -1,7 +1,7 @@
 package service;
 
 import dao.StockDAO;
-import dao.StockDAOImpl;
+import daoImpl.StockDAOImpl;
 import model.Stock;
 
 import java.util.List;

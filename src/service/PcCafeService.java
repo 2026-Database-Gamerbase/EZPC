@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import dao.PcCafeDAO;
-import dao.PcCafeDAOImpl;
+import daoImpl.PcCafeDAOImpl;
 import model.PcCafe;
 
 public class PcCafeService {
