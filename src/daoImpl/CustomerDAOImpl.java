@@ -18,7 +18,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 		this.conn = conn;
 	}
 
-	// pc방 선택 -> 좌석 선택 -> 로그인 또는 비회원 이용 선택 후 최종적으로 customer 테이블에 삽입
+	// 로그인/회원가입/비회원 -> pc방 선택 -> 좌석 선택 후 최종적으로 customer 테이블에 삽입
 	@Override
 	public void insertCustomer(Customer customer) {
 		String sql = "INSERT INTO customer (pc_cafe_id, seat_num, member_id, remaining_time) VALUES (?, ?, ?, ?)";
