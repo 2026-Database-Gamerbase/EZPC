@@ -16,14 +16,22 @@ public class EventInfoDAOImpl implements EventInfoDAO {
     @Override
     public void insert(EventInfo eventInfo) throws SQLException {
         // 이벤트 정보 1개 추가 / Insert one event info row.
-        String sql = "INSERT INTO event_info (event_type, event_content) VALUES (?, ?)";
+    	   String sql = """
+    	            INSERT INTO event_info
+    	            (event_type, event_content, event_type_num, payment_rate)
+    	            VALUES (?, ?, ?, ?)
+    	            """;
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, eventInfo.getEventType());
-            statement.setString(2, eventInfo.getEventContent());
-            statement.executeUpdate();
-        }
+    	    try (Connection connection = DatabaseConnector.getConnection();
+    	         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+    	        statement.setString(1, eventInfo.getEventType());
+    	        statement.setString(2, eventInfo.getEventContent());
+    	        statement.setInt(3, eventInfo.getEventTypeNum());
+    	        statement.setDouble(4, eventInfo.getPaymentRate());
+
+    	        statement.executeUpdate();
+    	    }
     }
 
     @Override
@@ -64,13 +72,22 @@ public class EventInfoDAOImpl implements EventInfoDAO {
 
     @Override
     public void update(EventInfo eventInfo) throws SQLException {
-        // 이벤트 종류로 이벤트 내용 수정 / Update event content by event type.
-        String sql = "UPDATE event_info SET event_content = ? WHERE event_type = ?";
+        String sql = """
+                UPDATE event_info
+                SET event_content = ?,
+                    event_type_num = ?,
+                    payment_rate = ?
+                WHERE event_type = ?
+                """;
 
         try (Connection connection = DatabaseConnector.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
+
             statement.setString(1, eventInfo.getEventContent());
-            statement.setString(2, eventInfo.getEventType());
+            statement.setInt(2, eventInfo.getEventTypeNum());
+            statement.setDouble(3, eventInfo.getPaymentRate());
+            statement.setString(4, eventInfo.getEventType());
+
             statement.executeUpdate();
         }
     }
@@ -87,11 +104,13 @@ public class EventInfoDAOImpl implements EventInfoDAO {
         }
     }
 
-    // 조회 결과 한 줄을 EventInfo 객체로 변환 / Convert one ResultSet row into an EventInfo object.
+ // 조회 결과 한 줄을 EventInfo 객체로 변환 / Convert one ResultSet row into an EventInfo object.
     private EventInfo mapToEventInfo(ResultSet resultSet) throws SQLException {
         return new EventInfo(
                 resultSet.getString("event_type"),
-                resultSet.getString("event_content")
+                resultSet.getString("event_content"),
+                resultSet.getInt("event_type_num"),
+                resultSet.getDouble("payment_rate")
         );
     }
 }
