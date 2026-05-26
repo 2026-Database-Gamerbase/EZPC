@@ -3,6 +3,7 @@ package view.auth;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import view.FontUtil;
 
 /**
  * LoginView - 통합 로그인 화면
@@ -35,7 +36,7 @@ public class LoginView extends JFrame {
 
         // 제목
         JLabel titleLabel = new JLabel("PC방 로그인");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(24));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
@@ -45,20 +46,26 @@ public class LoginView extends JFrame {
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.EAST;
-        mainPanel.add(new JLabel("ID:"), gbc);
+        JLabel idLabel = new JLabel("ID:");
+        idLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        mainPanel.add(idLabel, gbc);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         idField = new JTextField(15);
+        idField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(idField, gbc);
 
         // 비밀번호 입력
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.EAST;
-        mainPanel.add(new JLabel("Password:"), gbc);
+        JLabel pwLabel = new JLabel("Password:");
+        pwLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        mainPanel.add(pwLabel, gbc);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         passwordField = new JPasswordField(15);
+        passwordField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(passwordField, gbc);
 
         // 상태 메시지
@@ -66,6 +73,7 @@ public class LoginView extends JFrame {
         gbc.gridy = 3;
         gbc.gridwidth = 2;
         statusLabel = new JLabel(" ");
+        statusLabel.setFont(FontUtil.getKoreanFontPlain(12));
         statusLabel.setForeground(Color.RED);
         mainPanel.add(statusLabel, gbc);
 
@@ -73,12 +81,14 @@ public class LoginView extends JFrame {
         gbc.gridy = 4;
         gbc.gridwidth = 1;
         loginButton = new JButton("로그인");
+        loginButton.setFont(FontUtil.getKoreanFontBold(14));
         loginButton.setPreferredSize(new Dimension(100, 35));
         mainPanel.add(loginButton, gbc);
 
         // 회원가입 버튼
         gbc.gridx = 1;
         signUpButton = new JButton("회원가입");
+        signUpButton.setFont(FontUtil.getKoreanFontBold(14));
         signUpButton.setPreferredSize(new Dimension(100, 35));
         mainPanel.add(signUpButton, gbc);
 

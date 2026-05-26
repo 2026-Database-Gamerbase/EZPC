@@ -3,6 +3,7 @@ package view.user;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import view.FontUtil;
 
 /**
  * UserBranchSelectView - 지점 선택 화면
@@ -23,7 +24,7 @@ public class UserBranchSelectView extends JPanel {
 
         // 제목
         titleLabel = new JLabel("이용할 지점을 선택하세요");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(24));
         titleLabel.setHorizontalAlignment(JLabel.CENTER);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
@@ -47,7 +48,7 @@ public class UserBranchSelectView extends JPanel {
         branchButtons = new JButton[branchNames.length];
         for (int i = 0; i < branchNames.length; i++) {
             branchButtons[i] = new JButton(branchNames[i]);
-            branchButtons[i].setFont(new Font("Arial", Font.PLAIN, 18));
+            branchButtons[i].setFont(FontUtil.getKoreanFontPlain(18));
             branchButtons[i].setPreferredSize(new Dimension(150, 100));
             branchButtons[i].setBackground(new Color(100, 150, 255));
             branchButtons[i].setForeground(Color.WHITE);
