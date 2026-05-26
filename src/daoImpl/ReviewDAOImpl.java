@@ -32,7 +32,7 @@ public class ReviewDAOImpl implements ReviewDAO {
 			pstmt.setString(1, review.getMemberId());
 			pstmt.setInt(2, nextReviewId);
 			pstmt.setString(3, review.getPcCafeId());
-			pstmt.setBigDecimal(4, review.getStarRating());
+			pstmt.setDouble(4, review.getStarRating());
 			pstmt.setString(5, review.getReviewTitle());
 			pstmt.setString(6, review.getReviewContent());
 			
@@ -60,7 +60,7 @@ public class ReviewDAOImpl implements ReviewDAO {
 		try(PreparedStatement pstmt = conn.prepareStatement(sql)){
 			pstmt.setString(1, review.getReviewTitle());
 			pstmt.setString(2, review.getReviewContent());
-			pstmt.setBigDecimal(3, review.getStarRating());
+			pstmt.setDouble(3, review.getStarRating());
 			pstmt.setString(4, review.getMemberId());
 			pstmt.setInt(5, review.getReviewId());
 			
@@ -191,8 +191,8 @@ public class ReviewDAOImpl implements ReviewDAO {
 		// TODO Auto-generated method stub
 		String pcCafeName = getPcCafeName(review.getPcCafeId());
 		
-		double rating = review.getStarRating().doubleValue(); //demical -> double
-		int fullStar = review.getStarRating().intValue(); //리뷰의 정수 부분, 꽉찬 별
+		double rating = review.getStarRating();
+		int fullStar = (int)review.getStarRating(); //리뷰의 정수 부분, 꽉찬 별
 		
 		System.out.println("====================================");
 		System.out.printf("pc방 지점: %s ", pcCafeName);
@@ -263,7 +263,7 @@ public class ReviewDAOImpl implements ReviewDAO {
 		r.setMemberId(rs.getString("member_id"));
 		r.setPcCafeId(rs.getString("pc_cafe_id"));
 		r.setReviewId(rs.getInt("review_id"));
-		r.setStarRating(rs.getBigDecimal("star_rating"));
+		r.setStarRating(rs.getDouble("star_rating"));
 		r.setReviewTitle(rs.getString("review_title"));
 		r.setReviewContent(rs.getString("review_content"));
 		return r;
