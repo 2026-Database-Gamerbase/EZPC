@@ -5,8 +5,8 @@ import model.Customer;
 
 public interface CustomerDAO {
 	
-	//pc방 선택 -> 좌석 선택 -> 로그인 또는 비회원 이용 선택 후 최종적으로 customer 테이블에 삽입
-	void insertCustomer(Customer customer);
+	//로그인/회원가입/비회원 -> pc방 선택 -> 좌석 선택 후 최종적으로 customer 테이블에 삽입
+	boolean insertCustomer(Customer customer);
 	
 	//자리 이동
 	void updateSeatNo(String pcCafeId, int oldSeatNum, int newSeatNum);

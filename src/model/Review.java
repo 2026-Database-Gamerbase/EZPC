@@ -6,13 +6,13 @@ public class Review { //리뷰 테이블
 	private String memberId; //회원아이디 기본키, 외래키
 	private int reviewId; //리뷰 번호 기본키, 식별자
 	private String pcCafeId; //pc방 번호, 외래키
-	private BigDecimal starRating; //평균 평점
+	private double starRating; //평균 평점
 	private String reviewTitle; //리뷰 제목
 	private String reviewContent; //리뷰 내용
 	
 	public Review() {} //기본 생성자
 
-	public Review(String memberId, int reviewId, String pcCafeId, BigDecimal starRating, String reviewTitle,
+	public Review(String memberId, int reviewId, String pcCafeId, double starRating, String reviewTitle,
 			String reviewContent) {
 		super();
 		this.memberId = memberId;
@@ -47,11 +47,11 @@ public class Review { //리뷰 테이블
 		this.pcCafeId = pcCafeId;
 	}
 
-	public BigDecimal getStarRating() {
+	public double getStarRating() {
 		return starRating;
 	}
 
-	public void setStarRating(BigDecimal starRating) {
+	public void setStarRating(double starRating) {
 		this.starRating = starRating;
 	}
 
