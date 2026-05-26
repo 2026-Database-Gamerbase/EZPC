@@ -14,7 +14,12 @@ import java.util.List;
 import dao.EmployeeDAO;
 
 public class EmployeeDAOImpl implements EmployeeDAO {
-    @Override
+    public EmployeeDAOImpl() {
+		// TODO Auto-generated constructor stub
+	}
+
+
+	@Override
     public int insert(Employee employee) throws SQLException {
         // 직원 1명 추가 후 자동 생성된 ID 반환 / Insert one employee and return the generated id.
         String sql = "INSERT INTO employee (employee_name, pc_cafe_id, employee_position, hour_wage, is_currently_working) VALUES (?, ?, ?, ?, ?)";

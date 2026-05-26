@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import dao.PC_MemberDAO;
 import model.PC_Member;
@@ -16,40 +18,26 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
         this.conn = conn;
     }
 
-    //로그인 기능
+    //회원 삽입 기능 - user만 회원 가입 가능, owner는 불가능, type = user 고정
 	@Override
-	public PC_Member login(String memberId, String password) {
-		// TODO Auto-generated method stub
-		String sql = "SELECT * from pc_member WHERE member_id = ? AND member_password = ?";
-		PC_Member member = null;
-		
-		try (PreparedStatement pstmt = conn.prepareStatement(sql)){
-			pstmt.setString(1, memberId);
-			pstmt.setString(2, password);
-			
-			try(ResultSet rs = pstmt.executeQuery()){
-				if(rs.next()) {
-					member = new PC_Member(rs.getString("member_id"), rs.getString("member_password"), rs.getString("member_name")
-							, rs.getInt("remain_time"), rs.getString("grade_type"), rs.getInt("total_payment_amount"), rs.getString("member_type"));
-				}
-				else {
-					System.out.println("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
-					return member;
-				}
-			}
-			
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("로그인 중 오류 발생");
-		}
-		
-		if (member != null) {
-		    System.out.printf("로그인에 성공했습니다. 현재 회원 ID : %s\n", memberId);
-		}
-		
-		return member;
-	}
+    public void insertMember(PC_Member member) {
+        String sql = "INSERT INTO pc_member (member_id, member_password, member_name, remain_time, grade_type, total_payment_amount, member_type) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, member.getMemberId());
+            pstmt.setString(2, member.getMemberPassword());
+            pstmt.setString(3, member.getMemberName());
+            pstmt.setInt(4, member.getRemainTime());
+            pstmt.setString(5, member.getGradeType());
+            pstmt.setInt(6, member.getTotalPaymentAmount());
+            pstmt.setString(7, member.getMemberType()); // 무조건 'user'로 들어오게 Service에서 통제
+
+            pstmt.executeUpdate();
+              
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 	
 	 
 	//회원 정보 수정 기능 (이름, 비밀번호만)
@@ -57,25 +45,17 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 	public void updateMember(PC_Member member) {
 		// TODO Auto-generated method stub
 		String sql = "UPDATE pc_member SET member_password = ?, member_name = ? WHERE member_id = ?";
-		int result = -1;
 		
 		try(PreparedStatement pstmt = conn.prepareStatement(sql)){
 			pstmt.setString(1, member.getMemberPassword());
 			pstmt.setString(2, member.getMemberName());
 			pstmt.setString(3, member.getMemberId());
 			
-			result = pstmt.executeUpdate();
+			pstmt.executeUpdate();
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("회원 정보 수정 중 오류 발생");
-		}
-
-		if (result > 0) {
-		    System.out.printf("회원 정보가 수정되었습니다. 수정된 회원의 ID: %s\n", member.getMemberId());
-		} else {
-		    System.out.println("회원 정보 수정 실패: 해당 아이디가 존재하지 않습니다.");
 		}
 	}
 
@@ -84,24 +64,15 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 	public void deleteMember(PC_Member member) {
 		// TODO Auto-generated method stub
 		String sql = "DELETE FROM pc_member WHERE member_id = ?";
-		int result = -1;
 		
 		try(PreparedStatement pstmt = conn.prepareStatement(sql)){
 			pstmt.setString(1, member.getMemberId());
 			
-			result = pstmt.executeUpdate();
+			pstmt.executeUpdate();
 			
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("회원 삭제 중 오류 발생");
-		}
-		
-		if(result > 0) {
-			System.out.printf("회원이 삭제되었습니다. 삭제된 회원의 ID: %s\n", member.getMemberId());
-		}
-		else {
-			System.out.println("회원 삭제 실패: 해당 회원이 존재하지 않습니다.");
 		}
 		
 	}
@@ -119,38 +90,121 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 
 			try(ResultSet rs = pstmt.executeQuery()){
 				if(rs.next()) {
-					member = new PC_Member(rs.getString("member_id"), rs.getString("member_password"), rs.getString("member_name")
-							, rs.getInt("remain_time"), rs.getString("grade_type"), rs.getInt("total_payment_amount"), rs.getString("member_type"));
-				}
-				else {
-					System.out.println("회원 조회 실패: 아이디를 확인하세요.");
-					return member;
-				}
+					member = mapRowToMember(rs);
+				}	
 			}
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("회원 정보 조회 중 오류 발생");
         }
 
         return member;
 	}
-
+	
+	//전체 회원 조회
 	@Override
-	//회원 정보 보여주기
-	public void showMember(PC_Member member) {
+	public List<PC_Member> findAll() {
 		// TODO Auto-generated method stub
-		System.out.println("====================================");
-		System.out.printf("회원 ID: %s 회원 이름: %s 회원 종류: %s\n", member.getMemberId(), member.getMemberName(), member.getMemberType());
+		String sql = "SELECT * FROM pc_member";
+		List<PC_Member> members = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql);
+			 ResultSet rs = pstmt.executeQuery()) {
+
+			while (rs.next()) {
+				members.add(mapRowToMember(rs));
+				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return members;
+	}
+	
+	//잔여 시간 조회
+	@Override
+	public int getRemainTime(String memberId) {
+		String sql = "SELECT remain_time FROM pc_member WHERE member_id = ?";
 		
-		//운영자 회원이면 더 이상 정보를 보여주지 않음
-		if (member.getMemberType().equals("owner")) {
-			return;
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, memberId);
+			
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt("remain_time");
+				}
+			}	
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("잔여 시간 조회 중 오류 발생");
 		}
 		
-		System.out.printf("잔여시간: %d\n", member.getRemainingTime());
-		System.out.printf("등급: %s\n", member.getGradeType());
-		System.out.printf("총 결제 금액: %d\n", member.getTotalPaymentAmount());
+		return 0;
+	}
+
+	//잔여 시간 갱신 - 이용권 충전시 호출하는 함수
+	@Override
+	public void updateRemainTime(String memberId, int time) {
+		//누적 시간으로 계산함
+		String sql = "UPDATE pc_member SET remain_time = remain_time + ? WHERE member_id = ?";
+		
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, time);
+			pstmt.setString(2, memberId);
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
 	}
+
+	//총 결제 금액 누적 - 이용권 충전시 호출하는 함수
+	@Override
+	public void addTotalPayment(String memberId, int amount) {
+		//누적 합으로 계산함
+		String sql = "UPDATE pc_member SET total_payment_amount = total_payment_amount + ? WHERE member_id = ?";
+		
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setInt(1, amount);
+			pstmt.setString(2, memberId);
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	//회원 등급 갱신 - 이용권 충전시 호출하는 함수
+	@Override
+	public void updateUserGrade(String memberId, String gradeType) {
+		String sql = "UPDATE pc_member SET grade_type = ? WHERE member_id = ?";
+		
+		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+			pstmt.setString(1, gradeType);
+			pstmt.setString(2, memberId);
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+
+	private PC_Member mapRowToMember(ResultSet rs) throws SQLException {
+		return new PC_Member(
+			rs.getString("member_id"),
+			rs.getString("member_password"),
+			rs.getString("member_name"),
+			rs.getInt("remain_time"),
+			rs.getString("grade_type"),
+			rs.getInt("total_payment_amount"),
+			rs.getString("member_type")
+		);
+	}
+
+
 
 }

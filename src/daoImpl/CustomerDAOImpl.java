@@ -20,28 +20,21 @@ public class CustomerDAOImpl implements CustomerDAO {
 
 	// 로그인/회원가입/비회원 -> pc방 선택 -> 좌석 선택 후 최종적으로 customer 테이블에 삽입
 	@Override
-	public void insertCustomer(Customer customer) {
+	public boolean insertCustomer(Customer customer) {
 		String sql = "INSERT INTO customer (pc_cafe_id, seat_num, member_id, remaining_time) VALUES (?, ?, ?, ?)";
-		int result = -1;
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, customer.getPcCafeId());
 			pstmt.setInt(2, customer.getSeatNum());
-			pstmt.setString(3, customer.getMemberId()); // 회원 ID 또는 비회원일 경우 null
+			pstmt.setString(3, customer.getMemberId()); 
 			pstmt.setInt(4, customer.getRemainingTime());
 
-			result = pstmt.executeUpdate();
+			int result = pstmt.executeUpdate();
+			return result > 0; // 성공하면 true
 			
 		} catch (SQLException e) {
-			e.printStackTrace();
-			System.out.println("손님 등록 중 오류 발생");
-		}
-
-		if (result > 0) {
-			System.out.printf("[%s] %d번 좌석에 손님 등록이 완료되었습니다.\n", 
-					getPcCafeName(customer.getPcCafeId()), customer.getSeatNum());
-		} else {
-			System.out.println("손님 등록 실패: 입력 데이터를 확인하세요.");
+			// 누군가 0.1초 차이로 먼저 자리를 차지해서 DB 유니크 에러가 났을 때
+			return false; 
 		}
 	}
 
@@ -49,74 +42,55 @@ public class CustomerDAOImpl implements CustomerDAO {
 	@Override
 	public void updateSeatNo(String pcCafeId, int oldSeatNum, int newSeatNum) {
 		String sql = "UPDATE customer SET seat_num = ? WHERE pc_cafe_id = ? AND seat_num = ?";
-		int result = -1;
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setInt(1, newSeatNum);
 			pstmt.setString(2, pcCafeId);
 			pstmt.setInt(3, oldSeatNum);
 
-			result = pstmt.executeUpdate();
+			pstmt.executeUpdate();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.out.println("좌석 이동 중 오류 발생");
 		}
 
-		if (result > 0) {
-			System.out.printf("[%s] 손님의 좌석이 %d번에서 %d번으로 변경되었습니다.\n", 
-					getPcCafeName(pcCafeId), oldSeatNum, newSeatNum);
-		} else {
-			System.out.println("좌석 이동 실패: 유효한 좌석 번호인지 확인하세요.");
-		}
 	}
 
 	// 로그아웃
 	@Override
 	public void deleteCustomer(String pcCafeId, int seatNum) {
 		String sql = "DELETE FROM customer WHERE pc_cafe_id = ? AND seat_num = ?";
-		int result = -1;
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, pcCafeId);
 			pstmt.setInt(2, seatNum);
 
-			result = pstmt.executeUpdate();
+			pstmt.executeUpdate();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			System.out.println("로그아웃 처리 중 오류 발생");
-		}
-
-		if (result > 0) {
-			System.out.printf("[%s] %d번 좌석의 손님이 로그아웃되었습니다.\n", getPcCafeName(pcCafeId), seatNum);
-		} else {
-			System.out.println("퇴실 처리 실패: 해당 좌석에 손님이 없습니다.");
 		}
 	}
 
 	// 실시간 잔여 시간 갱신
 	@Override
-	public void updateRemainingTime(String pcCafeId, int seatNum, int remainingTime) {
+	public void updateRemainingTime(String pcCafeId, int seatNum, int updatedTime) {
 		String sql = "UPDATE customer SET remaining_time = ? WHERE pc_cafe_id = ? AND seat_num = ?";
-		int result = -1;
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-			pstmt.setInt(1, remainingTime);
+			pstmt.setInt(1, updatedTime);
 			pstmt.setString(2, pcCafeId);
 			pstmt.setInt(3, seatNum);
 
-			result = pstmt.executeUpdate();
+			pstmt.executeUpdate();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
-			System.out.println("실시간 잔여 시간 갱신 중 오류 발생");
 		}
 
-		if (result > 0) {
-			System.out.printf("[%s] %d번 좌석 잔여 시간 갱신: %d분\n", getPcCafeName(pcCafeId), seatNum, remainingTime);
-		}
 	}
+	
 
 	// 특정 PC방의 손님 조회 - 좌석 선택 단계에서 호출하는 함수
 	@Override
@@ -134,7 +108,6 @@ public class CustomerDAOImpl implements CustomerDAO {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			System.out.println("특정 PC방의 손님 조회 중 오류 발생");
 		}
 		return customers;
 	}
@@ -156,7 +129,6 @@ public class CustomerDAOImpl implements CustomerDAO {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			System.out.println("특정 PC방의 좌석별 손님 조회 중 오류 발생");
 		}
 		return customer;
 	}
@@ -182,7 +154,6 @@ public class CustomerDAOImpl implements CustomerDAO {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			System.out.println("회원 ID별 조회 중 오류 발생");
 		}
 		return customer;
 	}
@@ -201,7 +172,6 @@ public class CustomerDAOImpl implements CustomerDAO {
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			System.out.println("전체 이용객 조회 중 오류 발생");
 		}
 		return customers;
 	}
