@@ -31,7 +31,7 @@ public class PC_MemberService {
         newMember.setMemberPassword(pw);
         newMember.setMemberName(name);
         newMember.setRemainTime(0);              // 초기 시간 0
-        newMember.setGradeType("null");        // 기본 등급
+        newMember.setGradeType(null);        // 기본 등급
         newMember.setTotalPaymentAmount(0);      // 초기 결제 0
         newMember.setMemberType("user");         // 일반 사용자만 회원 가입 가능, 운영자로 회원 가입 불가능
 
