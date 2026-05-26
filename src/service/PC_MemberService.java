@@ -31,7 +31,7 @@ public class PC_MemberService {
         newMember.setMemberPassword(pw);
         newMember.setMemberName(name);
         newMember.setRemainTime(0);              // 초기 시간 0
-        newMember.setGradeType(null);        // 기본 등급
+        newMember.setGradeType("bronze");        // 기본 등급
         newMember.setTotalPaymentAmount(0);      // 초기 결제 0
         newMember.setMemberType("user");         // 일반 사용자만 회원 가입 가능, 운영자로 회원 가입 불가능
 
@@ -91,7 +91,7 @@ public class PC_MemberService {
             int totalPayment = member.getTotalPaymentAmount(); // 총 결제 금액
             String currentGrade = member.getGradeType(); //현재 등급
             
-            String newGrade = null; // 기본 등급 세팅 (총 결제 금액 20만 원 미만일 경우 기본값)
+            String newGrade = "bronze"; // 기본 등급 세팅 (총 결제 금액 20만 원 미만일 경우 기본값)
             int maxStandard = 0;
             
             try {
