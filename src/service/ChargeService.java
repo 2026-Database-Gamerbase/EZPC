@@ -10,18 +10,24 @@ import model.Charge;
 public class ChargeService {
     private final ChargeDAO chargeDAO;
 
-    public ChargeService() {
-        this(new ChargeDAOImpl());
-    }
+   // public ChargeService() {
+   //     this(new ChargeDAOImpl());
+   // }
 
     public ChargeService(ChargeDAO chargeDAO) {
         this.chargeDAO = chargeDAO;
     }
 
-    public int recordCharge(Charge charge) throws SQLException {
-        validateCharge(charge);
-        return chargeDAO.insert(charge);
-    }
+//    public int recordCharge(Charge charge) throws SQLException {
+//    		validateCharge(charge);
+//    		return chargeDAO.insert(charge);
+//    }
+    
+	  public void recordCharge(Charge charge) throws SQLException {
+		validateCharge(charge);
+		// 충전시 등급, 총 결제 금액, 이벤트 확인 진행 (프로시저) 
+		chargeDAO.chargeCustomer(charge);
+	}
 
     public Charge getCharge(int chargeId) throws SQLException {
         return chargeDAO.findById(chargeId);

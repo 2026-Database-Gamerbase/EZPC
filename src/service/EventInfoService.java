@@ -11,9 +11,6 @@ public class EventInfoService {
     // 이벤트 정보 관련 비즈니스 로직 담당 / Handles event info business logic.
     private final EventInfoDAO eventInfoDAO;
 
-    public EventInfoService() {
-        this(new EventInfoDAOImpl());
-    }
 
     public EventInfoService(EventInfoDAO eventInfoDAO) {
         this.eventInfoDAO = eventInfoDAO;

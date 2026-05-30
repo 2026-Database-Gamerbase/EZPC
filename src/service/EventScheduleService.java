@@ -1,19 +1,16 @@
 package service;
 
 import java.sql.SQLException;
+
 import java.time.LocalDate;
 import java.util.List;
 
 import dao.EventScheduleDAO;
-import daoImpl.EventScheduleDAOImpl;
 import model.EventSchedule;
 
 public class EventScheduleService {
     private final EventScheduleDAO eventScheduleDAO;
 
-    public EventScheduleService() {
-        this(new EventScheduleDAOImpl());
-    }
 
     public EventScheduleService(EventScheduleDAO eventScheduleDAO) {
         this.eventScheduleDAO = eventScheduleDAO;

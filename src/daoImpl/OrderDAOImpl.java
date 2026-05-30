@@ -18,20 +18,21 @@ public class OrderDAOImpl implements OrderDAO {
         this.conn = conn;
     }
 
+ //throws SQLException -> DB 작업 중 오류가 발생하면 이 메서드에서 처리하지 않고 호출한 상위 메서드로 예외를 전달한다.
+ // catch 에서 출력만 하고 끝내면 호출자는 실패를 알 수 없어 정상 처리된 것으로 오해할 수 있다.
     @Override
-    public void insertOrder(Order order) {
-        String sql = "INSERT INTO food_order (order_id, food_name, pc_cafe_id, seat_num, food_quantity, food_pay_amount) VALUES (?, ?, ?, ?, ?, ?)";
+    public void insertOrder(Order order) throws SQLException {
+        String sql = "INSERT INTO food_order (order_id, food_name, pc_cafe_id, seat_num, food_quantity,payment_rate, food_pay_amount) VALUES (?, ?, ?, ?, ?,?, ?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, order.getOrderId());
             pstmt.setString(2, order.getFoodName());
             pstmt.setString(3, order.getPcCafeId());
             pstmt.setInt(4, order.getSeatNum());
             pstmt.setInt(5, order.getFoodQuantity());
-            pstmt.setInt(6, order.getFoodPayAmount());
+            pstmt.setDouble(6, order.getPaymentRate());
+            pstmt.setInt(7, order.getFoodPayAmount());
             pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        } 
     }
 
     @Override
@@ -63,6 +64,7 @@ public class OrderDAOImpl implements OrderDAO {
                         rs.getInt("seat_num"),
                         rs.getInt("food_quantity"),
                         rs.getInt("food_pay_amount"),
+                        rs.getDouble("payment_rate"),
                         rs.getTimestamp("ordered_at")
                     );
                     orderList.add(order);
@@ -89,6 +91,7 @@ public class OrderDAOImpl implements OrderDAO {
                         rs.getInt("seat_num"),
                         rs.getInt("food_quantity"),
                         rs.getInt("food_pay_amount"),
+                        rs.getDouble("payment_rate"),
                         rs.getTimestamp("ordered_at")
                     );
                     orderList.add(order);

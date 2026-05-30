@@ -71,11 +71,11 @@ public class Main {
             //dao 생성
             PC_MemberDAO memberDao = new PC_MemberDAOImpl(conn);
             PcCafeDAO pcCafeDao = new PcCafeDAOImpl(); 
-            ChargeDAO chargeDao = new ChargeDAOImpl();
+            ChargeDAO chargeDao = new ChargeDAOImpl(conn);
             CustomerDAO customerDao = new CustomerDAOImpl(conn);
             EmployeeDAO employeeDao = new EmployeeDAOImpl();
-            EventInfoDAO eventInfoDao = new EventInfoDAOImpl();
-            EventScheduleDAO eventScheduleDao = new EventScheduleDAOImpl();
+            EventInfoDAO eventInfoDao = new EventInfoDAOImpl(conn);
+            EventScheduleDAO eventScheduleDao = new EventScheduleDAOImpl(conn);
             FoodDAO foodDao = new FoodDAOImpl(conn);
             GradeDAO gradeDao = new GradeDAOImpl();
             LogDAO logDao = new LogDAOImpl();
@@ -89,7 +89,7 @@ public class Main {
             PC_MemberService pcMemberService = new PC_MemberService(memberDao, gradeDao);
             PcCafeService pcCafeService = new PcCafeService(pcCafeDao);
             CustomerService customerService = new CustomerService(customerDao);
-            ChargeService chargeService = new ChargeService();
+            ChargeService chargeService = new ChargeService(chargeDao);
             EmployeeService employeeService = new EmployeeService(employeeDao);
             EventInfoService eventInfoService = new EventInfoService(eventInfoDao);
             EventScheduleService eventScheduleService = new EventScheduleService(eventScheduleDao);
@@ -99,7 +99,7 @@ public class Main {
             ReviewService reviewService = new ReviewService(reviewDao);
             SalesReportService salesReportService = new SalesReportService(salesReportDao);
             StockService stockService = new StockService(stockDao);
-            OrderService orderService = new OrderService(orderDao, stockService);
+            OrderService orderService = new OrderService(conn, orderDao, stockService, foodDao, eventScheduleDao);
             TicketService ticketService = new TicketService(ticketDao);
 
             //controller 생성 및 뷰, 서비스 주입

@@ -1,8 +1,9 @@
 package daoImpl;
 
 import db.DatabaseConnector;
-import model.Charge;
 
+import model.Charge;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,37 +14,64 @@ import java.util.List;
 import dao.ChargeDAO;
 
 public class ChargeDAOImpl implements ChargeDAO {
-    @Override
-    public int insert(Charge charge) throws SQLException {
-        String sql = "INSERT INTO charge (pc_cafe_id, seat_num, ticket_time, member_id, charge_pay_amount) VALUES (?, ?, ?, ?, ?)";
+	
+	private Connection conn;
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, charge.getPcCafeId());
-            statement.setInt(2, charge.getSeatNum());
-            statement.setInt(3, charge.getTicketTime());
-            statement.setString(4, charge.getMemberId());
-            statement.setInt(5, charge.getChargePayAmount());
-            statement.executeUpdate();
+	public ChargeDAOImpl(Connection conn) {
+		this.conn = conn;
+	}
 
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    int generatedId = generatedKeys.getInt(1);
-                    charge.setChargeId(generatedId);
-                    return generatedId;
-                }
-            }
-        }
+	
+	public void chargeCustomer(Charge charge) throws SQLException {
+		// 프로시저 호출 
+	    String sql = "{CALL charge_customer(?, ?, ?, ?)}";
+	    //CallableStatement -> DB 프로시저 호출할때 사용 
+	    try (CallableStatement stmt = conn.prepareCall(sql)) {
+	        stmt.setString(1, charge.getPcCafeId());
+	        stmt.setInt(2, charge.getSeatNum());
+	        stmt.setString(3, charge.getMemberId());
+	        stmt.setInt(4, charge.getTicketTime());
+	        stmt.execute();
+	    }
+	}
+	
+	
+	@Override
+	public int insert(Charge charge) throws SQLException {
+	    String sql = """
+	            INSERT INTO charge
+	            (pc_cafe_id, seat_num, ticket_time, member_id, charge_pay_amount, payment_rate)
+	            VALUES (?, ?, ?, ?, ?, ?)
+	            """;
 
-        return 0;
-    }
+	    try (PreparedStatement statement =
+	                 conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
+	        statement.setString(1, charge.getPcCafeId());
+	        statement.setInt(2, charge.getSeatNum());
+	        statement.setInt(3, charge.getTicketTime());
+	        statement.setString(4, charge.getMemberId());
+	        statement.setInt(5, charge.getChargePayAmount());
+	        statement.setDouble(6, 1.00); // 기존 insert 방식은 이벤트 계산 없이 기본 결제비율 적용
+
+	        statement.executeUpdate();
+
+	        try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+	            if (generatedKeys.next()) {
+	                int generatedId = generatedKeys.getInt(1);
+	                charge.setChargeId(generatedId);
+	                return generatedId;
+	            }
+	        }
+	    }
+
+	    return 0;
+	}
     @Override
     public Charge findById(int chargeId) throws SQLException {
         String sql = "SELECT * FROM charge WHERE charge_id = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, chargeId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -61,8 +89,7 @@ public class ChargeDAOImpl implements ChargeDAO {
         String sql = "SELECT * FROM charge";
         List<Charge> charges = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
+        try (PreparedStatement statement = conn.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 charges.add(mapToCharge(resultSet));
@@ -77,8 +104,7 @@ public class ChargeDAOImpl implements ChargeDAO {
         String sql = "SELECT * FROM charge WHERE pc_cafe_id = ? ORDER BY charged_at DESC";
         List<Charge> charges = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, pcCafeId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -96,8 +122,7 @@ public class ChargeDAOImpl implements ChargeDAO {
         String sql = "SELECT * FROM charge WHERE member_id = ? ORDER BY charged_at DESC";
         List<Charge> charges = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, memberId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -114,8 +139,7 @@ public class ChargeDAOImpl implements ChargeDAO {
     public void deleteById(int chargeId) throws SQLException {
         String sql = "DELETE FROM charge WHERE charge_id = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, chargeId);
             statement.executeUpdate();
         }

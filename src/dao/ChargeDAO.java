@@ -6,6 +6,8 @@ import model.Charge;
 
 public interface ChargeDAO {
     int insert(Charge charge) throws SQLException;
+    
+    void chargeCustomer(Charge charge) throws SQLException;
 
     Charge findById(int chargeId) throws SQLException;
 
