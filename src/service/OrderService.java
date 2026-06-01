@@ -5,6 +5,7 @@ import java.sql.Connection;
 import dao.FoodDAO;
 import dao.EventScheduleDAO;
 import daoImpl.OrderDAOImpl;
+import model.Food;
 import model.Order;
 
 import java.util.List;
@@ -148,10 +149,10 @@ public class OrderService {
 
     /**
      지점별 전체 누적 주문 내역 조회
-     
+
      @param pcCafeId PC방 지점 ID
      @return 지점 주문 내역 리스트
-     
+
     **/
     public List<Order> getCafeOrderHistory(String pcCafeId) {
         List<Order> history = orderDAO.getOrdersByCafe(pcCafeId);
@@ -160,5 +161,16 @@ public class OrderService {
             throw new IllegalArgumentException("지점 주문 내역을 불러오는 데 실패했습니다.");
         }
         return history;
+    }
+
+    
+    //이 음식을 먹은 손님이 함께 주문한 상위 3개 상품 추천
+    //추천 음식이 담긴 리스트를 리턴함. 리스트의 인덱스 순서대로 1, 2, 3위 순서로 많이 시킨 음식임 ex) 불닭볶음면 고름 -> ['카레라이스', '진라면 매운맛', '진라면 순한맛'] 리턴
+    //데이터가 없으면 빈 리스트 리턴
+    public List<Food> getFoodRecommendations(String foodName) { //foodName은 손님이 현재 고른 음식
+        if (foodName == null || foodName.trim().isEmpty()) {
+            return List.of(); //손님이 고른 음식이 없다면 빈 리스트 리턴
+        }
+        return orderDAO.getRecommendedFoods(foodName.trim()); //리턴 값은 손님이 현재 고른 음식을 다른 손님이 함께 주문한 상위 3개 음식 리스트
     }
 }
