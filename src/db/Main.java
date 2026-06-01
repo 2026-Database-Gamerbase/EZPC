@@ -78,7 +78,7 @@ public class Main {
             EventScheduleDAO eventScheduleDao = new EventScheduleDAOImpl(conn);
             FoodDAO foodDao = new FoodDAOImpl(conn);
             GradeDAO gradeDao = new GradeDAOImpl();
-            LogDAO logDao = new LogDAOImpl();
+            LogDAO logDao = new LogDAOImpl(conn);
             OrderDAO orderDao = new OrderDAOImpl(conn);
             ReviewDAO reviewDao = new ReviewDAOImpl(conn);
             SalesReportDAO salesReportDao = new SalesReportDAOImpl(conn);
@@ -88,7 +88,7 @@ public class Main {
             //서비스 생성 및 dao 
             PC_MemberService pcMemberService = new PC_MemberService(memberDao, gradeDao);
             PcCafeService pcCafeService = new PcCafeService(pcCafeDao);
-            CustomerService customerService = new CustomerService(customerDao);
+            CustomerService customerService = new CustomerService(conn, customerDao, logDao, memberDao);
             ChargeService chargeService = new ChargeService(chargeDao);
             EmployeeService employeeService = new EmployeeService(employeeDao);
             EventInfoService eventInfoService = new EventInfoService(eventInfoDao);

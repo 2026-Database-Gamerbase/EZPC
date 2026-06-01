@@ -131,7 +131,7 @@ public class View {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		String currentTime = now.format(formatter);
 			
-		System.out.printf("손님의 잔여 시간: %d분 남았습니다. (현재 시각 : %s 기준)\n", c.getRemainingTime(), currentTime);
+		System.out.printf("손님의 잔여 시간: %d분 남았습니다. (현재 시각 : %s 기준)\n", c.getRemainTime(), currentTime);
 	}
 	
 	//이용권 보여주기

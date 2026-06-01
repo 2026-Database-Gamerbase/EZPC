@@ -150,7 +150,7 @@ public class Controller {
 					newCustomer.setPcCafeId(pcNum);
 					newCustomer.setSeatNum(selectedSeat);
 					newCustomer.setMemberId(loggedInMemberId);
-					newCustomer.setRemainingTime(loggedInMemberRemainingTime);
+					newCustomer.setRemainTime(loggedInMemberRemainingTime);
 					
 					// 동시성 방어 로직 (0.1초 차이로 좌석 뺏긴 경우 처리)
 					boolean isSuccess = customerService.checkIn(newCustomer);
@@ -210,11 +210,11 @@ public class Controller {
 					chargeService.recordCharge(newCharge);
 					
 					//손님 테이블 시간 누적 업데이트
-					int updatedTime = customer.getRemainingTime() + addTime;
+					int updatedTime = customer.getRemainTime() + addTime;
 					customerService.addRemainingTime(customer.getPcCafeId(), customer.getSeatNum(), updatedTime);
 					
 					//현재 콘솔을 이용 중인 customer 객체의 잔여 시간 필드도 동기화 (화면 출력용)
-					customer.setRemainingTime(updatedTime);
+					customer.setRemainTime(updatedTime);
 					
 					//회원일 경우에만 누적 결제금액 증가 및 등급 반영
 					if (customer.getMemberId() != null) {

@@ -4,16 +4,16 @@ public class Customer { //손님 테이블
 	private String pcCafeId; //pc방 번호
 	private int seatNum; //좌석 번호
 	private String memberId; //회원 아이디
-	private int remainingTime; //잔여시간 - 회원 테이블 참조 예정
+	private int remainTime; //잔여시간 - 회원 테이블 참조 예정
 	
 	public Customer() {} //기본생성자
 
-	public Customer(String pcCafeId, int seatNum, String memberId, int remainingTime) {
+	public Customer(String pcCafeId, int seatNum, String memberId, int remainTime) {
 		super();
 		this.pcCafeId = pcCafeId;
 		this.seatNum = seatNum;
 		this.memberId = memberId;
-		this.remainingTime = remainingTime;
+		this.remainTime = remainTime;
 	}
 
 	public String getPcCafeId() {
@@ -40,12 +40,12 @@ public class Customer { //손님 테이블
 		this.memberId = memberId;
 	}
 
-	public int getRemainingTime() {
-		return remainingTime;
+	public int getRemainTime() {
+		return remainTime;
 	}
 
-	public void setRemainingTime(int remainingTime) {
-		this.remainingTime = remainingTime;
+	public void setRemainTime(int remainingTime) {
+		this.remainTime = remainingTime;
 	}
 	
 	
