@@ -14,6 +14,8 @@ public interface EventScheduleDAO {
     List<EventSchedule> findAll() throws SQLException;
 
     List<EventSchedule> findByPcId(String pcId) throws SQLException;
+    
+    double findCurrentOrderPaymentRate(String pcCafeId) throws SQLException;
 
     void update(EventSchedule eventSchedule) throws SQLException;
 

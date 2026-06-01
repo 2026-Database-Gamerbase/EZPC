@@ -10,20 +10,23 @@ public class Order {
     private int seatNum;             // 좌석 번호
     private int foodQuantity;        // 주문 수량
     private int foodPayAmount;       // 해당 음식 결제 금액
+    private double paymentRate;      // 주문 결제비율(1- 할인율) 
     private Timestamp orderedAt;     // 주문 시각
 
     // 기본 생성자
     public Order() {}
 
     // 모든 필드를 포함한 생성자
-    public Order(int orderId, String foodName, String pcCafeId, int seatNum, int foodQuantity, int foodPayAmount, Timestamp orderedAt) {
+    public Order(int orderId, String foodName, String pcCafeId, int seatNum, int foodQuantity, int foodPayAmount, double paymentRate, Timestamp orderedAt) {
         this.orderId = orderId;
         this.foodName = foodName;
         this.pcCafeId = pcCafeId;
         this.seatNum = seatNum;
         this.foodQuantity = foodQuantity;
         this.foodPayAmount = foodPayAmount;
+        this.paymentRate = paymentRate;
         this.orderedAt = orderedAt;
+        
     }
 
     public int getOrderId() { return orderId; }
@@ -43,8 +46,13 @@ public class Order {
 
     public int getFoodPayAmount() { return foodPayAmount; }
     public void setFoodPayAmount(int foodPayAmount) { this.foodPayAmount = foodPayAmount; }
+    
+    
 
-    public Timestamp getOrderedAt() { return orderedAt; }
+    public double getPaymentRate() { return paymentRate;}
+	public void setPaymentRate(double paymentRate) { this.paymentRate = paymentRate; }
+
+	public Timestamp getOrderedAt() { return orderedAt; }
     public void setOrderedAt(Timestamp orderedAt) { this.orderedAt = orderedAt; }
 
     @Override
