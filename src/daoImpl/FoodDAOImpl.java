@@ -2,6 +2,7 @@ package daoImpl;
 
 import model.Food;
 
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,6 +60,26 @@ public class FoodDAOImpl implements FoodDAO {
             e.printStackTrace();
         }
     }
+    
+    @Override //이름으로 가격 찾기 (주문의 총결제금액에 가격을 넣기 위해 만듬)
+    public int findPriceByFoodName(String foodName) {
+        String sql = "SELECT price FROM food WHERE food_name = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, foodName);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("price");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        throw new IllegalArgumentException("존재하지 않는 음식입니다: " + foodName);
+    }
+        
 
     @Override
     public Food getFoodByName(String foodName) {

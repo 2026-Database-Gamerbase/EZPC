@@ -10,6 +10,6 @@ public interface FoodDAO {
     void deleteFood(String foodName);
     
     Food getFoodByName(String foodName);
-    
+    int findPriceByFoodName(String foodName);
     List<Food> getAllFoods();
 }

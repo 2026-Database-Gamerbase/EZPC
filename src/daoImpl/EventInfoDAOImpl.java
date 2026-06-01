@@ -1,6 +1,5 @@
 package daoImpl;
 
-import db.DatabaseConnector;
 import model.EventInfo;
 
 import java.sql.Connection;
@@ -13,6 +12,15 @@ import java.util.List;
 import dao.EventInfoDAO;
 
 public class EventInfoDAOImpl implements EventInfoDAO {
+	
+	private final Connection conn;
+
+	public EventInfoDAOImpl(Connection conn) {
+	    this.conn = conn;
+	}
+	
+	
+	
     @Override
     public void insert(EventInfo eventInfo) throws SQLException {
         // 이벤트 정보 1개 추가 / Insert one event info row.
@@ -22,8 +30,7 @@ public class EventInfoDAOImpl implements EventInfoDAO {
     	            VALUES (?, ?, ?, ?)
     	            """;
 
-    	    try (Connection connection = DatabaseConnector.getConnection();
-    	         PreparedStatement statement = connection.prepareStatement(sql)) {
+    	    try (PreparedStatement statement = conn.prepareStatement(sql)) {
 
     	        statement.setString(1, eventInfo.getEventType());
     	        statement.setString(2, eventInfo.getEventContent());
@@ -39,8 +46,8 @@ public class EventInfoDAOImpl implements EventInfoDAO {
         // 이벤트 종류로 이벤트 정보 조회 / Select one event info by event type.
         String sql = "SELECT * FROM event_info WHERE event_type = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)
+             ) {
             statement.setString(1, eventType);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -59,8 +66,7 @@ public class EventInfoDAOImpl implements EventInfoDAO {
         String sql = "SELECT * FROM event_info";
         List<EventInfo> eventInfos = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
+        try (PreparedStatement statement = conn.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 eventInfos.add(mapToEventInfo(resultSet));
@@ -80,8 +86,7 @@ public class EventInfoDAOImpl implements EventInfoDAO {
                 WHERE event_type = ?
                 """;
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
 
             statement.setString(1, eventInfo.getEventContent());
             statement.setInt(2, eventInfo.getEventTypeNum());
@@ -97,8 +102,7 @@ public class EventInfoDAOImpl implements EventInfoDAO {
         // 이벤트 종류로 이벤트 정보 삭제 / Delete one event info by event type.
         String sql = "DELETE FROM event_info WHERE event_type = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, eventType);
             statement.executeUpdate();
         }
