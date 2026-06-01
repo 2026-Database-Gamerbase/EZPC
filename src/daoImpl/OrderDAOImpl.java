@@ -2,6 +2,7 @@ package daoImpl;
 
 import model.Food;
 import model.Order;
+import model.FoodRankingReport;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dao.OrderDAO;
+
 
 public class OrderDAOImpl implements OrderDAO {
 
@@ -164,5 +166,105 @@ public class OrderDAOImpl implements OrderDAO {
             e.printStackTrace();
         }
         return result;
+    }
+    
+    
+    // 해당 PC방의 가장 잘 팔린 음식 TOP5 
+    // (음식, 음식 가격, 음식 총 판매 수량, 음식 총 결제 금액 출력 가능)
+    @Override
+    public List<FoodRankingReport> getTop5FoodRankingByPcCafe(String pcCafeId) {
+        List<FoodRankingReport> list = new ArrayList<>();
+
+        String sql =
+            "WITH FoodSales AS ( " +
+            "    SELECT " +
+            "        fo.food_name AS foodName, " +
+            "        f.price AS foodPrice, " +
+            "        SUM(fo.food_quantity) AS totalQuantity, " +
+            "        SUM(fo.food_pay_amount) AS totalSales, " +
+            "        DENSE_RANK() OVER ( " +
+            "            ORDER BY SUM(fo.food_quantity) DESC, SUM(fo.food_pay_amount) DESC " +
+            "        ) AS ranking " +
+            "    FROM food_order fo " +
+            "    JOIN food f ON fo.food_name = f.food_name " +
+            "    WHERE fo.pc_cafe_id = ? " +
+            "    GROUP BY fo.food_name, f.price " +
+            ") " +
+            "SELECT ranking, foodName, foodPrice, totalQuantity, totalSales " +
+            "FROM FoodSales " +
+            "WHERE ranking <= 5 " +
+            "ORDER BY ranking";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, pcCafeId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                	FoodRankingReport report = new FoodRankingReport();
+                    report.setRanking(rs.getInt("ranking"));
+                    report.setFoodName(rs.getString("foodName"));
+                    report.setFoodPrice(rs.getInt("foodPrice"));
+                    report.setTotalQuantity(rs.getInt("totalQuantity"));
+                    report.setTotalSales(rs.getInt("totalSales"));
+                    list.add(report);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("지점별 음식 판매 랭킹 TOP 5 조회 중 오류 발생");
+        }
+
+        return list;
+    }
+    
+    
+    
+ // 전체 PC방의 지점별 음식 판매 TOP 5
+   //(PC방id, 음식, 음식 가격, 음식 총 판매 수량, 음식 총 결제 금액 출력 가능)
+    @Override
+    public List<FoodRankingReport> getTop5FoodRankingAllPcCafe() {
+        List<FoodRankingReport> list = new ArrayList<>();
+
+        String sql =
+            "WITH FoodSales AS ( " +
+            "    SELECT " +
+            "        fo.pc_cafe_id AS pcCafeId, " +
+            "        fo.food_name AS foodName, " +
+            "        f.price AS foodPrice, " +
+            "        SUM(fo.food_quantity) AS totalQuantity, " +
+            "        SUM(fo.food_pay_amount) AS totalSales, " +
+            "        DENSE_RANK() OVER ( " +
+            "            PARTITION BY fo.pc_cafe_id " +
+            "            ORDER BY SUM(fo.food_quantity) DESC, SUM(fo.food_pay_amount) DESC " +
+            "        ) AS ranking " +
+            "    FROM food_order fo " +
+            "    JOIN food f ON fo.food_name = f.food_name " +
+            "    GROUP BY fo.pc_cafe_id, fo.food_name, f.price " +
+            ") " +
+            "SELECT pcCafeId, ranking, foodName, foodPrice, totalQuantity, totalSales " +
+            "FROM FoodSales " +
+            "WHERE ranking <= 5 " +
+            "ORDER BY pcCafeId, ranking";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                FoodRankingReport report = new FoodRankingReport();
+                report.setPcCafeId(rs.getString("pcCafeId"));
+                report.setRanking(rs.getInt("ranking"));
+                report.setFoodName(rs.getString("foodName"));
+                report.setFoodPrice(rs.getInt("foodPrice"));
+                report.setTotalQuantity(rs.getInt("totalQuantity"));
+                report.setTotalSales(rs.getInt("totalSales"));
+                list.add(report);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("전체 지점별 음식 판매 랭킹 TOP 5 조회 중 오류 발생");
+        }
+
+        return list;
     }
 }

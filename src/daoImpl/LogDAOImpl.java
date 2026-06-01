@@ -13,7 +13,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class LogDAOImpl implements LogDAO {
@@ -191,6 +193,65 @@ public class LogDAOImpl implements LogDAO {
             statement.executeUpdate();
         }
     }
+    
+    // 연별, 월별, 일별 가능한 해당 PC방의  시간 대 별 입장 손님 수 
+    // 예시: 일별 findCustomerEntryCounts(pcCafeId, "DAY", 2026, 6, 2);
+    // 월별:findCustomerEntryCounts(pcCafeId, "MONTH", 2026, 6, 0);
+    // 년별: findCustomerEntryCounts(pcCafeId, "YEAR", 2026, 0, 0);
+    @Override
+    public Map<String, Integer> findCustomerEntryCounts(String pcCafeId, String periodType,int year,int month,int date) {
+        Map<String, Integer> result = new LinkedHashMap<>();
+
+        String sql =
+            "SELECT DATE_FORMAT(login_time, '%H') AS timeSlot, " +
+            "       COUNT(*) AS customerCount " +
+            "FROM use_log " +
+            "WHERE pc_cafe_id = ? " +
+            "  AND login_time IS NOT NULL " +
+            "  AND YEAR(login_time) = ? ";
+
+        if ("MONTH".equals(periodType) || "DAY".equals(periodType)) {
+            sql += "  AND MONTH(login_time) = ? ";
+        }
+
+        if ("DAY".equals(periodType)) {
+            sql += "  AND DAY(login_time) = ? ";
+        }
+
+        sql +=
+            "GROUP BY DATE_FORMAT(login_time, '%H') " +
+            "ORDER BY timeSlot ASC";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            int index = 1;
+
+            pstmt.setString(index++, pcCafeId);
+            pstmt.setInt(index++, year);
+
+            if ("MONTH".equals(periodType) || "DAY".equals(periodType)) {
+                pstmt.setInt(index++, month);
+            }
+
+            if ("DAY".equals(periodType)) {
+                pstmt.setInt(index++, date);
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.put(
+                        rs.getString("timeSlot"),
+                        rs.getInt("customerCount")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("시간대별 손님 입장 수 조회 중 오류 발생");
+        }
+
+        return result;
+    }
+
 
     private Log mapToLog(ResultSet resultSet) throws SQLException {
         return new Log(

@@ -10,9 +10,6 @@ import model.PcCafe;
 public class PcCafeService {
     private final PcCafeDAO pcCafeDAO;
 
-    public PcCafeService() {
-        this(new PcCafeDAOImpl());
-    }
 
     public PcCafeService(PcCafeDAO pcCafeDAO) {
         this.pcCafeDAO = pcCafeDAO;
