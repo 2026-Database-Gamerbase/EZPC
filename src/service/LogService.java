@@ -15,9 +15,6 @@ import model.Log;
 public class LogService {
     private final LogDAO logDAO;
 
-    public LogService() {
-        this(new LogDAOImpl());
-    }
 
     public LogService(LogDAO logDAO) {
         this.logDAO = logDAO;
@@ -43,8 +40,8 @@ public class LogService {
         return logDAO.findByMemberId(memberId);
     }
 
-    public void updateLogoutTime(int logId) throws SQLException {
-        logDAO.updateLogoutTime(logId);
+    public void updateLogoutTime(String pcCafeId, int seatNum) throws SQLException {
+        logDAO.updateLogoutTime(pcCafeId,seatNum);
     }
 
     public void updateLog(Log log) throws SQLException {

@@ -21,13 +21,13 @@ public class CustomerDAOImpl implements CustomerDAO {
 	// 로그인/회원가입/비회원 -> pc방 선택 -> 좌석 선택 후 최종적으로 customer 테이블에 삽입
 	@Override
 	public boolean insertCustomer(Customer customer) {
-		String sql = "INSERT INTO customer (pc_cafe_id, seat_num, member_id, remaining_time) VALUES (?, ?, ?, ?)";
+		String sql = "INSERT INTO customer (pc_cafe_id, seat_num, member_id, remain_time) VALUES (?, ?, ?, ?)";
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setString(1, customer.getPcCafeId());
 			pstmt.setInt(2, customer.getSeatNum());
 			pstmt.setString(3, customer.getMemberId()); 
-			pstmt.setInt(4, customer.getRemainingTime());
+			pstmt.setInt(4, customer.getRemainTime());
 
 			int result = pstmt.executeUpdate();
 			return result > 0; // 성공하면 true
@@ -76,7 +76,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 	// 실시간 잔여 시간 갱신
 	@Override
 	public void updateRemainingTime(String pcCafeId, int seatNum, int updatedTime) {
-		String sql = "UPDATE customer SET remaining_time = ? WHERE pc_cafe_id = ? AND seat_num = ?";
+		String sql = "UPDATE customer SET remain_time = ? WHERE pc_cafe_id = ? AND seat_num = ?";
 
 		try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 			pstmt.setInt(1, updatedTime);
@@ -182,7 +182,7 @@ public class CustomerDAOImpl implements CustomerDAO {
 		c.setPcCafeId(rs.getString("pc_cafe_id"));
 		c.setSeatNum(rs.getInt("seat_num"));
 		c.setMemberId(rs.getString("member_id"));
-		c.setRemainingTime(rs.getInt("remaining_time"));
+		c.setRemainTime(rs.getInt("remain_time"));
 		return c;
 	}
 	

@@ -33,4 +33,7 @@ public interface PC_MemberDAO {
 	//회원 등급 갱신 - 등급 조건 충족 시 호출
 	void updateUserGrade(String memberId, String gradeType);
 	
+	//로그아웃 시 회원의 잔여 시간 갱신 
+	void updateRemainTimeAfterUse(String memberId, int remainTime, int usedTime);
+	
 }

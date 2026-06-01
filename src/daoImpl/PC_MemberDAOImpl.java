@@ -192,6 +192,32 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 		}
 	}
 	
+	
+//회원의 잔여 시간 갱신 
+    @Override
+    public void updateRemainTimeAfterUse(String memberId, int remainTime, int usedTime){
+        String sql = """
+            UPDATE pc_member
+            SET remain_time = ?
+            WHERE member_id = ?
+        """;
+
+        int newRemainTime = remainTime - usedTime;
+
+        if (newRemainTime < 0) {
+            newRemainTime = 0;
+        }
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, newRemainTime);
+            pstmt.setString(2, memberId);
+
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("회원 잔여시간 업데이트 실패", e);
+        }
+    }
 
 	private PC_Member mapRowToMember(ResultSet rs) throws SQLException {
 		return new PC_Member(
