@@ -176,12 +176,17 @@ public class OrderDAOImpl implements OrderDAO {
         List<FoodRankingReport> list = new ArrayList<>();
 
         String sql =
+        		//food_order와 food를 조인해서 food의 price를 select하고 
+        		//pcCafeId, foodName, foodPrice, 
+        		//SUM(fo.food_quantity) -> totalQuantity, SUM(fo.food_pay_amount)-> totalSales를 select
             "WITH FoodSales AS ( " +
             "    SELECT " +
             "        fo.food_name AS foodName, " +
             "        f.price AS foodPrice, " +
             "        SUM(fo.food_quantity) AS totalQuantity, " +
             "        SUM(fo.food_pay_amount) AS totalSales, " +
+           //DENSE_RANK: 총 수량(2순위:총매출) 을 기준으로 랭크를 매김 
+           //pc방이 고정되어있기 때문에 PARTITION BY로 PC방마다 순위를 매길 필요가 없음 
             "        DENSE_RANK() OVER ( " +
             "            ORDER BY SUM(fo.food_quantity) DESC, SUM(fo.food_pay_amount) DESC " +
             "        ) AS ranking " +
@@ -190,6 +195,7 @@ public class OrderDAOImpl implements OrderDAO {
             "    WHERE fo.pc_cafe_id = ? " +
             "    GROUP BY fo.food_name, f.price " +
             ") " +
+            //ranking <= 5을 조건문으로 쓰기위해 CTE(FoodSales) 생성
             "SELECT ranking, foodName, foodPrice, totalQuantity, totalSales " +
             "FROM FoodSales " +
             "WHERE ranking <= 5 " +
@@ -220,12 +226,15 @@ public class OrderDAOImpl implements OrderDAO {
     
     
  // 전체 PC방의 지점별 음식 판매 TOP 5
-   //(PC방id, 음식, 음식 가격, 음식 총 판매 수량, 음식 총 결제 금액 출력 가능)
+   //(PC방id,ranking ,음식, 음식 가격, 음식 총 판매 수량, 음식 총 결제 금액 출력 가능)
     @Override
     public List<FoodRankingReport> getTop5FoodRankingAllPcCafe() {
         List<FoodRankingReport> list = new ArrayList<>();
 
         String sql =
+        		//food_order와 food를 조인해서 food의 price를 select하고 
+        		//pcCafeId, foodName, foodPrice, 
+        		//SUM(fo.food_quantity) -> totalQuantity, SUM(fo.food_pay_amount)-> totalSales를 select
             "WITH FoodSales AS ( " +
             "    SELECT " +
             "        fo.pc_cafe_id AS pcCafeId, " +
@@ -233,6 +242,8 @@ public class OrderDAOImpl implements OrderDAO {
             "        f.price AS foodPrice, " +
             "        SUM(fo.food_quantity) AS totalQuantity, " +
             "        SUM(fo.food_pay_amount) AS totalSales, " +
+            
+            //PC방마다 순위를 부여해야하기 떄문에 GROUP BY 가 아닌 PARTITION BY 사용
             "        DENSE_RANK() OVER ( " +
             "            PARTITION BY fo.pc_cafe_id " +
             "            ORDER BY SUM(fo.food_quantity) DESC, SUM(fo.food_pay_amount) DESC " +
@@ -241,6 +252,7 @@ public class OrderDAOImpl implements OrderDAO {
             "    JOIN food f ON fo.food_name = f.food_name " +
             "    GROUP BY fo.pc_cafe_id, fo.food_name, f.price " +
             ") " +
+            //ranking <= 5을 조건문으로 쓰기위해 CTE(FoodSales) 생성 
             "SELECT pcCafeId, ranking, foodName, foodPrice, totalQuantity, totalSales " +
             "FROM FoodSales " +
             "WHERE ranking <= 5 " +
