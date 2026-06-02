@@ -200,7 +200,7 @@ public class LogDAOImpl implements LogDAO {
     // 년별: findCustomerEntryCounts(pcCafeId, "YEAR", 2026, 0, 0); -> month, date 쪽은 보지 않음 
     @Override
     public Map<String, Integer> findCustomerEntryCounts(String pcCafeId, String periodType,int year,int month,int date) {
-        Map<String, Integer> result = new LinkedHashMap<>(); // 2개의 변수(시간대, 손님수) 만 받기에 map으로 만듬 (model로 X)
+        Map<String, Integer> result = new LinkedHashMap<>(); // 시간대와 손님 수 두 값만 반환하므로 Map 사용 (model X)
 
         // 로그인(login_time)의 Hour 를 기준으로 손님수를 셈 
         //기본 sql은 YEAR 만 조건문으로 있음 
