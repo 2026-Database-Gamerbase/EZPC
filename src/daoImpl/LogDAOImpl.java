@@ -196,12 +196,14 @@ public class LogDAOImpl implements LogDAO {
     
     // 연별, 월별, 일별 가능한 해당 PC방의  시간 대 별 입장 손님 수 
     // 예시: 일별 findCustomerEntryCounts(pcCafeId, "DAY", 2026, 6, 2);
-    // 월별:findCustomerEntryCounts(pcCafeId, "MONTH", 2026, 6, 0);
-    // 년별: findCustomerEntryCounts(pcCafeId, "YEAR", 2026, 0, 0);
+    // 월별:findCustomerEntryCounts(pcCafeId, "MONTH", 2026, 6, 0); -> date 쪽은 보지 않음
+    // 년별: findCustomerEntryCounts(pcCafeId, "YEAR", 2026, 0, 0); -> month, date 쪽은 보지 않음 
     @Override
     public Map<String, Integer> findCustomerEntryCounts(String pcCafeId, String periodType,int year,int month,int date) {
-        Map<String, Integer> result = new LinkedHashMap<>();
+        Map<String, Integer> result = new LinkedHashMap<>(); // 2개의 변수(시간대, 손님수) 만 받기에 map으로 만듬 (model로 X)
 
+        // 로그인(login_time)의 Hour 를 기준으로 손님수를 셈 
+        //기본 sql은 YEAR 만 조건문으로 있음 
         String sql =
             "SELECT DATE_FORMAT(login_time, '%H') AS timeSlot, " +
             "       COUNT(*) AS customerCount " +
@@ -210,14 +212,18 @@ public class LogDAOImpl implements LogDAO {
             "  AND login_time IS NOT NULL " +
             "  AND YEAR(login_time) = ? ";
 
+        
+        // MONTH 거나 DAY가 period type이면 month 조건문 추가 (년-월) 
         if ("MONTH".equals(periodType) || "DAY".equals(periodType)) {
             sql += "  AND MONTH(login_time) = ? ";
         }
-
+        
+        // DAY가 period type이면 day 조건문 추가(년-월-일)
         if ("DAY".equals(periodType)) {
             sql += "  AND DAY(login_time) = ? ";
         }
-
+        //년,월,일 상관 없이 시간대별로 group by
+        //시간대 별로 오름차순 0-23시 
         sql +=
             "GROUP BY DATE_FORMAT(login_time, '%H') " +
             "ORDER BY timeSlot ASC";
