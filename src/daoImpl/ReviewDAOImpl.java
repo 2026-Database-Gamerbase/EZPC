@@ -273,11 +273,16 @@ public class ReviewDAOImpl implements ReviewDAO {
 	        "    avgStarRating, " +
 	        "    reviewCount, " +
 	        "    CASE " +
+	        //리뷰가 없으면 무조건 4등급
 	        "        WHEN reviewCount = 0 THEN 4 " +
+	        // NTILE(4): 평균 별점 기준으로 전체 PC방을 4개 구간으로 나누어 등급 부여
 	        "        ELSE NTILE(4) OVER ( " +
 	        "            ORDER BY avgStarRating DESC, pcCafeId ASC " +
 	        "        ) " +
 	        "    END AS pcCafeGrade " +
+	         // reviewCount를 먼저 계산한 뒤 바깥 SELECT에서 등급 계산에 사용하기 위해 ->  WHEN reviewCount = 0 THEN 4 
+	        // review 와 pc_cafe를 조인해서 pcId, pcCafeName, avgStarRating, reviewCount를 행으로 갖는 
+	        // 인라인뷰(pc_review_grades)를 만듬
 	        "FROM ( " +
 	        "    SELECT " +
 	        "        pc.pc_cafe_id AS pcCafeId, " +
@@ -288,9 +293,7 @@ public class ReviewDAOImpl implements ReviewDAO {
 	        "    LEFT JOIN review r " +
 	        "        ON pc.pc_cafe_id = r.pc_cafe_id " +
 	        "    GROUP BY " +
-	        "        pc.pc_cafe_id, " +
-	        "        pc.pc_cafe_name, " +
-	        "        pc.average_star_rating " +
+	        "        pc.pc_cafe_id " +
 	        ") pc_review_grades " +
 	        "ORDER BY pcCafeGrade, avgStarRating DESC";
 
