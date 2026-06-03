@@ -96,10 +96,11 @@ public class OwnerController {
             FoodService foodService = new FoodService(foodDAO);
             TicketService ticketService = new TicketService(ticketDAO);
             EventInfoService eventInfoService = new EventInfoService(eventInfoDAO);
+            EventScheduleService eventScheduleService = new EventScheduleService(eventScheduleDAO);
 
             // [3] 서브 컨트롤러 세팅 (View + Service 연결)
             this.seatMonitorController = new SeatMonitorController(mainView.getSeatMonitorView(), customerService, pcCafeService);
-            this.salesStatsController = new SalesStatsController(mainView.getSalesStatsView(), mainView, salesReportService, orderService, logService, pcCafeService);
+            this.salesStatsController = new SalesStatsController(mainView.getSalesStatsView(), mainView, salesReportService, orderService, logService, pcCafeService, eventScheduleService);            
             this.foodStockController = new FoodStockController(mainView.getFoodStockView(), stockService);
             this.employeeManageController = new EmployeeManageController(mainView.getEmployeeManageView(), employeeService);
             this.memberManageController = new MemberManageController(mainView.getMemberManageView(), pcMemberService, gradeService);
