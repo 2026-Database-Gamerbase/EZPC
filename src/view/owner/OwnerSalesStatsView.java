@@ -15,7 +15,6 @@ import view.FontUtil;
 // ==========================================
 public class OwnerSalesStatsView extends JPanel {
     private JLabel totalSalesLabel;
-    private JLabel userCountLabel;
     private JLabel averageRate;
     
     private JTable salesTable;
@@ -44,11 +43,10 @@ public class OwnerSalesStatsView extends JPanel {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         // 전체 통계 패널
-        JPanel statsPanel = new JPanel(new GridLayout(1, 3, 10, 10));
+        JPanel statsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
         statsPanel.setBackground(new Color(240, 240, 240));
 
         totalSalesLabel = createStatPanel(statsPanel, "총 매출", new Color(100, 150, 255));
-        userCountLabel = createStatPanel(statsPanel, "사용자 수", new Color(255, 140, 0));
         averageRate = createStatPanel(statsPanel, "평균 별점", new Color(100, 200, 100));
 
         topPanel.add(statsPanel, BorderLayout.EAST);
@@ -219,9 +217,8 @@ public class OwnerSalesStatsView extends JPanel {
      * @param userCount 총 방문자 수
      * @param averageRating 지점 평균 별점
      */
-    public void updateStats(long totalSales, int userCount, double averageRating) {
+    public void updateStats(long totalSales, double averageRating) {
         totalSalesLabel.setText(String.format("%,d원", totalSales));
-        userCountLabel.setText(userCount + "명");
         averageRate.setText(String.format("%.1f점", averageRating));
     }
 

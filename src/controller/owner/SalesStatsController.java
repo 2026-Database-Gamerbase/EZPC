@@ -82,7 +82,7 @@ public class SalesStatsController {
             PcCafe pcCafe = pcCafeService.getPcCafe(branchId);
             double avgRating = (pcCafe != null) ? pcCafe.getAverageStarRating() : 0.0;
             
-            view.updateStats(totalSales, totalUserCount, avgRating);
+            view.updateStats(totalSales, avgRating);
 
             Object[][] salesData = new Object[monthlyReport.size()][5];
             for (int i = 0; i < monthlyReport.size(); i++) {
