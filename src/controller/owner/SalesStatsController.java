@@ -136,11 +136,19 @@ public class SalesStatsController {
         OwnerPeakTimeDialog dialog = new OwnerPeakTimeDialog(parentFrame);
         List<PeakTimeSalesReport> peakList = salesReportService.getPeakTimeAnalysis(currentBranchId);
 
-        Object[][] dialogData = new Object[peakList.size()][2];
+        // 시간대별 손님 수 (올해 전체 기준 - 매출 집계 기간과 근사)
+        LocalDate now = LocalDate.now();
+        Map<String, Integer> visitorMap = logService.findCustomerEntryCounts(
+                currentBranchId, "YEAR", now.getYear(), 0, 0);
+
+        Object[][] dialogData = new Object[peakList.size()][3];
         for (int i = 0; i < peakList.size(); i++) {
             PeakTimeSalesReport p = peakList.get(i);
-            dialogData[i][0] = p.getTimeSlot() + "시 ~ " + (Integer.parseInt(p.getTimeSlot()) + 1) + "시";
+            String hour = p.getTimeSlot(); // "14"
+            int visitors = visitorMap.getOrDefault(hour, 0);
+            dialogData[i][0] = hour + "시 ~ " + (Integer.parseInt(hour) + 1) + "시";
             dialogData[i][1] = String.format("%,d원", p.getTotalSales());
+            dialogData[i][2] = visitors > 0 ? visitors + "명" : "-";
         }
         dialog.setPeakTimeData(dialogData);
         dialog.setVisible(true);
