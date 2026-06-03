@@ -51,7 +51,7 @@ public class ChargeDAOImpl implements ChargeDAO {
 	        statement.setInt(3, charge.getTicketTime());
 	        statement.setString(4, charge.getMemberId());
 	        statement.setInt(5, charge.getChargePayAmount());
-	        statement.setDouble(6, 1.00); // 기존 insert 방식은 이벤트 계산 없이 기본 결제비율 적용
+	        statement.setDouble(6, charge.getPaymentRate()); 
 
 	        statement.executeUpdate();
 
@@ -152,6 +152,7 @@ public class ChargeDAOImpl implements ChargeDAO {
                 resultSet.getInt("ticket_time"),
                 resultSet.getString("member_id"),
                 resultSet.getInt("charge_pay_amount"),
+                resultSet.getDouble("payment_rate"),
                 resultSet.getTimestamp("charged_at")
         );
     }
