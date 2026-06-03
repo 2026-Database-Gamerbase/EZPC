@@ -49,6 +49,7 @@ import dao.ChargeDAO;
 import daoImpl.ChargeDAOImpl;
 import model.Charge;
 import service.ChargeService;
+import controller.LoginController;
 import view.user.UserBranchSelectView;
 import view.user.UserFoodOrderView;
 import view.user.UserMainDashboardView;
@@ -279,22 +280,31 @@ public class UserController {
         dashboard.setReviewButtonListener(e -> showReviewView(dashboard, customer.getPcCafeId(), member));
         dashboard.setTimeChargeButtonListener(e -> showTimeChargeView(dashboard, customer, member));
         
-        // 💡 2. 로그아웃 리스너 수정 (사용한 시간만큼 DB에서 빼기)
+     // 사용한 시간만큼 DB에서 빼고 처음 로그인 화면으로 이동
         dashboard.setLogoutButtonListener(e -> {
             dashboard.stopTimer(); // 타이머 정지
-            int usedTime = dashboard.getUsedMinutes(); // 화면에서 카운트한 '사용한 시간' 가져오기
+            int usedTime = dashboard.getUsedMinutes();
             
-            // [회원일 경우] -> DB(pc_member)의 잔여 시간에서 '사용한 시간' 차감
+            // 회원일 경우 DB(pc_member)의 잔여 시간에서 '사용한 시간' 차감
             if (member != null && member.getMemberId() != null) {
-                // 이따가 PC_MemberService에 추가할 메서드입니다.
                 pcMemberService.deductUsedTime(member.getMemberId(), usedTime); 
             }
             
-            // [비회원/회원 공통] -> 현재 점유 중인 PC방 좌석 세션(customer) 삭제
+            // 비회원/회원 공통 현재 점유 중인 PC방 좌석 세션(customer) 삭제
             customerService.checkOut(customer);
             
-            dashboard.dispose(); // 대시보드 끄기
-            showBranchSelection(); // 지점 선택 화면으로 복귀
+            dashboard.dispose();
+            
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                    System.out.println("[UserController] 로그아웃 - 유저 DB 연결 종료");
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            
+            new LoginController().start(); 
         });
 
         dashboard.setVisible(true);
