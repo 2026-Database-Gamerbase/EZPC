@@ -1,6 +1,5 @@
 package daoImpl;
 
-import db.DatabaseConnector;
 import model.Grade;
 
 import java.sql.Connection;
@@ -13,12 +12,18 @@ import java.util.List;
 import dao.GradeDAO;
 
 public class GradeDAOImpl implements GradeDAO {
+
+    private final Connection conn;
+
+    public GradeDAOImpl(Connection conn) {
+        this.conn = conn;
+    }
+
     @Override
     public void insert(Grade grade) throws SQLException {
         String sql = "INSERT INTO grade (grade_type, benefit, grade_standard) VALUES (?, ?, ?)";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, grade.getGradeType());
             statement.setDouble(2, grade.getBenefit());
             statement.setInt(3, grade.getGradeStandard());
@@ -30,8 +35,7 @@ public class GradeDAOImpl implements GradeDAO {
     public Grade findByType(String gradeType) throws SQLException {
         String sql = "SELECT * FROM grade WHERE grade_type = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, gradeType);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -49,8 +53,7 @@ public class GradeDAOImpl implements GradeDAO {
         String sql = "SELECT * FROM grade";
         List<Grade> grades = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
+        try (PreparedStatement statement = conn.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 grades.add(mapToGrade(resultSet));
@@ -64,8 +67,7 @@ public class GradeDAOImpl implements GradeDAO {
     public void update(Grade grade) throws SQLException {
         String sql = "UPDATE grade SET benefit = ?, grade_standard = ? WHERE grade_type = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setDouble(1, grade.getBenefit());
             statement.setInt(2, grade.getGradeStandard());
             statement.setString(3, grade.getGradeType());
@@ -77,8 +79,7 @@ public class GradeDAOImpl implements GradeDAO {
     public void deleteByType(String gradeType) throws SQLException {
         String sql = "DELETE FROM grade WHERE grade_type = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, gradeType);
             statement.executeUpdate();
         }
