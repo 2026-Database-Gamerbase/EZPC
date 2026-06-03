@@ -10,10 +10,6 @@ import model.Ticket;
 public class TicketService {
     private final TicketDAO ticketDAO;
 
-    public TicketService() {
-        this(new TicketDAOImpl());
-    }
-
     public TicketService(TicketDAO ticketDAO) {
         this.ticketDAO = ticketDAO;
     }
