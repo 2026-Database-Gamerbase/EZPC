@@ -7,7 +7,6 @@ import view.FontUtil;
 
 // ==========================================
 // 시간대별 피크 분석 팝업 (JDialog)
-// 특정 지점의 시간대별 최대 매출과 손님 수를 표 형태로 병합하여 제공
 // ==========================================
 public class OwnerPeakTimeDialog extends JDialog {
     private JTable peakTable;
@@ -37,7 +36,7 @@ public class OwnerPeakTimeDialog extends JDialog {
         // ==========================================
         // 중앙: 피크타임 분석 테이블
         // ==========================================
-        String[] columnNames = {"시간대", "평균 매출액", "최대 방문객 수", "밀집도 상태"};
+        String[] columnNames = {"시간대", "평균 매출액", "최대 방문객 수"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -71,10 +70,7 @@ public class OwnerPeakTimeDialog extends JDialog {
     // 상태 갱신용 메서드
     // ==========================================
     
-    /**
-     * Controller에서 피크타임 리포트 데이터를 주입
-     * @param data Object[][] 형태의 배열 (시간대, 평균 매출액, 최대 방문객 수, 밀집도 상태)
-     */
+    // Controller에서 피크타임 리포트 데이터를 주입
     public void setPeakTimeData(Object[][] data) {
         tableModel.setRowCount(0);
         if (data != null) {
