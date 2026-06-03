@@ -14,7 +14,6 @@ import view.FontUtil;
 // 음식 연관 추천 기능을 제공하며, 고급 통계 분석 모달을 호출할 수 있도록 설계.
 // ==========================================
 public class OwnerSalesStatsView extends JPanel {
-    private JComboBox<String> periodCombo;
     private JLabel totalSalesLabel;
     private JLabel userCountLabel;
     private JLabel averageRate;
@@ -38,23 +37,11 @@ public class OwnerSalesStatsView extends JPanel {
         setBackground(new Color(240, 240, 240));
 
         // ==========================================
-        // 상단: 필터 및 전체 통계
+        // 상단: 전체 통계
         // ==========================================
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(new Color(240, 240, 240));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // 필터 패널
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        filterPanel.setBackground(new Color(240, 240, 240));
-        JLabel periodLabel = new JLabel("기간:");
-        periodLabel.setFont(FontUtil.getKoreanFontBold(12));
-        String[] periods = {"오늘", "이번 주", "이번 달", "3개월", "6개월", "1년"};
-        periodCombo = new JComboBox<>(periods);
-        periodCombo.setFont(FontUtil.getKoreanFontPlain(12));
-        filterPanel.add(periodLabel);
-        filterPanel.add(periodCombo);
-        topPanel.add(filterPanel, BorderLayout.WEST);
 
         // 전체 통계 패널
         JPanel statsPanel = new JPanel(new GridLayout(1, 3, 10, 10));
@@ -192,13 +179,6 @@ public class OwnerSalesStatsView extends JPanel {
     // Controller 연동을 위한 Getter 및 Listener 메서드 모음
     // ==========================================
 
-    // ==========================================
-    // Getter
-    // ==========================================
-    public String getSelectedPeriod() {
-        return (String) periodCombo.getSelectedItem();
-    }
-    
     // 테이블 내 선택된 음식명 가져오기 (연관 분석용)
     public String getSelectedPopularFood() {
         int row = popularFoodTable.getSelectedRow();
@@ -208,21 +188,11 @@ public class OwnerSalesStatsView extends JPanel {
         return null;
     }
 
-    // ==========================================
-    // Setter
-    // ==========================================
     // 연관 추천 결과 텍스트 업데이트
     public void setRecommendationText(String text) {
         recommendationLabel.setText(text);
     }
 
-    // ==========================================
-    // Listener 등록
-    // ==========================================
-    public void setPeriodChangeListener(ActionListener listener) {
-        periodCombo.addActionListener(listener);
-    }
-    
     public void setFoodSelectionListener(ListSelectionListener listener) {
         popularFoodTable.getSelectionModel().addListSelectionListener(listener);
     }
@@ -254,6 +224,7 @@ public class OwnerSalesStatsView extends JPanel {
         userCountLabel.setText(userCount + "명");
         averageRate.setText(String.format("%.1f점", averageRating));
     }
+
     // 지점별 매출 테이블 데이터 주입
     public void setSalesTableData(Object[][] data) {
         salesTableModel.setRowCount(0);
