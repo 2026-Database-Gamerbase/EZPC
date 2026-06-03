@@ -78,7 +78,7 @@ public class OwnerPeakTimeDialog extends JDialog {
         // ==========================================
         // 중앙: 전체 순위 테이블
         // ==========================================
-        String[] columnNames = {"순위", "시간대", "총 매출액"};
+        String[] columnNames = {"순위", "시간대", "총 매출액", "손님 수"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -88,8 +88,9 @@ public class OwnerPeakTimeDialog extends JDialog {
         peakTable.setFont(FontUtil.getKoreanFontPlain(12));
         peakTable.setRowHeight(25);
         peakTable.getColumnModel().getColumn(0).setPreferredWidth(40);
-        peakTable.getColumnModel().getColumn(1).setPreferredWidth(160);
-        peakTable.getColumnModel().getColumn(2).setPreferredWidth(200);
+        peakTable.getColumnModel().getColumn(1).setPreferredWidth(130);
+        peakTable.getColumnModel().getColumn(2).setPreferredWidth(160);
+        peakTable.getColumnModel().getColumn(3).setPreferredWidth(80);
 
         peakTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
@@ -131,7 +132,7 @@ public class OwnerPeakTimeDialog extends JDialog {
         if (data == null) return;
 
         for (int i = 0; i < data.length; i++) {
-            tableModel.addRow(new Object[]{(i + 1) + "위", data[i][0], data[i][1]});
+            tableModel.addRow(new Object[]{(i + 1) + "위", data[i][0], data[i][1], data[i][2]});
         }
 
         // 배너에 1위 데이터 표시
