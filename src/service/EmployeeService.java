@@ -10,10 +10,6 @@ import model.Employee;
 public class EmployeeService {
     private final EmployeeDAO employeeDAO;
 
-    public EmployeeService() {
-        this(new EmployeeDAOImpl());
-    }
-
     public EmployeeService(EmployeeDAO employeeDAO) {
         this.employeeDAO = employeeDAO;
     }
