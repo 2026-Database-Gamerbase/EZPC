@@ -53,9 +53,13 @@ public class LogService {
         logDAO.deleteById(logId);
     }
     
+    public Map<String, Integer> findMonthlyCustomerCounts(String pcCafeId, int year) {
+        return logDAO.findMonthlyCustomerCounts(pcCafeId, year);
+    }
+    
     
     public Map<String, Integer> findCustomerEntryCounts(String pcCafeId,String periodType,int year,int month,int date) {
 
-        return logDAO.findCustomerEntryCounts(pcCafeId, periodType, year, month, date);
+        return logDAO.findCustomerHourlyEntryCounts(pcCafeId, periodType, year, month, date);
     }
 }

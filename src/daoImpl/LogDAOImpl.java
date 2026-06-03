@@ -194,12 +194,53 @@ public class LogDAOImpl implements LogDAO {
         }
     }
     
+    
+ // 월별 PC방 이용자 수 추이 텍스트 그래프용
+ // year를 입력하면 해당 연도의 "월별 손님 수"를 반환
+ // COUNT(*) 사용: 회원/비회원 상관없이 use_log 입장 기록 기준으로 카운트
+ @Override
+ public Map<String, Integer> findMonthlyCustomerCounts(String pcCafeId, int year) {
+     Map<String, Integer> result = new LinkedHashMap<>();
+
+     String sql =
+         "SELECT DATE_FORMAT(login_time, '%m') AS monthSlot, " +
+         "       COUNT(*) AS customerCount " +
+         "FROM use_log " +
+         "WHERE pc_cafe_id = ? " +
+         "  AND login_time IS NOT NULL " +
+         "  AND YEAR(login_time) = ? " +
+         "GROUP BY DATE_FORMAT(login_time, '%m') " +
+         "ORDER BY monthSlot ASC";
+
+     try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+         pstmt.setString(1, pcCafeId);
+         pstmt.setInt(2, year);
+
+         try (ResultSet rs = pstmt.executeQuery()) {
+             while (rs.next()) {
+                 result.put(
+                     rs.getString("monthSlot"),
+                     rs.getInt("customerCount")
+                 );
+             }
+         }
+     } catch (SQLException e) {
+         e.printStackTrace();
+         System.out.println("월별 손님 수 조회 중 오류 발생");
+     }
+
+     return result;
+ }
+    
+    
+    
+    
     // 연별, 월별, 일별 가능한 해당 PC방의  시간 대 별 입장 손님 수 
     // 예시: 일별 findCustomerEntryCounts(pcCafeId, "DAY", 2026, 6, 2);
     // 월별:findCustomerEntryCounts(pcCafeId, "MONTH", 2026, 6, 0); -> date 쪽은 보지 않음
     // 년별: findCustomerEntryCounts(pcCafeId, "YEAR", 2026, 0, 0); -> month, date 쪽은 보지 않음 
     @Override
-    public Map<String, Integer> findCustomerEntryCounts(String pcCafeId, String periodType,int year,int month,int date) {
+    public Map<String, Integer> findCustomerHourlyEntryCounts(String pcCafeId, String periodType,int year,int month,int date) {
         Map<String, Integer> result = new LinkedHashMap<>(); // 시간대와 손님 수 두 값만 반환하므로 Map 사용 (model X)
 
         // 로그인(login_time)의 Hour 를 기준으로 손님수를 셈 
