@@ -13,6 +13,8 @@ public class ReviewService {
 		this.reviewDao = reviewDao;
 	}
 	
+	//회원 기능 - 리뷰 작성, 리뷰 수정, 리뷰 삭제, 본인이 작성한 리뷰 목록 보기(checkReviewByMemberId)
+	
 	//리뷰 작성하기, 매개변수로 리뷰 객체를 전달함 (회원 아이디, 리뷰 아이디(회원별로 생성됨), pc방 번호, 별점, 리뷰 제목, 리뷰 내용)
 	public void writeReview(Review review) {
 		reviewDao.insertReview(review);
@@ -29,6 +31,8 @@ public class ReviewService {
 		reviewDao.deleteReview(review);
 	}
 	
+	
+	//운영자 기능 - 회원별 리뷰 목록 조회, pc방 별 리뷰 조회, 전체 리뷰 조회, 리뷰 기반 등급 조회
 	
 	//특정 회원이 작성한 리뷰 목록 보기
 	//매개변수로 회원아이디 전달하면 해당 회원이 작성한 리뷰 리스트 List<Review> 리턴
