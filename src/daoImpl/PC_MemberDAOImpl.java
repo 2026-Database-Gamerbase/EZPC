@@ -100,7 +100,7 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
         return member;
 	}
 	
-	//전체 회원 조회
+	//전체 회원 조회 (owner포함)
 	@Override
 	public List<PC_Member> findAll() {
 		// TODO Auto-generated method stub
@@ -113,6 +113,24 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 			while (rs.next()) {
 				members.add(mapRowToMember(rs));
 				
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return members;
+	}
+	
+	//user 타입 회원만 조회
+	@Override
+	public List<PC_Member> findAllUsers() {
+		String sql = "SELECT * FROM pc_member WHERE member_type = 'user'";
+		List<PC_Member> members = new ArrayList<>();
+
+		try (PreparedStatement pstmt = conn.prepareStatement(sql);
+			 ResultSet rs = pstmt.executeQuery()) {
+
+			while (rs.next()) {
+				members.add(mapRowToMember(rs));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
