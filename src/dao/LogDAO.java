@@ -29,6 +29,7 @@ public interface LogDAO {
     void deleteById(int logId) throws SQLException;
     
     Map<String, Integer> findMonthlyCustomerCounts(String pcCafeId, int year);
+    Map<String, Integer> findCustomerCountsByYearMonth(String pcCafeId);
     
     public Map<String, Integer> findCustomerHourlyEntryCounts(String pcCafeId,String periodType,int year,int month,int date);
 }

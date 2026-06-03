@@ -56,6 +56,10 @@ public class LogService {
     public Map<String, Integer> findMonthlyCustomerCounts(String pcCafeId, int year) {
         return logDAO.findMonthlyCustomerCounts(pcCafeId, year);
     }
+
+    public Map<String, Integer> findCustomerCountsByYearMonth(String pcCafeId) {
+        return logDAO.findCustomerCountsByYearMonth(pcCafeId);
+    }
     
     
     public Map<String, Integer> findCustomerEntryCounts(String pcCafeId,String periodType,int year,int month,int date) {
