@@ -104,7 +104,7 @@ public class UserController {
                 } catch (SQLException roleEx) {
                     System.out.println("[UserController] 역할별 연결 실패: " + roleEx.getMessage());
                     System.out.println("[UserController] 루트 연결로 재시도합니다.");
-                    conn = DatabaseConnector.getConnection();
+                    conn = DatabaseConnector.getRootConnection();
                 }
             }
             openServices();
