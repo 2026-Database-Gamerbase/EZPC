@@ -9,12 +9,10 @@ import java.util.List;
 public class PC_MemberService {
 
     private PC_MemberDAO memberDao;
-    private GradeDAO gradeDao; 
 
     // 의존성 주입
-    public PC_MemberService(PC_MemberDAO memberDao, GradeDAO gradeDao) {
+    public PC_MemberService(PC_MemberDAO memberDao) {
         this.memberDao = memberDao;
-        this.gradeDao = gradeDao;
     }
     
     // 회원 가입
@@ -80,46 +78,46 @@ public class PC_MemberService {
     }
     
     // 7. 잔여시간 추가
-    public void chargeTime(String memberId, int addTime, int paymentAmount) {
-        //회원 테이블의 잔여 시간 및 결제 금액 누적
-        memberDao.updateRemainTime(memberId, addTime);
-        memberDao.addTotalPayment(memberId, paymentAmount);
-        
-        //회원의 총 결제 금액, 현재 등급 가져오기
-        PC_Member member = memberDao.findByID(memberId);
-        if (member != null) {
-            int totalPayment = member.getTotalPaymentAmount(); // 총 결제 금액
-            String currentGrade = member.getGradeType(); //현재 등급
-            
-            String newGrade = "bronze"; // 기본 등급 세팅 (총 결제 금액 20만 원 미만일 경우 기본값)
-            int maxStandard = 0;
-            
-            try {
-                //grade 테이블에 등록된 모든 등급 기준 목록을 가져옴
-                //브론즈(20만), 실버(30만), 골드(50만), 다이아(80만)
-                List<Grade> gradeList = gradeDao.findAll();
-                
-                for (Grade g : gradeList) {
-                    // 회원의 총 결제 금액이 등급 기준 금액 이상이면서, 
-                    // 지금까지 판별한 기준 금액보다 더 높은 등급 기준이라면 갱신
-                    if (totalPayment >= g.getGradeStandard() && g.getGradeStandard() >= maxStandard) {
-                        newGrade = g.getGradeType();
-                        maxStandard = g.getGradeStandard();
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("등급 기준을 조회하는 중 오류가 발생했습니다. 기본 등급을 유지합니다.");
-                e.printStackTrace();
-            }
-            
-            //계산된 등급이 현재 회원의 등급과 다를 때만 db 업데이트 수행
-            if (!currentGrade.equalsIgnoreCase(newGrade)) {
-                memberDao.updateUserGrade(memberId, newGrade); // pc_member 테이블 변경
-                System.out.printf("\n[등급 변경] 축하합니다! %s님의 등급이 [%s] -> [%s]로 상승했습니다!\n", 
-                                  memberId, currentGrade, newGrade);
-            }
-        }
-    }
+//    public void chargeTime(String memberId, int addTime, int paymentAmount) {
+//        //회원 테이블의 잔여 시간 및 결제 금액 누적
+//        memberDao.updateRemainTime(memberId, addTime);
+//        memberDao.addTotalPayment(memberId, paymentAmount);
+//        
+//        //회원의 총 결제 금액, 현재 등급 가져오기
+//        PC_Member member = memberDao.findByID(memberId);
+//        if (member != null) {
+//            int totalPayment = member.getTotalPaymentAmount(); // 총 결제 금액
+//            String currentGrade = member.getGradeType(); //현재 등급
+//            
+//            String newGrade = "bronze"; // 기본 등급 세팅 (총 결제 금액 20만 원 미만일 경우 기본값)
+//            int maxStandard = 0;
+//            
+//            try {
+//                //grade 테이블에 등록된 모든 등급 기준 목록을 가져옴
+//                //브론즈(20만), 실버(30만), 골드(50만), 다이아(80만)
+//                List<Grade> gradeList = gradeDao.findAll();
+//                
+//                for (Grade g : gradeList) {
+//                    // 회원의 총 결제 금액이 등급 기준 금액 이상이면서, 
+//                    // 지금까지 판별한 기준 금액보다 더 높은 등급 기준이라면 갱신
+//                    if (totalPayment >= g.getGradeStandard() && g.getGradeStandard() >= maxStandard) {
+//                        newGrade = g.getGradeType();
+//                        maxStandard = g.getGradeStandard();
+//                    }
+//                }
+//            } catch (Exception e) {
+//                System.out.println("등급 기준을 조회하는 중 오류가 발생했습니다. 기본 등급을 유지합니다.");
+//                e.printStackTrace();
+//            }
+//            
+//            //계산된 등급이 현재 회원의 등급과 다를 때만 db 업데이트 수행
+//            if (!currentGrade.equalsIgnoreCase(newGrade)) {
+//                memberDao.updateUserGrade(memberId, newGrade); // pc_member 테이블 변경
+//                System.out.printf("\n[등급 변경] 축하합니다! %s님의 등급이 [%s] -> [%s]로 상승했습니다!\n", 
+//                                  memberId, currentGrade, newGrade);
+//            }
+//        }
+//    }
     
 
 }
