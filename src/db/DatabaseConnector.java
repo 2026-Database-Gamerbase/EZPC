@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DatabaseConnector {
 
-    private static final String URL = "jdbc:mysql://본인IP/EZPC";
+    private static final String URL = "jdbc:mysql://localhost/EZPC";
     
     //루트 계정
     private static final String ROOT_USER = "root";
