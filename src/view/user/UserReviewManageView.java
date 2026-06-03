@@ -6,6 +6,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import model.Review;
+import view.FontUtil;
 
 /**
  * UserReviewManageView - 리뷰 관리 화면
@@ -37,11 +38,11 @@ public class UserReviewManageView extends JPanel {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel titleLabel = new JLabel("리뷰 관리");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(20));
         topPanel.add(titleLabel, BorderLayout.WEST);
 
         branchNameLabel = new JLabel("지점: 강남점"); // DB 연결 필요
-        branchNameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        branchNameLabel.setFont(FontUtil.getKoreanFontBold(14));
         topPanel.add(branchNameLabel, BorderLayout.EAST);
 
         add(topPanel, BorderLayout.NORTH);
@@ -65,7 +66,7 @@ public class UserReviewManageView extends JPanel {
 
         // 별점 선택
         JLabel ratingLabel = new JLabel("별점:");
-        ratingLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        ratingLabel.setFont(FontUtil.getKoreanFontBold(12));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
@@ -76,21 +77,21 @@ public class UserReviewManageView extends JPanel {
         writePanel.add(ratingSpinner, gbc);
 
         JLabel starsLabel = new JLabel("★★★★★");
-        starsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        starsLabel.setFont(FontUtil.getKoreanFontPlain(14));
         starsLabel.setForeground(new Color(255, 215, 0));
         gbc.gridx = 2;
         writePanel.add(starsLabel, gbc);
 
         // 리뷰 텍스트 입력
         JLabel reviewLabel = new JLabel("후기:");
-        reviewLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        reviewLabel.setFont(FontUtil.getKoreanFontBold(12));
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         writePanel.add(reviewLabel, gbc);
 
         reviewTextArea = new JTextArea(8, 20);
-        reviewTextArea.setFont(new Font("Arial", Font.PLAIN, 12));
+        reviewTextArea.setFont(FontUtil.getKoreanFontPlain(12));
         reviewTextArea.setLineWrap(true);
         reviewTextArea.setWrapStyleWord(true);
         reviewTextArea.setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -126,7 +127,7 @@ public class UserReviewManageView extends JPanel {
         leftBottomPanel.setBackground(new Color(240, 240, 240));
         statusLabel = new JLabel(" ");
         statusLabel.setForeground(Color.RED);
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        statusLabel.setFont(FontUtil.getKoreanFontPlain(11));
         leftBottomPanel.add(statusLabel);
         leftPanel.add(leftBottomPanel, BorderLayout.SOUTH);
 
@@ -148,7 +149,7 @@ public class UserReviewManageView extends JPanel {
         };
 
         reviewListTable = new JTable(tableModel);
-        reviewListTable.setFont(new Font("Arial", Font.PLAIN, 11));
+        reviewListTable.setFont(FontUtil.getKoreanFontPlain(11));
         reviewListTable.setRowHeight(25);
         reviewListTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 

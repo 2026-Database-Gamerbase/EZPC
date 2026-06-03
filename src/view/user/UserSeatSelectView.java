@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
+import view.FontUtil;
+
 /**
  * UserSeatSelectView - 좌석 선택 화면
  * 선택한 지점의 실시간 좌석 배치도를 보여주고, 비어있는 좌석을 선택하는 화면입니다.
@@ -34,7 +36,7 @@ public class UserSeatSelectView extends JPanel {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         branchNameLabel = new JLabel("지점명: 강남점");
-        branchNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        branchNameLabel.setFont(FontUtil.getKoreanFontBold(18));
         topPanel.add(branchNameLabel);
 
         JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -64,7 +66,7 @@ public class UserSeatSelectView extends JPanel {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 JButton seatButton = new JButton((i * COLS + j + 1) + "");
-                seatButton.setFont(new Font("Arial", Font.BOLD, 12));
+                seatButton.setFont(FontUtil.getKoreanFontBold(12));
                 seatButton.setPreferredSize(new Dimension(40, 40));
                 seatButton.setBackground(new Color(144, 238, 144));
                 seatButton.setFocusPainted(false);
@@ -83,7 +85,7 @@ public class UserSeatSelectView extends JPanel {
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         seatStatusLabel = new JLabel("선택된 좌석: 없음");
-        seatStatusLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        seatStatusLabel.setFont(FontUtil.getKoreanFontPlain(14));
         bottomPanel.add(seatStatusLabel);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));

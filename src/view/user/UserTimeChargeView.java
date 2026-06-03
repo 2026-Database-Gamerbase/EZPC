@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
+import view.FontUtil;
+
 /**
  * UserTimeChargeView - 시간 충전 결제 화면
  * 선불 이용권을 결제하는 화면입니다.
@@ -35,7 +37,7 @@ public class UserTimeChargeView extends JPanel {
         titlePanel.setBackground(new Color(240, 240, 240));
         titlePanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
         JLabel titleLabel = new JLabel("시간권 구매");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(24));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
@@ -50,41 +52,41 @@ public class UserTimeChargeView extends JPanel {
 
         // 사용자 정보
         JLabel userLabel = new JLabel("사용자:");
-        userLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        userLabel.setFont(FontUtil.getKoreanFontBold(14));
         gbc.gridx = 0;
         gbc.gridy = 0;
         centerPanel.add(userLabel, gbc);
         userNameLabel = new JLabel("사용자명"); // DB 연결 필요
-        userNameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        userNameLabel.setFont(FontUtil.getKoreanFontPlain(14));
         gbc.gridx = 1;
         centerPanel.add(userNameLabel, gbc);
 
         // 사용자 등급 (DB 연결 필요: 회원등급에 따른 할인율 반영)
         JLabel gradeLabel = new JLabel("회원 등급:");
-        gradeLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        gradeLabel.setFont(FontUtil.getKoreanFontBold(14));
         gbc.gridx = 0;
         gbc.gridy = 1;
         centerPanel.add(gradeLabel, gbc);
         userGradeLabel = new JLabel("Bronze"); // DB 연결 필요
-        userGradeLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        userGradeLabel.setFont(FontUtil.getKoreanFontPlain(14));
         gbc.gridx = 1;
         centerPanel.add(userGradeLabel, gbc);
 
         // 할인율
         JLabel discountLabel = new JLabel("할인율:");
-        discountLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        discountLabel.setFont(FontUtil.getKoreanFontBold(14));
         gbc.gridx = 0;
         gbc.gridy = 2;
         centerPanel.add(discountLabel, gbc);
         discountRateLabel = new JLabel("0%"); // DB 연결 필요
-        discountRateLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        discountRateLabel.setFont(FontUtil.getKoreanFontPlain(14));
         discountRateLabel.setForeground(new Color(255, 100, 100));
         gbc.gridx = 1;
         centerPanel.add(discountRateLabel, gbc);
 
         // 시간 옵션 선택
         JLabel timeOptionLabel = new JLabel("시간 선택:");
-        timeOptionLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        timeOptionLabel.setFont(FontUtil.getKoreanFontBold(14));
         gbc.gridx = 0;
         gbc.gridy = 3;
         centerPanel.add(timeOptionLabel, gbc);
@@ -96,23 +98,23 @@ public class UserTimeChargeView extends JPanel {
 
         // 기본 가격
         JLabel basePriceTextLabel = new JLabel("기본 가격:");
-        basePriceTextLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        basePriceTextLabel.setFont(FontUtil.getKoreanFontBold(14));
         gbc.gridx = 0;
         gbc.gridy = 4;
         centerPanel.add(basePriceTextLabel, gbc);
         basePriceLabel = new JLabel("2,000원"); // DB 연결 필요
-        basePriceLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        basePriceLabel.setFont(FontUtil.getKoreanFontPlain(14));
         gbc.gridx = 1;
         centerPanel.add(basePriceLabel, gbc);
 
         // 할인액
         JLabel discountAmountTextLabel = new JLabel("할인액:");
-        discountAmountTextLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        discountAmountTextLabel.setFont(FontUtil.getKoreanFontBold(14));
         gbc.gridx = 0;
         gbc.gridy = 5;
         centerPanel.add(discountAmountTextLabel, gbc);
         discountAmountLabel = new JLabel("0원"); // DB 연결 필요
-        discountAmountLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        discountAmountLabel.setFont(FontUtil.getKoreanFontPlain(14));
         discountAmountLabel.setForeground(new Color(100, 200, 100));
         gbc.gridx = 1;
         centerPanel.add(discountAmountLabel, gbc);
@@ -121,10 +123,10 @@ public class UserTimeChargeView extends JPanel {
         gbc.gridy = 6;
         gbc.gridx = 0;
         JLabel finalPriceTextLabel = new JLabel("최종 결제액:");
-        finalPriceTextLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        finalPriceTextLabel.setFont(FontUtil.getKoreanFontBold(16));
         centerPanel.add(finalPriceTextLabel, gbc);
         finalPriceLabel = new JLabel("2,000원"); // DB 연결 필요
-        finalPriceLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        finalPriceLabel.setFont(FontUtil.getKoreanFontBold(16));
         finalPriceLabel.setForeground(new Color(0, 100, 200));
         gbc.gridx = 1;
         centerPanel.add(finalPriceLabel, gbc);
