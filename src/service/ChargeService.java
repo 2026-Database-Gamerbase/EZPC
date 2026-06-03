@@ -11,10 +11,6 @@ import model.Charge;
 public class ChargeService {
     private final ChargeDAO chargeDAO;
 
-   // public ChargeService() {
-   //     this(new ChargeDAOImpl());
-   // }
-
     public ChargeService(ChargeDAO chargeDAO) {
         this.chargeDAO = chargeDAO;
     }
