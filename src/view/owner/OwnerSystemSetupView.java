@@ -24,11 +24,11 @@ public class OwnerSystemSetupView extends JPanel {
     private JTable dataTable;
     private DefaultTableModel tableModel;
     
-    // 하단 공통 입력 폼 요소들 (위치/주소 제거로 3개로 축소)
+    // 하단 공통 입력 폼 요소들
     private JLabel field1Label; private JTextField field1Input;
     private JLabel field2Label; private JTextField field2Input;
     private JLabel field3Label; private JTextField field3Input;
-    private JLabel field4Label; private JTextField field4Input; // 최대 4개 필드 활용을 위해 변수 자체는 유지 (다른 카테고리 대비)
+    private JLabel field4Label; private JTextField field4Input;
     
     private JButton saveButton;
     private JButton deleteButton;
@@ -103,21 +103,21 @@ public class OwnerSystemSetupView extends JPanel {
         JPanel formWrapper = new JPanel(new BorderLayout());
         formWrapper.setBackground(new Color(240, 240, 240));
         
-        JPanel formPanel = new JPanel(new GridLayout(2, 4, 10, 10)); // 2줄 x 4칸 배치
+        JPanel formPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10)); 
         formPanel.setBorder(BorderFactory.createTitledBorder("기준 정보 추가 / 수정"));
         formPanel.setBackground(new Color(240, 240, 240));
         
         field1Label = new JLabel("지점 코드:"); field1Label.setFont(FontUtil.getKoreanFontPlain(12));
-        field1Input = new JTextField();       field1Input.setFont(FontUtil.getKoreanFontPlain(12));
+        field1Input = new JTextField(8);      field1Input.setFont(FontUtil.getKoreanFontPlain(12));
         
         field2Label = new JLabel("지점명:");   field2Label.setFont(FontUtil.getKoreanFontPlain(12));
-        field2Input = new JTextField();       field2Input.setFont(FontUtil.getKoreanFontPlain(12));
+        field2Input = new JTextField(10);     field2Input.setFont(FontUtil.getKoreanFontPlain(12));
         
         field3Label = new JLabel("총 좌석수:"); field3Label.setFont(FontUtil.getKoreanFontPlain(12));
-        field3Input = new JTextField();       field3Input.setFont(FontUtil.getKoreanFontPlain(12));
+        field3Input = new JTextField(8);      field3Input.setFont(FontUtil.getKoreanFontPlain(12));
         
         field4Label = new JLabel("여분 필드:"); field4Label.setFont(FontUtil.getKoreanFontPlain(12));
-        field4Input = new JTextField();       field4Input.setFont(FontUtil.getKoreanFontPlain(12));
+        field4Input = new JTextField(8);      field4Input.setFont(FontUtil.getKoreanFontPlain(12));
         field4Label.setVisible(false);
         field4Input.setVisible(false);
         
@@ -144,11 +144,15 @@ public class OwnerSystemSetupView extends JPanel {
         saveButton.setFont(FontUtil.getKoreanFontPlain(12));
         saveButton.setBackground(new Color(100, 150, 255));
         saveButton.setForeground(Color.WHITE);
+        saveButton.setOpaque(true);
+        saveButton.setBorderPainted(false);
         
         deleteButton = new JButton("삭제");
         deleteButton.setFont(FontUtil.getKoreanFontPlain(12));
         deleteButton.setBackground(new Color(255, 99, 71));
         deleteButton.setForeground(Color.WHITE);
+        deleteButton.setOpaque(true);
+        deleteButton.setBorderPainted(false);
         
         buttonPanel.add(clearButton);
         buttonPanel.add(deleteButton);
@@ -259,11 +263,18 @@ public class OwnerSystemSetupView extends JPanel {
         for (int i = 0; i < values.length && i < 4; i++) {
             inputs[i].setText(values[i]);
         }
+        // 테이블 데이터를 불러왔을 때 = 수정 모드이므로 PK(field1) 수정 불가 처리
+        field1Input.setEditable(false);
+        field1Input.setBackground(Color.LIGHT_GRAY);
     }
 
     public void clearForm() {
         field1Input.setText(""); field2Input.setText("");
         field3Input.setText(""); field4Input.setText("");
         dataTable.clearSelection();
+
+        // 신규 추가 모드이므로 PK 입력 가능하게 롤백
+        field1Input.setEditable(true);
+        field1Input.setBackground(Color.WHITE);
     }
 }

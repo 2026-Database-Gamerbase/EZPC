@@ -14,10 +14,8 @@ import view.FontUtil;
 // 음식 연관 추천 기능을 제공하며, 고급 통계 분석 모달을 호출할 수 있도록 설계.
 // ==========================================
 public class OwnerSalesStatsView extends JPanel {
-    private JComboBox<String> periodCombo;
     private JLabel totalSalesLabel;
-    private JLabel userCountLabel;
-    private JLabel averagePriceLabel;
+    private JLabel averageRate;
     
     private JTable salesTable;
     private JTable popularFoodTable;
@@ -38,31 +36,18 @@ public class OwnerSalesStatsView extends JPanel {
         setBackground(new Color(240, 240, 240));
 
         // ==========================================
-        // 상단: 필터 및 전체 통계
+        // 상단: 전체 통계
         // ==========================================
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(new Color(240, 240, 240));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // 필터 패널
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        filterPanel.setBackground(new Color(240, 240, 240));
-        JLabel periodLabel = new JLabel("기간:");
-        periodLabel.setFont(FontUtil.getKoreanFontBold(12));
-        String[] periods = {"오늘", "이번 주", "이번 달", "3개월", "6개월", "1년"};
-        periodCombo = new JComboBox<>(periods);
-        periodCombo.setFont(FontUtil.getKoreanFontPlain(12));
-        filterPanel.add(periodLabel);
-        filterPanel.add(periodCombo);
-        topPanel.add(filterPanel, BorderLayout.WEST);
-
         // 전체 통계 패널
-        JPanel statsPanel = new JPanel(new GridLayout(1, 3, 10, 10));
+        JPanel statsPanel = new JPanel(new GridLayout(1, 2, 10, 10));
         statsPanel.setBackground(new Color(240, 240, 240));
 
         totalSalesLabel = createStatPanel(statsPanel, "총 매출", new Color(100, 150, 255));
-        userCountLabel = createStatPanel(statsPanel, "사용자 수", new Color(255, 140, 0));
-        averagePriceLabel = createStatPanel(statsPanel, "평균 결제액", new Color(100, 200, 100));
+        averageRate = createStatPanel(statsPanel, "평균 별점", new Color(100, 200, 100));
 
         topPanel.add(statsPanel, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
@@ -78,7 +63,7 @@ public class OwnerSalesStatsView extends JPanel {
         leftPanel.setBorder(BorderFactory.createTitledBorder("지점별 매출 및 평가 리포트"));
         leftPanel.setBackground(new Color(240, 240, 240));
 
-        String[] salesColumnNames = {"지점", "매출액", "사용자 수", "평균 가격", "리뷰 등급"};
+        String[] salesColumnNames = {"기준월", "당월 매출", "손님 수", "전월비(%)", "지점 상태"};
         salesTableModel = new DefaultTableModel(salesColumnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -87,8 +72,6 @@ public class OwnerSalesStatsView extends JPanel {
         salesTable = new JTable(salesTableModel);
         salesTable.setFont(FontUtil.getKoreanFontPlain(12));
         salesTable.setRowHeight(25);
-        
-        // 부진 지점(4등급) 옅은 붉은색 하이라이트 렌더러
         salesTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -132,7 +115,7 @@ public class OwnerSalesStatsView extends JPanel {
         JPanel recommendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         recommendPanel.setBackground(new Color(255, 250, 205)); // 옅은 노란색 배경
         recommendPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        recommendationLabel = new JLabel("💡 표에서 음식을 선택하면 연관 추천 메뉴가 분석됩니다.");
+        recommendationLabel = new JLabel("표에서 음식을 선택하면 연관 추천 메뉴가 분석됩니다.");
         recommendationLabel.setFont(FontUtil.getKoreanFontBold(12));
         recommendPanel.add(recommendationLabel);
         rightPanel.add(recommendPanel, BorderLayout.SOUTH);
@@ -194,13 +177,6 @@ public class OwnerSalesStatsView extends JPanel {
     // Controller 연동을 위한 Getter 및 Listener 메서드 모음
     // ==========================================
 
-    // ==========================================
-    // Getter
-    // ==========================================
-    public String getSelectedPeriod() {
-        return (String) periodCombo.getSelectedItem();
-    }
-    
     // 테이블 내 선택된 음식명 가져오기 (연관 분석용)
     public String getSelectedPopularFood() {
         int row = popularFoodTable.getSelectedRow();
@@ -210,21 +186,11 @@ public class OwnerSalesStatsView extends JPanel {
         return null;
     }
 
-    // ==========================================
-    // Setter
-    // ==========================================
     // 연관 추천 결과 텍스트 업데이트
     public void setRecommendationText(String text) {
         recommendationLabel.setText(text);
     }
 
-    // ==========================================
-    // Listener 등록
-    // ==========================================
-    public void setPeriodChangeListener(ActionListener listener) {
-        periodCombo.addActionListener(listener);
-    }
-    
     public void setFoodSelectionListener(ListSelectionListener listener) {
         popularFoodTable.getSelectionModel().addListSelectionListener(listener);
     }
@@ -245,11 +211,15 @@ public class OwnerSalesStatsView extends JPanel {
     // 상태 갱신용 메서드
     // ==========================================
     
-    // 상단 전체 통계 업데이트
-    public void updateStats(long totalSales, int userCount, int averagePrice) {
+    /**
+     * 상단 전체 통계 정보를 갱신
+     * @param totalSales 총 매출액
+     * @param userCount 총 방문자 수
+     * @param averageRating 지점 평균 별점
+     */
+    public void updateStats(long totalSales, double averageRating) {
         totalSalesLabel.setText(String.format("%,d원", totalSales));
-        userCountLabel.setText(userCount + "명");
-        averagePriceLabel.setText(String.format("%,d원", averagePrice));
+        averageRate.setText(String.format("%.1f점", averageRating));
     }
 
     // 지점별 매출 테이블 데이터 주입
