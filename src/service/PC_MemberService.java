@@ -72,9 +72,14 @@ public class PC_MemberService {
     	return memberDao.findByID(member.getMemberId());
     }
 
-    // 6. 전체 회원 조회
+    // 6. 전체 회원 조회 (owner 포함)
     public List<PC_Member> getAllMembers() {
         return memberDao.findAll();
+    }
+    
+    // 7. user 타입 회원만 조회 (운영자 뷰 회원 관리용)
+    public List<PC_Member> getAllUsers(){
+    	return memberDao.findAllUsers();
     }
     
     // 7. 잔여시간 추가
