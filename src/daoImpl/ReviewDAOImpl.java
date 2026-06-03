@@ -57,7 +57,6 @@ public class ReviewDAOImpl implements ReviewDAO {
 		// TODO Auto-generated method stub
 		//본인이 작성한 리뷰만 수정 가능
 		String sql = "UPDATE review SET review_title = ?, review_content = ?, star_rating = ? WHERE member_id = ? AND review_id = ?";
-		int result = -1;
 		
 		try(PreparedStatement pstmt = conn.prepareStatement(sql)){
 			pstmt.setString(1, review.getReviewTitle());
@@ -66,7 +65,7 @@ public class ReviewDAOImpl implements ReviewDAO {
 			pstmt.setString(4, review.getMemberId());
 			pstmt.setInt(5, review.getReviewId());
 			
-			result = pstmt.executeUpdate();
+			pstmt.executeUpdate();
 			
 			
 		} catch (SQLException e) {
@@ -74,12 +73,7 @@ public class ReviewDAOImpl implements ReviewDAO {
 			e.printStackTrace();
 			System.out.println("리뷰 수정 중 오류 발생");
 		}
-		
-		if (result > 0) {
-		    System.out.printf("리뷰가 수정되었습니다. 수정된 리뷰의 회원 ID: %s, 리뷰 번호: %d\n", review.getMemberId(), review.getReviewId());
-		} else {
-		    System.out.println("리뷰 수정 실패: 수정할 리뷰가 존재하지 않습니다.");
-		}
+
 		
 	}
 	
@@ -88,14 +82,12 @@ public class ReviewDAOImpl implements ReviewDAO {
 	public void deleteReview(Review review) {
 		// TODO Auto-generated method stub
 		String sql = "DELETE FROM review WHERE member_id = ? AND review_id = ?";
-		int result = -1;
 		
 		try(PreparedStatement pstmt = conn.prepareStatement(sql)){
 			pstmt.setString(1, review.getMemberId());
 			pstmt.setInt(2, review.getReviewId());
 			
-			//쿼리 실행 결과 테이블의 행 개수를 받음
-			result = pstmt.executeUpdate();
+			pstmt.executeUpdate();
 			
 			
 		} catch (SQLException e) {
@@ -104,12 +96,6 @@ public class ReviewDAOImpl implements ReviewDAO {
 			System.out.println("리뷰 삭제 중 오류 발생");
 		}
 		
-		if (result > 0) {
-			System.out.printf("리뷰가 성공적으로 삭제되었습니다. 삭제된 리뷰의 회원 ID: %s, 리뷰 번호: %d\n", review.getMemberId(), review.getReviewId());
-		}
-		else {
-			System.out.println("리뷰 삭제 실패: 삭제할 리뷰가 존재하지 않습니다");
-		}
 	}
 	
 	//특정 회원이 작성한 리뷰 조회
