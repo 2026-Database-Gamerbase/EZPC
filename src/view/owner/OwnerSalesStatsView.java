@@ -17,7 +17,7 @@ public class OwnerSalesStatsView extends JPanel {
     private JComboBox<String> periodCombo;
     private JLabel totalSalesLabel;
     private JLabel userCountLabel;
-    private JLabel averagePriceLabel;
+    private JLabel averageRate;
     
     private JTable salesTable;
     private JTable popularFoodTable;
@@ -62,7 +62,7 @@ public class OwnerSalesStatsView extends JPanel {
 
         totalSalesLabel = createStatPanel(statsPanel, "총 매출", new Color(100, 150, 255));
         userCountLabel = createStatPanel(statsPanel, "사용자 수", new Color(255, 140, 0));
-        averagePriceLabel = createStatPanel(statsPanel, "평균 결제액", new Color(100, 200, 100));
+        averageRate = createStatPanel(statsPanel, "평균 별점", new Color(100, 200, 100));
 
         topPanel.add(statsPanel, BorderLayout.EAST);
         add(topPanel, BorderLayout.NORTH);
@@ -78,7 +78,7 @@ public class OwnerSalesStatsView extends JPanel {
         leftPanel.setBorder(BorderFactory.createTitledBorder("지점별 매출 및 평가 리포트"));
         leftPanel.setBackground(new Color(240, 240, 240));
 
-        String[] salesColumnNames = {"지점", "매출액", "사용자 수", "평균 가격", "리뷰 등급"};
+        String[] salesColumnNames = {"기준월", "당월 매출", "사용자 수", "전월비(%)", "지점 상태"};
         salesTableModel = new DefaultTableModel(salesColumnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -87,8 +87,6 @@ public class OwnerSalesStatsView extends JPanel {
         salesTable = new JTable(salesTableModel);
         salesTable.setFont(FontUtil.getKoreanFontPlain(12));
         salesTable.setRowHeight(25);
-        
-        // 부진 지점(4등급) 옅은 붉은색 하이라이트 렌더러
         salesTable.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -245,13 +243,17 @@ public class OwnerSalesStatsView extends JPanel {
     // 상태 갱신용 메서드
     // ==========================================
     
-    // 상단 전체 통계 업데이트
-    public void updateStats(long totalSales, int userCount, int averagePrice) {
+    /**
+     * 상단 전체 통계 정보를 갱신
+     * @param totalSales 총 매출액
+     * @param userCount 총 방문자 수
+     * @param averageRating 지점 평균 별점
+     */
+    public void updateStats(long totalSales, int userCount, double averageRating) {
         totalSalesLabel.setText(String.format("%,d원", totalSales));
         userCountLabel.setText(userCount + "명");
-        averagePriceLabel.setText(String.format("%,d원", averagePrice));
+        averageRate.setText(String.format("%.1f점", averageRating));
     }
-
     // 지점별 매출 테이블 데이터 주입
     public void setSalesTableData(Object[][] data) {
         salesTableModel.setRowCount(0);
