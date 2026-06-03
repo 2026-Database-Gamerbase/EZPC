@@ -300,6 +300,30 @@ public class LogDAOImpl implements LogDAO {
     }
 
 
+    // 연월별(YYYY-MM) 손님 수 집계 - 월별 매출 테이블과 키 매칭용
+    @Override
+    public Map<String, Integer> findCustomerCountsByYearMonth(String pcCafeId) {
+        Map<String, Integer> result = new LinkedHashMap<>();
+        String sql =
+            "SELECT DATE_FORMAT(login_time, '%Y-%m') AS yearMonth, COUNT(*) AS customerCount " +
+            "FROM use_log " +
+            "WHERE pc_cafe_id = ? AND login_time IS NOT NULL " +
+            "GROUP BY DATE_FORMAT(login_time, '%Y-%m') " +
+            "ORDER BY yearMonth ASC";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, pcCafeId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.put(rs.getString("yearMonth"), rs.getInt("customerCount"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("연월별 손님 수 조회 중 오류 발생");
+        }
+        return result;
+    }
+
     private Log mapToLog(ResultSet resultSet) throws SQLException {
         return new Log(
                 resultSet.getInt("log_id"),
