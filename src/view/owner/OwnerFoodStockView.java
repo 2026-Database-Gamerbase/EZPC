@@ -1,12 +1,14 @@
-// 음식 재고 탭
 package view.owner;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import view.FontUtil;
 
+/**
+ * OwnerFoodStockView - 음식 재고 탭
+ * 매장의 음식 재고 수량을 확인하고, 부족한 재고를 채워 넣는(Update) 관리 화면입니다.
+ */
 public class OwnerFoodStockView extends JPanel {
     private JTable stockTable;
     private DefaultTableModel tableModel;
@@ -28,7 +30,7 @@ public class OwnerFoodStockView extends JPanel {
         titlePanel.setBackground(new Color(240, 240, 240));
         titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JLabel titleLabel = new JLabel("음식 재고 관리");
-        titleLabel.setFont(FontUtil.getKoreanFontBold(20));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
@@ -52,7 +54,7 @@ public class OwnerFoodStockView extends JPanel {
         tableModel.addRow(new Object[]{"소시지", 15, 25, "부족"});
 
         stockTable = new JTable(tableModel);
-        stockTable.setFont(FontUtil.getKoreanFontPlain(12));
+        stockTable.setFont(new Font("Arial", Font.PLAIN, 12));
         stockTable.setRowHeight(25);
         stockTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -109,7 +111,7 @@ public class OwnerFoodStockView extends JPanel {
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         statusPanel.setBackground(new Color(240, 240, 240));
         statusLabel = new JLabel(" ");
-        statusLabel.setFont(FontUtil.getKoreanFontPlain(12));
+        statusLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         statusLabel.setForeground(Color.RED);
         statusPanel.add(statusLabel);
         bottomPanel.add(statusPanel);

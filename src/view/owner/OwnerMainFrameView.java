@@ -1,10 +1,13 @@
-// 사장님 관리자 창의 메인 프레임
 package view.owner;
 
 import java.awt.*;
 import javax.swing.*;
-import view.FontUtil;
 
+/**
+ * OwnerMainFrameView - 사장님 관리자 창의 메인 프레임
+ * 사장님 관리자 창의 메인 전체 틀(Frame)입니다.
+ * 좌측이나 상단에 메뉴 네비게이션을 포함합니다.
+ */
 public class OwnerMainFrameView extends JFrame {
     private JTabbedPane tabbedPane;
     private OwnerSeatMonitorView seatMonitorView;
@@ -32,7 +35,7 @@ public class OwnerMainFrameView extends JFrame {
         titlePanel.setBackground(new Color(40, 40, 40));
         titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JLabel titleLabel = new JLabel("PC방 관리 시스템");
-        titleLabel.setFont(FontUtil.getKoreanFontBold(24));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setForeground(Color.WHITE);
         titlePanel.add(titleLabel);
         mainPanel.add(titlePanel, BorderLayout.NORTH);
@@ -64,7 +67,7 @@ public class OwnerMainFrameView extends JFrame {
         statusPanel.setBackground(new Color(200, 200, 200));
         statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         JLabel statusLabel = new JLabel("준비 완료");
-        statusLabel.setFont(FontUtil.getKoreanFontPlain(12));
+        statusLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         statusPanel.add(statusLabel);
         mainPanel.add(statusPanel, BorderLayout.SOUTH);
 

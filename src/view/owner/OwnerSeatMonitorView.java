@@ -1,11 +1,14 @@
-// 좌석 모니터링 탭
 package view.owner;
 
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import view.FontUtil;
 
+/**
+ * OwnerSeatMonitorView - 좌석 모니터링 탭
+ * 현재 매장의 전체 좌석 현황과 로그인 중인 손님
+ * (회원/비회원 정보, 남은 시간)을 실시간으로 모니터링하는 화면입니다.
+ */
 public class OwnerSeatMonitorView extends JPanel {
     private JLabel totalSeatsLabel;
     private JLabel usedSeatsLabel;
@@ -35,10 +38,10 @@ public class OwnerSeatMonitorView extends JPanel {
         totalPanel.setBackground(new Color(100, 150, 255));
         totalPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         JLabel totalLabel = new JLabel("전체 좌석");
-        totalLabel.setFont(FontUtil.getKoreanFontBold(14));
+        totalLabel.setFont(new Font("Arial", Font.BOLD, 14));
         totalLabel.setForeground(Color.WHITE);
         totalSeatsLabel = new JLabel("30"); // DB 연결 필요
-        totalSeatsLabel.setFont(FontUtil.getKoreanFontBold(32));
+        totalSeatsLabel.setFont(new Font("Arial", Font.BOLD, 32));
         totalSeatsLabel.setForeground(Color.WHITE);
         totalSeatsLabel.setHorizontalAlignment(JLabel.CENTER);
         totalPanel.add(totalLabel, BorderLayout.NORTH);
@@ -50,10 +53,10 @@ public class OwnerSeatMonitorView extends JPanel {
         usedPanel.setBackground(new Color(255, 99, 71));
         usedPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         JLabel usedLabel = new JLabel("사용 중");
-        usedLabel.setFont(FontUtil.getKoreanFontBold(14));
+        usedLabel.setFont(new Font("Arial", Font.BOLD, 14));
         usedLabel.setForeground(Color.WHITE);
         usedSeatsLabel = new JLabel("12"); // DB 연결 필요
-        usedSeatsLabel.setFont(FontUtil.getKoreanFontBold(32));
+        usedSeatsLabel.setFont(new Font("Arial", Font.BOLD, 32));
         usedSeatsLabel.setForeground(Color.WHITE);
         usedSeatsLabel.setHorizontalAlignment(JLabel.CENTER);
         usedPanel.add(usedLabel, BorderLayout.NORTH);
@@ -65,10 +68,10 @@ public class OwnerSeatMonitorView extends JPanel {
         emptyPanel.setBackground(new Color(144, 238, 144));
         emptyPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         JLabel emptyLabel = new JLabel("빈 좌석");
-        emptyLabel.setFont(FontUtil.getKoreanFontBold(14));
+        emptyLabel.setFont(new Font("Arial", Font.BOLD, 14));
         emptyLabel.setForeground(Color.BLACK);
         emptySeatsLabel = new JLabel("18"); // DB 연결 필요
-        emptySeatsLabel.setFont(FontUtil.getKoreanFontBold(32));
+        emptySeatsLabel.setFont(new Font("Arial", Font.BOLD, 32));
         emptySeatsLabel.setForeground(Color.BLACK);
         emptySeatsLabel.setHorizontalAlignment(JLabel.CENTER);
         emptyPanel.add(emptyLabel, BorderLayout.NORTH);
@@ -92,7 +95,7 @@ public class OwnerSeatMonitorView extends JPanel {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 JButton seatButton = new JButton((i * COLS + j + 1) + "");
-                seatButton.setFont(FontUtil.getKoreanFontBold(12));
+                seatButton.setFont(new Font("Arial", Font.BOLD, 12));
                 seatButton.setPreferredSize(new Dimension(40, 40));
                 // 샘플 상태: 짝수번째는 사용중, 홀수번째는 빈 좌석
                 if ((i * COLS + j) % 2 == 0) {
@@ -128,7 +131,7 @@ public class OwnerSeatMonitorView extends JPanel {
         tableModel.addRow(new Object[]{"4번", "user003", "회원", "01:20:00", "25,000원"});
 
         JTable userTable = new JTable(tableModel);
-        userTable.setFont(FontUtil.getKoreanFontPlain(11));
+        userTable.setFont(new Font("Arial", Font.PLAIN, 11));
         userTable.setRowHeight(25);
         userTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
