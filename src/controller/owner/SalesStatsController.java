@@ -154,34 +154,41 @@ public class SalesStatsController {
         }
 
         OwnerUserTrendDialog dialog = new OwnerUserTrendDialog(parentFrame);
-        LocalDate now = LocalDate.now();
-        Map<String, Integer> trendMap = logService.findCustomerEntryCounts(currentBranchId, "MONTH", now.getYear(), now.getMonthValue(), now.getDayOfMonth());
-        
-        StringBuilder chartBuilder = new StringBuilder();
-        chartBuilder.append("=========================================\n");
-        chartBuilder.append(" 연월       방문객 수    시각 시각화 그래프\n");
-        chartBuilder.append("=========================================\n");
-        
-        if (trendMap == null || trendMap.isEmpty()) {
-            chartBuilder.append("\n  조회된 최근 방문자 데이터 로그가 존재하지 않습니다.\n");
+
+        // 초기 조회 (현재 연도)
+        dialog.setTrendData(buildTrendChart(currentBranchId, LocalDate.now().getYear()));
+
+        // 조회 버튼 리스너
+        dialog.setSearchButtonListener(e -> {
+            int selectedYear = dialog.getSelectedYear();
+            dialog.setTrendData(buildTrendChart(currentBranchId, selectedYear));
+        });
+
+        dialog.setVisible(true);
+    }
+
+    private String buildTrendChart(String branchId, int year) {
+        Map<String, Integer> trendMap = logService.findMonthlyCustomerCounts(branchId, year);
+        int maxCount = trendMap.values().stream().mapToInt(Integer::intValue).max().orElse(1);
+        int barMax   = 30;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("==========================================\n");
+        sb.append(String.format("  %d년 월별 이용자 수 추이\n", year));
+        sb.append("==========================================\n");
+
+        if (trendMap.isEmpty()) {
+            sb.append("\n  조회된 방문자 데이터 로그가 존재하지 않습니다.\n");
         } else {
             for (Map.Entry<String, Integer> entry : trendMap.entrySet()) {
-                String monthKey = entry.getKey();
-                int count = entry.getValue();
-                
-                chartBuilder.append(String.format(" %-10s : %3d명    ", monthKey, count));
-                int barLength = Math.min(count / 10, 20); 
-                for (int i = 0; i < barLength; i++) {
-                    chartBuilder.append("■");
-                }
-                if (barLength == 20) chartBuilder.append("+");
-                chartBuilder.append("\n");
+                int count     = entry.getValue();
+                int barLength = (int)((double) count / maxCount * barMax);
+                String bar    = "█".repeat(barLength);
+                sb.append(String.format("  %s월 | %-30s %d명\n", entry.getKey(), bar, count));
             }
         }
-        chartBuilder.append("=========================================\n");
-        
-        dialog.setTrendData(chartBuilder.toString());
-        dialog.setVisible(true);
+        sb.append("==========================================\n");
+        return sb.toString();
     }
 
     // 콤보박스에서 이벤트 선택 후 분석
