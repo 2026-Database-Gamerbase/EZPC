@@ -76,8 +76,7 @@ public class SalesStatsController {
             long totalSales = salesReportService.getBranchTotalSalesAmount(branchId);
             List<MonthlySalesReport> monthlyReport = salesReportService.getMonthlySalesAnalysis(branchId);
             
-            Map<String, Integer> entryLogs = logService.findCustomerEntryCounts(branchId, "ALL_MONTHS", 0, 0, 0);
-            int totalUserCount = entryLogs.values().stream().mapToInt(Integer::intValue).sum();
+            Map<String, Integer> entryLogs = logService.findCustomerCountsByYearMonth(branchId);
             
             PcCafe pcCafe = pcCafeService.getPcCafe(branchId);
             double avgRating = (pcCafe != null) ? pcCafe.getAverageStarRating() : 0.0;
