@@ -95,6 +95,24 @@ public class PC_MemberService {
         return dormantList;
     }
     
+    // 시간 충전 시 DB에 시간을 더하는 메서드
+    public void chargeTime(String memberId, int addTime, int paymentAmount) {
+        // 회원 테이블의 잔여 시간 및 결제 금액 누적
+        memberDao.updateRemainTime(memberId, addTime);
+        memberDao.addTotalPayment(memberId, paymentAmount);
+        
+        System.out.println("[Service] " + memberId + " 계정에 " + addTime + "분 추가 및 " + paymentAmount + "원 누적 완료.");
+    }
+    
+    // 로그아웃 시 사용한 시간만큼 DB에서 차감하는 메서드
+    public void deductUsedTime(String memberId, int usedMinutes) {
+        if (usedMinutes > 0) {
+            // 사용한 시간(usedMinutes)에 마이너스(-)를 붙여서 DB 시간을 깎습니다.
+            memberDao.updateRemainTime(memberId, -usedMinutes);
+            System.out.println("[Service] " + memberId + " 계정에서 " + usedMinutes + "분 차감 완료.");
+        }
+    }
+    
     // 7. 잔여시간 추가
 //    public void chargeTime(String memberId, int addTime, int paymentAmount) {
 //        //회원 테이블의 잔여 시간 및 결제 금액 누적

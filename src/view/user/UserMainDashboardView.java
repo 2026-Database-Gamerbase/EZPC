@@ -4,21 +4,28 @@ package view.user;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import javax.swing.Timer;
 import view.FontUtil;
 
 public class UserMainDashboardView extends JFrame {
     private JLabel remainingTimeLabel;
     private JLabel seatNumberLabel;
     private JLabel branchNameLabel;
+    private JLabel gradeLabel;
     private JButton foodOrderButton;
     private JButton reviewButton;
     private JButton logoutButton;
+    private JButton timeChargeButton;
     private JLabel timerLabel;
+    
+    private int remainMinutes; 
+    private int usedMinutes = 0; 
+    private Timer timer;
 
     public UserMainDashboardView() {
         setTitle("PC방 대시보드");
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        setSize(300, 250);
+        setSize(400, 350);
         setAlwaysOnTop(true);
         setResizable(false);
         setLocationRelativeTo(null);
@@ -33,7 +40,7 @@ public class UserMainDashboardView extends JFrame {
 
         // 상단: 사용 정보
         JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new GridLayout(3, 1));
+        infoPanel.setLayout(new GridLayout(4, 1));
         infoPanel.setBackground(new Color(50, 50, 50));
         infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -41,6 +48,12 @@ public class UserMainDashboardView extends JFrame {
         branchNameLabel.setFont(FontUtil.getKoreanFontBold(12));
         branchNameLabel.setForeground(Color.WHITE);
         infoPanel.add(branchNameLabel);
+        
+        // 3. 등급 라벨 UI 초기화 및 추가
+        gradeLabel = new JLabel("등급: (알 수 없음)"); 
+        gradeLabel.setFont(FontUtil.getKoreanFontBold(12));
+        gradeLabel.setForeground(new Color(255, 215, 0)); 
+        infoPanel.add(gradeLabel);
 
         seatNumberLabel = new JLabel("좌석: 1번"); // DB 연결 필요
         seatNumberLabel.setFont(FontUtil.getKoreanFontBold(12));
@@ -66,10 +79,18 @@ public class UserMainDashboardView extends JFrame {
 
         // 하단: 버튼 패널
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(1, 3, 5, 5));
+        buttonPanel.setLayout(new GridLayout(1, 4, 5, 5));
         buttonPanel.setBackground(new Color(50, 50, 50));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
+        
+        // 이용권 충전 버튼 
+        timeChargeButton = new JButton("시간충전");
+        timeChargeButton.setBackground(new Color(50, 205, 50));
+        timeChargeButton.setForeground(Color.WHITE);
+        timeChargeButton.setFocusPainted(false);
+        timeChargeButton.setFont(FontUtil.getKoreanFontBold(11));
+        buttonPanel.add(timeChargeButton);
+        
         foodOrderButton = new JButton("음식주문");
         foodOrderButton.setBackground(new Color(255, 140, 0));
         foodOrderButton.setForeground(Color.WHITE);
@@ -95,6 +116,19 @@ public class UserMainDashboardView extends JFrame {
 
         add(mainPanel);
     }
+    
+    // 등급 표시
+    public void setSessionInfo(String branchName, int seatNumber, String memberGrade) {
+        branchNameLabel.setText("지점: " + branchName);
+        seatNumberLabel.setText("좌석: " + seatNumber + "번");
+        
+        if (memberGrade == null || memberGrade.isEmpty()) {
+            gradeLabel.setText("등급: 비회원");
+            gradeLabel.setForeground(Color.LIGHT_GRAY);
+        } else {
+            gradeLabel.setText("등급: " + memberGrade.toUpperCase());
+        }
+    }
 
     // DB 연결 필요: 사용자 세션 정보 설정
     public void setSessionInfo(String branchName, int seatNumber) {
@@ -109,18 +143,54 @@ public class UserMainDashboardView extends JFrame {
         timerLabel.setText(String.format("남은 시간: %02d:%02d:%02d", hours, minutes, seconds));
     }
 
-    // 음식 주문 버튼 리스너 설정
     public void setFoodOrderButtonListener(ActionListener listener) {
         foodOrderButton.addActionListener(listener);
     }
 
-    // 리뷰 버튼 리스너 설정
     public void setReviewButtonListener(ActionListener listener) {
         reviewButton.addActionListener(listener);
     }
 
-    // 로그아웃 버튼 리스너 설정
     public void setLogoutButtonListener(ActionListener listener) {
         logoutButton.addActionListener(listener);
+    }
+    
+    public void setTimeChargeButtonListener(ActionListener listener) {
+        timeChargeButton.addActionListener(listener);
+    }
+    
+    public void startTimer(int initialRemainMinutes) {
+        this.remainMinutes = initialRemainMinutes;
+        this.usedMinutes = 0; // 사용 시간 초기화
+        
+        updateRemainingTime(remainMinutes / 60, remainMinutes % 60, 0); // 최초 1회 표시
+
+        // 1분(60,000 밀리초)마다 실행되는 타이머
+        timer = new Timer(60000, e -> {
+            remainMinutes--; // 남은 시간 1분 감소
+            usedMinutes++;   // 사용한 시간 1분 증가
+            
+            updateRemainingTime(remainMinutes / 60, remainMinutes % 60, 0); // 화면 갱신
+            
+            if (remainMinutes <= 0) {
+                timer.stop();
+                JOptionPane.showMessageDialog(this, "시간이 다 되었습니다. 자동으로 로그아웃됩니다.");
+                logoutButton.doClick(); // 강제 로그아웃 버튼 클릭 효과
+            }
+        });
+        timer.start();
+    }
+
+    public void addTime(int minutes) {
+        this.remainMinutes += minutes;
+        updateRemainingTime(remainMinutes / 60, remainMinutes % 60, 0);
+    }
+
+    public int getUsedMinutes() {
+        return this.usedMinutes;
+    }
+
+    public void stopTimer() {
+        if (timer != null) timer.stop();
     }
 }
