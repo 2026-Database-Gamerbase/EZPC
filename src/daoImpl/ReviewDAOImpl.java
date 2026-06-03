@@ -1,6 +1,7 @@
 package daoImpl;
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,6 +11,7 @@ import java.util.List;
 import dao.ReviewDAO;
 import model.Customer;
 import model.Review;
+import model.PcCafeReviewGradeReport;
 
 public class ReviewDAOImpl implements ReviewDAO {
 	
@@ -255,6 +257,67 @@ public class ReviewDAOImpl implements ReviewDAO {
 		}
 		
 		return null;
+	}
+	
+	// 전체 PC방 리뷰 평점 기준 1~4등급 조회
+	// 리뷰가 없을 시 무조건 4등급
+	// 리뷰 수와 등급 도출 을 위해 따로 model 생성 (+ pc방ID,pc방이름,평균 별점)
+	@Override
+	public List<PcCafeReviewGradeReport> getPcCafeReviewGradeReport() {
+	    List<PcCafeReviewGradeReport> list = new ArrayList<>();
+
+	    String sql =
+	        "SELECT " +
+	        "    pcCafeId, " +
+	        "    pcCafeName, " +
+	        "    avgStarRating, " +
+	        "    reviewCount, " +
+	        "    CASE " +
+	        //리뷰가 없으면 무조건 4등급
+	        "        WHEN reviewCount = 0 THEN 4 " +
+	        // NTILE(4): 평균 별점 기준으로 전체 PC방을 4개 구간으로 나누어 등급 부여
+	        "        ELSE NTILE(4) OVER ( " +
+	        "            ORDER BY avgStarRating DESC, pcCafeId ASC " +
+	        "        ) " +
+	        "    END AS pcCafeGrade " +
+	         // reviewCount를 먼저 계산한 뒤 바깥 SELECT에서 등급 계산에 사용하기 위해 ->  WHEN reviewCount = 0 THEN 4 
+	        // review 와 pc_cafe를 조인해서 pcId, pcCafeName, avgStarRating, reviewCount를 행으로 갖는 
+	        // 인라인뷰(pc_review_grades)를 만듬
+	        "FROM ( " +
+	        "    SELECT " +
+	        "        pc.pc_cafe_id AS pcCafeId, " +
+	        "        pc.pc_cafe_name AS pcCafeName, " +
+	        "        pc.average_star_rating AS avgStarRating, " +
+	        "        COUNT(r.star_rating) AS reviewCount " +
+	        "    FROM pc_cafe pc " +
+	        "    LEFT JOIN review r " +
+	        "        ON pc.pc_cafe_id = r.pc_cafe_id " +
+	        "    GROUP BY " +
+	        "        pc.pc_cafe_id " +
+	        ") pc_review_grades " +
+	        "ORDER BY pcCafeGrade, avgStarRating DESC";
+
+	    try (PreparedStatement pstmt = conn.prepareStatement(sql);
+	         ResultSet rs = pstmt.executeQuery()) {
+
+	        while (rs.next()) {
+	            PcCafeReviewGradeReport report = new PcCafeReviewGradeReport();
+
+	            report.setPcCafeId(rs.getString("pcCafeId"));
+	            report.setPcCafeName(rs.getString("pcCafeName"));
+	            report.setAvgStarRating(rs.getDouble("avgStarRating"));
+	            report.setReviewCount(rs.getInt("reviewCount"));
+	            report.setPcCafeGrade(rs.getInt("pcCafeGrade"));
+
+	            list.add(report);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        System.out.println("PC방 리뷰 등급 조회 중 오류 발생");
+	    }
+
+	    return list;
 	}
 	
 	//ResultSet 데이터를 Review 객체로 매핑

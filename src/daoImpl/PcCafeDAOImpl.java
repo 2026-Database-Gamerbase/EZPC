@@ -1,6 +1,7 @@
 package daoImpl;
 
-import db.DatabaseConnector;
+
+
 import model.PcCafe;
 
 import java.sql.Connection;
@@ -13,12 +14,19 @@ import java.util.List;
 import dao.PcCafeDAO;
 
 public class PcCafeDAOImpl implements PcCafeDAO {
+	
+	  private Connection conn;
+
+	    public PcCafeDAOImpl(Connection conn) {
+	        this.conn = conn;
+	    }
+	    
+	    
     @Override
     public void insert(PcCafe pcCafe) throws SQLException {
         String sql = "INSERT INTO pc_cafe (pc_cafe_id, pc_cafe_name, average_star_rating, total_sales, total_seats) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, pcCafe.getPcId());
             statement.setString(2, pcCafe.getPcName());
             statement.setDouble(3, pcCafe.getAverageStarRating());
@@ -32,8 +40,7 @@ public class PcCafeDAOImpl implements PcCafeDAO {
     public PcCafe findById(String pcId) throws SQLException {
         String sql = "SELECT * FROM pc_cafe WHERE pc_cafe_id = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, pcId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -51,8 +58,7 @@ public class PcCafeDAOImpl implements PcCafeDAO {
         String sql = "SELECT * FROM pc_cafe";
         List<PcCafe> pcCafes = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
+        try (PreparedStatement statement = conn.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 pcCafes.add(mapToPcCafe(resultSet));
@@ -66,8 +72,7 @@ public class PcCafeDAOImpl implements PcCafeDAO {
     public void update(PcCafe pcCafe) throws SQLException {
         String sql = "UPDATE pc_cafe SET pc_cafe_name = ?, average_star_rating = ?, total_sales = ?, total_seats = ? WHERE pc_cafe_id = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, pcCafe.getPcName());
             statement.setDouble(2, pcCafe.getAverageStarRating());
             statement.setInt(3, pcCafe.getTotalSales());
@@ -81,13 +86,15 @@ public class PcCafeDAOImpl implements PcCafeDAO {
     public void deleteById(String pcId) throws SQLException {
         String sql = "DELETE FROM pc_cafe WHERE pc_cafe_id = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, pcId);
             statement.executeUpdate();
         }
     }
+    
 
+    
+  
     private PcCafe mapToPcCafe(ResultSet resultSet) throws SQLException {
         return new PcCafe(
                 resultSet.getString("pc_cafe_id"),
@@ -97,4 +104,6 @@ public class PcCafeDAOImpl implements PcCafeDAO {
                 resultSet.getInt("total_seats")
         );
     }
+    
+    
 }

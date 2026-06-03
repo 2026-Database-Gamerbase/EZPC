@@ -7,6 +7,7 @@ import dao.EventScheduleDAO;
 import daoImpl.OrderDAOImpl;
 import model.Food;
 import model.Order;
+import model.FoodRankingReport;
 
 import java.util.List;
 
@@ -173,4 +174,24 @@ public class OrderService {
         }
         return orderDAO.getRecommendedFoods(foodName.trim()); //리턴 값은 손님이 현재 고른 음식을 다른 손님이 함께 주문한 상위 3개 음식 리스트
     }
+    
+    
+    
+    // 해당 PC방의 음식 랭킹 TOP 5
+    // 음식, 음식 가격, 음식 총 판매 수량, 음식 총 결제 금액 출력
+    public List<FoodRankingReport> getTop5FoodRankingByPcCafe(String pcCafeId) {
+    	
+        if (pcCafeId == null || pcCafeId.trim().isEmpty()) {
+            throw new IllegalArgumentException("PC방 지점 ID를 입력해 주세요.");
+        }
+
+        return orderDAO.getTop5FoodRankingByPcCafe(pcCafeId);
+    }
+    
+    //전체 PC방의 음식 랭킹 TOP 5
+    //PC방ID,  음식, 음식 가격, 음식 총 판매 수량, 음식 총 결제 금액 출력
+    public List<FoodRankingReport> getTop5FoodRankingAllPcCafe() {
+        return orderDAO.getTop5FoodRankingAllPcCafe();
+    }
+    
 }

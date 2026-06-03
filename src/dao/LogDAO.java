@@ -3,6 +3,7 @@ package dao;
 import java.sql.SQLException;
 
 import java.util.List;
+import java.util.Map;
 
 import daoImpl.LogDAOImpl;
 import model.Log;
@@ -26,4 +27,6 @@ public interface LogDAO {
     void update(Log log) throws SQLException;
 
     void deleteById(int logId) throws SQLException;
+    
+    public Map<String, Integer> findCustomerEntryCounts(String pcCafeId,String periodType,int year,int month,int date);
 }

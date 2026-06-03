@@ -70,7 +70,7 @@ public class Main {
             
             //dao 생성
             PC_MemberDAO memberDao = new PC_MemberDAOImpl(conn);
-            PcCafeDAO pcCafeDao = new PcCafeDAOImpl(); 
+            PcCafeDAO pcCafeDao = new PcCafeDAOImpl(conn); 
             ChargeDAO chargeDao = new ChargeDAOImpl(conn);
             CustomerDAO customerDao = new CustomerDAOImpl(conn);
             EmployeeDAO employeeDao = new EmployeeDAOImpl();

@@ -1,6 +1,7 @@
 package dao;
 
 import model.Food;
+import model.FoodRankingReport;
 import model.Order;
 
 import java.sql.SQLException;
@@ -16,4 +17,11 @@ public interface OrderDAO {
 
     //이 음식을 먹은 손님이 함께 주문한 상위 3개 상품 추천
     List<Food> getRecommendedFoods(String targetFoodName);
+    
+    
+    //해당 PC방의 음식 판매량 TOP5
+    List<FoodRankingReport> getTop5FoodRankingByPcCafe(String pcCafeId);
+    
+    //전체 PC방의 음식 판매량 TOP5
+    public List<FoodRankingReport> getTop5FoodRankingAllPcCafe();
 }
