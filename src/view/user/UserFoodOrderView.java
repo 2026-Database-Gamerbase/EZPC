@@ -1,3 +1,4 @@
+// 음식 주문창 (+할인율 적용)
 package view.user;
 
 import java.awt.*;
@@ -11,11 +12,6 @@ import javax.swing.table.DefaultTableModel;
 import model.Food;
 import view.FontUtil;
 
-/**
- * UserFoodOrderView - 음식 주문 팝업 창
- * 해당 지점의 음식 재고(stock) 상황을 파악해 메뉴를 보여주며,
- * 진행 중인 이벤트가 있다면 할인율(payment_rate)을 적용해 주문을 생성합니다.
- */
 public class UserFoodOrderView extends JDialog {
     private JTable foodMenuTable;
     private JLabel eventDiscountLabel;

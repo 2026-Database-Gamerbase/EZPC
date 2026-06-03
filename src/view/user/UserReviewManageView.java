@@ -1,3 +1,4 @@
+// 리뷰 관리 화면
 package view.user;
 
 import java.awt.*;
@@ -8,11 +9,6 @@ import javax.swing.table.DefaultTableModel;
 import model.Review;
 import view.FontUtil;
 
-/**
- * UserReviewManageView - 리뷰 관리 화면
- * 사용자가 지점에 대해 별점과 후기를 남기거나
- * 다른 사람의 리뷰를 조회하는 화면입니다.
- */
 public class UserReviewManageView extends JPanel {
     private JLabel branchNameLabel;
     private JSpinner ratingSpinner;

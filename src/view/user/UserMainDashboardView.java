@@ -1,16 +1,11 @@
+// 메인 대시보드 (위젯)
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
-
 import view.FontUtil;
 
-/**
- * UserMainDashboardView - 메인 대시보드 (위젯형)
- * PC 사용 중 우측 상단 등에 항상 떠있는 메인 대시보드 창입니다.
- * 실시간 잔여 시간을 차감하여 보여주며, 음식 주문 및 리뷰 버튼이 포함됩니다.
- */
 public class UserMainDashboardView extends JFrame {
     private JLabel remainingTimeLabel;
     private JLabel seatNumberLabel;

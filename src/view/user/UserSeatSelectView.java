@@ -1,15 +1,11 @@
+// 좌석 선택 화면
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
-
 import view.FontUtil;
 
-/**
- * UserSeatSelectView - 좌석 선택 화면
- * 선택한 지점의 실시간 좌석 배치도를 보여주고, 비어있는 좌석을 선택하는 화면입니다.
- */
 public class UserSeatSelectView extends JPanel {
     private JButton[][] seatButtons;
     private JLabel branchNameLabel;

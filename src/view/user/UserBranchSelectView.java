@@ -1,3 +1,4 @@
+// 지점 선택 화면
 package view.user;
 
 import java.awt.*;
@@ -8,10 +9,6 @@ import javax.swing.*;
 import model.PcCafe;
 import view.FontUtil;
 
-/**
- * UserBranchSelectView - 지점 선택 화면
- * DB에서 조회한 지점 목록을 버튼으로 표시합니다.
- */
 public class UserBranchSelectView extends JPanel {
     private List<JButton> branchButtons;
     private JLabel titleLabel;
