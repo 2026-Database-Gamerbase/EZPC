@@ -1,17 +1,12 @@
+// 시간 충전 결제 화면 (등급별 할인 적용)
+// UserTimeChargeView.java
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
-
 import view.FontUtil;
 
-/**
- * UserTimeChargeView - 시간 충전 결제 화면
- * 선불 이용권을 결제하는 화면입니다.
- * 회원의 경우 누적 금액 등급(Silver, Gold 등)에 따른 할인율이
- * 실시간 반영되어 금액이 표시됩니다.
- */
 public class UserTimeChargeView extends JPanel {
     private JLabel userNameLabel;
     private JLabel userGradeLabel;
@@ -23,6 +18,9 @@ public class UserTimeChargeView extends JPanel {
     private JButton paymentButton;
     private JButton cancelButton;
     private JLabel statusLabel;
+
+    // 💡 사용자 할인율을 임시 저장할 변수 추가
+    private int currentDiscountRate = 0;
 
     public UserTimeChargeView() {
         initializeUI();
@@ -56,18 +54,18 @@ public class UserTimeChargeView extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         centerPanel.add(userLabel, gbc);
-        userNameLabel = new JLabel("사용자명"); // DB 연결 필요
+        userNameLabel = new JLabel("사용자명");
         userNameLabel.setFont(FontUtil.getKoreanFontPlain(14));
         gbc.gridx = 1;
         centerPanel.add(userNameLabel, gbc);
 
-        // 사용자 등급 (DB 연결 필요: 회원등급에 따른 할인율 반영)
+        // 사용자 등급
         JLabel gradeLabel = new JLabel("회원 등급:");
         gradeLabel.setFont(FontUtil.getKoreanFontBold(14));
         gbc.gridx = 0;
         gbc.gridy = 1;
         centerPanel.add(gradeLabel, gbc);
-        userGradeLabel = new JLabel("Bronze"); // DB 연결 필요
+        userGradeLabel = new JLabel("Bronze");
         userGradeLabel.setFont(FontUtil.getKoreanFontPlain(14));
         gbc.gridx = 1;
         centerPanel.add(userGradeLabel, gbc);
@@ -78,7 +76,7 @@ public class UserTimeChargeView extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 2;
         centerPanel.add(discountLabel, gbc);
-        discountRateLabel = new JLabel("0%"); // DB 연결 필요
+        discountRateLabel = new JLabel("0%");
         discountRateLabel.setFont(FontUtil.getKoreanFontPlain(14));
         discountRateLabel.setForeground(new Color(255, 100, 100));
         gbc.gridx = 1;
@@ -90,9 +88,13 @@ public class UserTimeChargeView extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 3;
         centerPanel.add(timeOptionLabel, gbc);
-        // DB 연결 필요: 시간 옵션 및 가격 로드
+        
         String[] timeOptions = {"1시간 - 2,000원", "3시간 - 5,500원", "5시간 - 9,000원", "10시간 - 17,000원"};
         timeOptionCombo = new JComboBox<>(timeOptions);
+        
+        // 💡 콤보박스 값이 바뀔 때마다 가격을 다시 계산하도록 이벤트 추가
+        timeOptionCombo.addActionListener(e -> updatePriceDisplay());
+        
         gbc.gridx = 1;
         centerPanel.add(timeOptionCombo, gbc);
 
@@ -102,7 +104,7 @@ public class UserTimeChargeView extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 4;
         centerPanel.add(basePriceTextLabel, gbc);
-        basePriceLabel = new JLabel("2,000원"); // DB 연결 필요
+        basePriceLabel = new JLabel("2,000원");
         basePriceLabel.setFont(FontUtil.getKoreanFontPlain(14));
         gbc.gridx = 1;
         centerPanel.add(basePriceLabel, gbc);
@@ -113,7 +115,7 @@ public class UserTimeChargeView extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 5;
         centerPanel.add(discountAmountTextLabel, gbc);
-        discountAmountLabel = new JLabel("0원"); // DB 연결 필요
+        discountAmountLabel = new JLabel("0원");
         discountAmountLabel.setFont(FontUtil.getKoreanFontPlain(14));
         discountAmountLabel.setForeground(new Color(100, 200, 100));
         gbc.gridx = 1;
@@ -125,7 +127,7 @@ public class UserTimeChargeView extends JPanel {
         JLabel finalPriceTextLabel = new JLabel("최종 결제액:");
         finalPriceTextLabel.setFont(FontUtil.getKoreanFontBold(16));
         centerPanel.add(finalPriceTextLabel, gbc);
-        finalPriceLabel = new JLabel("2,000원"); // DB 연결 필요
+        finalPriceLabel = new JLabel("2,000원");
         finalPriceLabel.setFont(FontUtil.getKoreanFontBold(16));
         finalPriceLabel.setForeground(new Color(0, 100, 200));
         gbc.gridx = 1;
@@ -159,36 +161,53 @@ public class UserTimeChargeView extends JPanel {
         add(southPanel, BorderLayout.SOUTH);
     }
 
-    // DB 연결 필요: 사용자 정보 설정
+    // 가격을 다시 계산하여 화면에 표시하는 메서드
+    private void updatePriceDisplay() {
+        String selectedOption = (String) timeOptionCombo.getSelectedItem();
+        int basePrice = 0;
+
+        if (selectedOption != null) {
+            if (selectedOption.contains("1시간")) basePrice = 2000;
+            else if (selectedOption.contains("3시간")) basePrice = 5500;
+            else if (selectedOption.contains("5시간")) basePrice = 9000;
+            else if (selectedOption.contains("10시간")) basePrice = 17000;
+        }
+
+        int discountAmount = basePrice * currentDiscountRate / 100;
+        int finalPrice = basePrice - discountAmount;
+
+        setPriceInfo(basePrice, discountAmount, finalPrice);
+    }
+
+    // 사용자 정보 설정할 때 초기 가격 표시도 갱신
     public void setUserInfo(String userName, String grade, int discountRate) {
         userNameLabel.setText(userName);
         userGradeLabel.setText(grade);
         discountRateLabel.setText(discountRate + "%");
+        
+        this.currentDiscountRate = discountRate;
+        updatePriceDisplay();
     }
 
-    // 가격 정보 설정 (DB 연결 필요)
+    // 가격 정보 설정
     public void setPriceInfo(int basePrice, int discountAmount, int finalPrice) {
         basePriceLabel.setText(basePrice + "원");
         discountAmountLabel.setText(discountAmount + "원");
         finalPriceLabel.setText(finalPrice + "원");
     }
 
-    // 선택된 시간 옵션 반환
     public String getSelectedTimeOption() {
         return (String) timeOptionCombo.getSelectedItem();
     }
 
-    // 결제 버튼 리스너 설정
     public void setPaymentButtonListener(ActionListener listener) {
         paymentButton.addActionListener(listener);
     }
 
-    // 취소 버튼 리스너 설정
     public void setCancelButtonListener(ActionListener listener) {
         cancelButton.addActionListener(listener);
     }
 
-    // 상태 메시지 설정
     public void setStatusMessage(String message) {
         statusLabel.setText(message);
     }

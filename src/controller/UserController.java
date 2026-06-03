@@ -28,6 +28,11 @@ import java.util.Map;
 import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.JDialog;
 import model.Customer;
 import model.Food;
 import model.PC_Member;
@@ -40,11 +45,17 @@ import service.PC_MemberService;
 import service.PcCafeService;
 import service.ReviewService;
 import service.StockService;
+import dao.ChargeDAO;
+import daoImpl.ChargeDAOImpl;
+import model.Charge;
+import service.ChargeService;
 import view.user.UserBranchSelectView;
 import view.user.UserFoodOrderView;
 import view.user.UserMainDashboardView;
 import view.user.UserReviewManageView;
 import view.user.UserSeatSelectView;
+import view.user.UserTimeChargeView;
+
 
 public class UserController {
     private Connection conn;
@@ -58,6 +69,7 @@ public class UserController {
     private ReviewService reviewService;
     private StockService stockService;
     private EventScheduleDAO eventScheduleDao;
+    private ChargeService chargeService;
 
     public UserController(Connection conn, PC_Member member) {
         this.conn = conn;
@@ -85,6 +97,9 @@ public class UserController {
         OrderDAO orderDao = new OrderDAOImpl(conn);
         StockDAO stockDao = new StockDAOImpl(conn);
         this.eventScheduleDao = new EventScheduleDAOImpl(conn);
+        
+        ChargeDAO chargeDao = new ChargeDAOImpl(conn);
+        this.chargeService = new ChargeService(chargeDao);
 
         this.pcCafeService = new PcCafeService(pcCafeDao);
         this.customerService = new CustomerService(conn, customerDao, logDao, memberDao);
@@ -254,18 +269,32 @@ public class UserController {
 
     private void showDashboard(String branchName, int seatNumber, Customer customer) {
         UserMainDashboardView dashboard = new UserMainDashboardView();
-        dashboard.setSessionInfo(branchName, seatNumber);
-        int remainTime = customer.getRemainTime();
-        int hours = remainTime / 60;
-        int minutes = remainTime % 60;
-        dashboard.updateRemainingTime(hours, minutes, 0);
+        String grade = (member != null) ? member.getGradeType() : null;
+        dashboard.setSessionInfo(branchName, seatNumber, grade);
+        
+        // 💡 1. 정지되어 있던 시간 표시 대신, 1분마다 작동하는 타이머 시작!
+        dashboard.startTimer(customer.getRemainTime()); 
 
         dashboard.setFoodOrderButtonListener(e -> showFoodOrderView(dashboard, customer.getPcCafeId(), seatNumber));
         dashboard.setReviewButtonListener(e -> showReviewView(dashboard, customer.getPcCafeId(), member));
+        dashboard.setTimeChargeButtonListener(e -> showTimeChargeView(dashboard, customer, member));
+        
+        // 💡 2. 로그아웃 리스너 수정 (사용한 시간만큼 DB에서 빼기)
         dashboard.setLogoutButtonListener(e -> {
+            dashboard.stopTimer(); // 타이머 정지
+            int usedTime = dashboard.getUsedMinutes(); // 화면에서 카운트한 '사용한 시간' 가져오기
+            
+            // [회원일 경우] -> DB(pc_member)의 잔여 시간에서 '사용한 시간' 차감
+            if (member != null && member.getMemberId() != null) {
+                // 이따가 PC_MemberService에 추가할 메서드입니다.
+                pcMemberService.deductUsedTime(member.getMemberId(), usedTime); 
+            }
+            
+            // [비회원/회원 공통] -> 현재 점유 중인 PC방 좌석 세션(customer) 삭제
             customerService.checkOut(customer);
-            dashboard.dispose();
-            showBranchSelection();
+            
+            dashboard.dispose(); // 대시보드 끄기
+            showBranchSelection(); // 지점 선택 화면으로 복귀
         });
 
         dashboard.setVisible(true);
@@ -281,9 +310,50 @@ public class UserController {
             double paymentRate = eventScheduleDao.findCurrentOrderPaymentRate(pcCafeId);
 
             foodOrderView.setMenuData(foods, stockMap, paymentRate);
-            Runnable refreshTotal = () -> foodOrderView.setTotalPrice(foodOrderView.getSelectedFoodPrice() * foodOrderView.getSelectedQuantity());
-            foodOrderView.setFoodTableSelectionListener(e -> refreshTotal.run());
-            foodOrderView.setQuantityChangeListener(e -> refreshTotal.run());
+            foodOrderView.setFoodTableSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent e) {
+                    if (!e.getValueIsAdjusting()) {
+                        // 총 가격 업데이트
+                        int price = foodOrderView.getSelectedFoodPrice();
+                        int qty = foodOrderView.getSelectedQuantity();
+                        foodOrderView.setTotalPrice(price * qty);
+
+                        // 추천 메뉴 DB 연동 및 업데이트
+                        String selectedFood = foodOrderView.getSelectedFoodName();
+                        if (selectedFood != null) {
+                            try {
+                                // UserController에 OrderDAO가 멤버 변수로 없으므로 직접 생성해서 사용
+                                OrderDAO orderDao = new OrderDAOImpl(conn);
+                                List<Food> recommendedFoods = orderDao.getRecommendedFoods(selectedFood);
+
+                                if (recommendedFoods != null && !recommendedFoods.isEmpty()) {
+                                    StringBuilder sb = new StringBuilder("[" + selectedFood + "] 추천 조합: ");
+                                    for (int i = 0; i < recommendedFoods.size(); i++) {
+                                        sb.append(i + 1).append("위 ").append(recommendedFoods.get(i).getFoodName());
+                                        if (i < recommendedFoods.size() - 1) sb.append(", ");
+                                    }
+                                    foodOrderView.setRecommendMessage(sb.toString());
+                                } else {
+                                    foodOrderView.setRecommendMessage("아직 [" + selectedFood + "]와(과) 함께 많이 주문된 메뉴가 없습니다.");
+                                }
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 2. 수량(Spinner) 변경 이벤트 리스너 (람다식 미사용)
+            foodOrderView.setQuantityChangeListener(new ChangeListener() {
+                @Override
+                public void stateChanged(ChangeEvent e) {
+                    int price = foodOrderView.getSelectedFoodPrice();
+                    int qty = foodOrderView.getSelectedQuantity();
+                    foodOrderView.setTotalPrice(price * qty);
+                }
+            });
 
             foodOrderView.setOrderButtonListener(e -> {
                 String selectedFood = foodOrderView.getSelectedFoodName();
@@ -372,6 +442,98 @@ public class UserController {
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(parent, "리뷰 창을 열 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void showTimeChargeView(JFrame parent, Customer customer, PC_Member member) {
+        try {
+            ensureOpenConnection();
+            UserTimeChargeView chargeView = new UserTimeChargeView();
+            
+            // 모달 팝업으로 띄우기
+            JDialog dialog = new JDialog(parent, "시간 충전", true);
+            dialog.setContentPane(chargeView);
+            dialog.setSize(450, 450);
+            dialog.setLocationRelativeTo(parent);
+
+            // 1. 회원 정보 세팅 (비회원은 null 처리 방어)
+            String userName = (member != null && member.getMemberName() != null) ? member.getMemberName() : "비회원";
+            String grade = (member != null && member.getGradeType() != null) ? member.getGradeType() : "NONE";
+            
+            int tempDiscount = 0;
+            if ("SILVER".equalsIgnoreCase(grade)) tempDiscount = 5;
+            else if ("GOLD".equalsIgnoreCase(grade)) tempDiscount = 10;
+            
+            final int discountRate = tempDiscount;
+            
+            chargeView.setUserInfo(userName, grade.toUpperCase(), discountRate);
+
+            // 2. 결제 버튼 클릭 시 동작
+            chargeView.setPaymentButtonListener(e -> {
+                String selectedOption = chargeView.getSelectedTimeOption();
+                int addMinutes = 0;
+                int finalPrice = 0;
+
+                // 콤보박스에서 선택된 시간에 따라 분(minute)과 가격 파싱
+                if (selectedOption != null) {
+                    if (selectedOption.contains("1시간")) { addMinutes = 60; finalPrice = 2000; }
+                    else if (selectedOption.contains("3시간")) { addMinutes = 180; finalPrice = 5500; }
+                    else if (selectedOption.contains("5시간")) { addMinutes = 300; finalPrice = 9000; }
+                    else if (selectedOption.contains("10시간")) { addMinutes = 600; finalPrice = 17000; }
+                }
+
+                // 할인율 반영
+                int discountAmount = finalPrice * discountRate / 100;
+                finalPrice = finalPrice - discountAmount;
+
+                try {
+                	// Charge 객체를 만들어 결제 내역 세팅
+                    Charge chargeLog = new Charge();
+                    chargeLog.setPcCafeId(customer.getPcCafeId());
+                    chargeLog.setSeatNum(customer.getSeatNum());
+                    
+                    // 비회원이면 memberId에 null이 들어갑니다.
+                    chargeLog.setMemberId((member != null && member.getMemberId() != null) ? member.getMemberId() : null);
+                    chargeLog.setTicketTime(addMinutes);
+                    chargeLog.setChargePayAmount(finalPrice);
+                	
+                	chargeService.recordCharge(chargeLog);
+                	
+                    // [핵심 1] 회원일 경우 -> pc_member 테이블 업데이트 (영구 저장용)
+                    if (member != null && member.getMemberId() != null) {
+                        pcMemberService.chargeTime(member.getMemberId(), addMinutes, finalPrice);
+                        // 메모리 상의 회원 정보 잔여시간도 즉시 갱신
+                        member.setRemainTime(member.getRemainTime() + addMinutes);
+                    }
+
+                    // [핵심 2] 비회원/회원 공통 -> 현재 세션(customer) 테이블 및 메모리 업데이트 (일회용 저장)
+                    int newRemain = customer.getRemainTime() + addMinutes;
+                    customer.setRemainTime(newRemain); // 메모리 갱신
+                    
+                    // 만들어두신 CustomerDAOImpl을 이용해 DB의 customer 테이블에도 시간 즉시 추가
+                    CustomerDAO customerDao = new CustomerDAOImpl(conn);
+                    customerDao.updateRemainingTime(customer.getPcCafeId(), customer.getSeatNum(), newRemain);
+
+                    // [핵심 3] 대시보드(View) 텍스트 실시간 갱신 (늘어난 시간으로)
+                    ((UserMainDashboardView) parent).addTime(addMinutes);
+
+                    JOptionPane.showMessageDialog(dialog, addMinutes + "분 충전이 완료되었습니다!\n결제 금액: " + finalPrice + "원");
+                    dialog.dispose();
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    chargeView.setStatusMessage("결제 처리 중 오류가 발생했습니다.");
+                }
+            });
+
+            // 취소 버튼
+            chargeView.setCancelButtonListener(e -> dialog.dispose());
+
+            dialog.setVisible(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(parent, "충전 창을 열 수 없습니다.", "오류", JOptionPane.ERROR_MESSAGE);
         }
     }
 }
