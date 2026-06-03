@@ -3,6 +3,7 @@ package view.owner;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import view.FontUtil;
 
@@ -186,6 +187,24 @@ public class OwnerMemberManageView extends JPanel {
         return null;
     }
 
+    // 선택된 행의 기준 금액 텍스트 원본 get
+    public String getSelectedGradeStandardString() {
+        int row = gradeTable.getSelectedRow();
+        if (row >= 0) {
+            return (String) gradeTableModel.getValueAt(row, 1);
+        }
+        return null;
+    }
+
+    // 선택된 행의 할인율 텍스트 원본 get
+    public String getSelectedGradeDiscountString() {
+        int row = gradeTable.getSelectedRow();
+        if (row >= 0) {
+            return (String) gradeTableModel.getValueAt(row, 2);
+        }
+        return null;
+    }
+
     public int getStandardAmount() {
         return (int) standardAmountSpinner.getValue();
     }
@@ -201,6 +220,14 @@ public class OwnerMemberManageView extends JPanel {
         statusLabel.setText(message);
     }
 
+    public void setStandardAmount(int amount) {
+        standardAmountSpinner.setValue(amount);
+    }
+
+    public void setDiscountRate(int rate) {
+        discountRateSpinner.setValue(rate);
+    }
+
     // ==========================================
     // Listener 등록
     // ==========================================
@@ -210,6 +237,11 @@ public class OwnerMemberManageView extends JPanel {
 
     public void setSaveGradeButtonListener(ActionListener listener) {
         saveGradeButton.addActionListener(listener);
+    }
+
+    // 우측 등급표 클릭 감지 리스너
+    public void setGradeTableSelectionListener(ListSelectionListener listener) {
+        gradeTable.getSelectionModel().addListSelectionListener(listener);
     }
 
     // ==========================================
