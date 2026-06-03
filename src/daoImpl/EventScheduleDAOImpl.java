@@ -1,7 +1,5 @@
 package daoImpl;
 
-import db.DatabaseConnector;
-
 import model.EventSchedule;
 
 import java.sql.Connection;
@@ -114,8 +112,7 @@ public double findCurrentOrderPaymentRate(String pcCafeId) throws SQLException {
         String sql = "SELECT * FROM event_schedule WHERE pc_cafe_id = ?";
         List<EventSchedule> eventSchedules = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, pcId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -133,8 +130,7 @@ public double findCurrentOrderPaymentRate(String pcCafeId) throws SQLException {
         // 복합 기본키로 이벤트 종료일 수정/ Update event end date by composite primary key.
         String sql = "UPDATE event_schedule SET event_end_date = ? WHERE event_type = ? AND pc_cafe_id = ? AND event_start_date = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setDate(1, Date.valueOf(eventSchedule.getEventEndDate()));
             statement.setString(2, eventSchedule.getEventType());
             statement.setString(3, eventSchedule.getPcId());
