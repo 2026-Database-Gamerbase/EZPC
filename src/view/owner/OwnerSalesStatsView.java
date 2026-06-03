@@ -63,7 +63,7 @@ public class OwnerSalesStatsView extends JPanel {
         leftPanel.setBorder(BorderFactory.createTitledBorder("지점별 매출 및 평가 리포트"));
         leftPanel.setBackground(new Color(240, 240, 240));
 
-        String[] salesColumnNames = {"기준월", "당월 매출", "사용자 수", "전월비(%)", "지점 상태"};
+        String[] salesColumnNames = {"기준월", "당월 매출", "손님 수", "전월비(%)", "지점 상태"};
         salesTableModel = new DefaultTableModel(salesColumnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
