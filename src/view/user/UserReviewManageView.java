@@ -2,8 +2,10 @@ package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import model.Review;
 
 /**
  * UserReviewManageView - 리뷰 관리 화면
@@ -145,11 +147,6 @@ public class UserReviewManageView extends JPanel {
             }
         };
 
-        // 샘플 데이터 (DB 연결 필요)
-        tableModel.addRow(new Object[]{"user001", "★★★★★", "정말 좋은 시설입니다!", "2024-05-20"});
-        tableModel.addRow(new Object[]{"user002", "★★★★", "쾌적하고 편합니다.", "2024-05-19"});
-        tableModel.addRow(new Object[]{"user003", "★★★", "보통 수준입니다.", "2024-05-18"});
-
         reviewListTable = new JTable(tableModel);
         reviewListTable.setFont(new Font("Arial", Font.PLAIN, 11));
         reviewListTable.setRowHeight(25);
@@ -167,6 +164,25 @@ public class UserReviewManageView extends JPanel {
     // DB 연결 필요: 지점명 설정
     public void setBranchName(String branchName) {
         branchNameLabel.setText("지점: " + branchName);
+    }
+
+    public void refreshReviews(List<Review> reviews) {
+        tableModel.setRowCount(0);
+        if (reviews == null || reviews.isEmpty()) {
+            return;
+        }
+        for (Review review : reviews) {
+            String starText = "";
+            int rating = (int) review.getStarRating();
+            for (int i = 0; i < rating; i++) {
+                starText += "★";
+            }
+            tableModel.addRow(new Object[]{review.getMemberId(), starText, review.getReviewContent(), "-"});
+        }
+    }
+
+    public void refreshReviewList() {
+        tableModel.setRowCount(0);
     }
 
     // 입력된 별점 반환
@@ -192,14 +208,6 @@ public class UserReviewManageView extends JPanel {
     // 초기화 버튼 리스너 설정
     public void setClearButtonListener(ActionListener listener) {
         clearButton.addActionListener(listener);
-    }
-
-    // 리뷰 목록 새로고침 (DB 연결 필요)
-    public void refreshReviewList() {
-        tableModel.setRowCount(0);
-        // DB 연결 필요: 해당 지점의 리뷰 목록 다시 로드
-        tableModel.addRow(new Object[]{"user001", "★★★★★", "정말 좋은 시설입니다!", "2024-05-20"});
-        tableModel.addRow(new Object[]{"user002", "★★★★", "쾌적하고 편합니다.", "2024-05-19"});
     }
 
     // 리뷰 입력 초기화

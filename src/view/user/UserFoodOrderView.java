@@ -2,8 +2,13 @@ package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Map;
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import model.Food;
 
 /**
  * UserFoodOrderView - 음식 주문 팝업 창
@@ -19,6 +24,7 @@ public class UserFoodOrderView extends JDialog {
     private JButton cancelButton;
     private JLabel statusLabel;
     private DefaultTableModel tableModel;
+    private double paymentRate = 1.0;
 
     public UserFoodOrderView(JFrame parent) {
         super(parent, "음식 주문", true);
@@ -61,13 +67,6 @@ public class UserFoodOrderView extends JDialog {
                 return false;
             }
         };
-
-        // 샘플 데이터 (DB 연결 필요)
-        tableModel.addRow(new Object[]{"라면", 4000, 4000, "5개"});
-        tableModel.addRow(new Object[]{"우동", 5000, 4500, "3개"});
-        tableModel.addRow(new Object[]{"김밥", 3000, 3000, "10개"});
-        tableModel.addRow(new Object[]{"떡볶이", 4500, 4050, "7개"});
-        tableModel.addRow(new Object[]{"핫도그", 3500, 3500, "8개"});
 
         foodMenuTable = new JTable(tableModel);
         foodMenuTable.setFont(new Font("Arial", Font.PLAIN, 12));
@@ -177,5 +176,31 @@ public class UserFoodOrderView extends JDialog {
     // 취소 버튼 리스너 설정
     public void setCancelButtonListener(ActionListener listener) {
         cancelButton.addActionListener(listener);
+    }
+
+    public void setMenuData(List<Food> foods, Map<String, Integer> stockMap, double paymentRate) {
+        this.paymentRate = paymentRate;
+        tableModel.setRowCount(0);
+        for (Food food : foods) {
+            int basePrice = food.getPrice();
+            int currentPrice = (int) Math.floor(basePrice * paymentRate);
+            int stockQty = stockMap.getOrDefault(food.getFoodName(), 0);
+            tableModel.addRow(new Object[]{food.getFoodName(), basePrice, currentPrice, stockQty + "개"});
+        }
+        if (paymentRate >= 1.0) {
+            setEventDiscount("없음", 0);
+        } else {
+            int discountRate = (int) Math.round((1.0 - paymentRate) * 100);
+            setEventDiscount("할인 중", discountRate);
+        }
+        setTotalPrice(getSelectedFoodPrice() * getSelectedQuantity());
+    }
+
+    public void setFoodTableSelectionListener(ListSelectionListener listener) {
+        foodMenuTable.getSelectionModel().addListSelectionListener(listener);
+    }
+
+    public void setQuantityChangeListener(ChangeListener listener) {
+        quantitySpinner.addChangeListener(listener);
     }
 }

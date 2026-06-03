@@ -1,24 +1,30 @@
 package controller;
 
 import dao.CustomerDAO;
+import dao.EventScheduleDAO;
 import dao.FoodDAO;
 import dao.LogDAO;
 import dao.OrderDAO;
 import dao.PC_MemberDAO;
 import dao.PcCafeDAO;
 import dao.ReviewDAO;
+import dao.StockDAO;
 import daoImpl.CustomerDAOImpl;
+import daoImpl.EventScheduleDAOImpl;
 import daoImpl.FoodDAOImpl;
 import daoImpl.LogDAOImpl;
 import daoImpl.OrderDAOImpl;
 import daoImpl.PC_MemberDAOImpl;
 import daoImpl.PcCafeDAOImpl;
 import daoImpl.ReviewDAOImpl;
+import daoImpl.StockDAOImpl;
 import db.DatabaseConnector;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -33,6 +39,7 @@ import service.OrderService;
 import service.PC_MemberService;
 import service.PcCafeService;
 import service.ReviewService;
+import service.StockService;
 import view.user.UserBranchSelectView;
 import view.user.UserFoodOrderView;
 import view.user.UserMainDashboardView;
@@ -49,6 +56,8 @@ public class UserController {
     private FoodService foodService;
     private OrderService orderService;
     private ReviewService reviewService;
+    private StockService stockService;
+    private EventScheduleDAO eventScheduleDao;
 
     public UserController(Connection conn, PC_Member member) {
         this.conn = conn;
@@ -74,11 +83,15 @@ public class UserController {
         FoodDAO foodDao = new FoodDAOImpl(conn);
         ReviewDAO reviewDao = new ReviewDAOImpl(conn);
         OrderDAO orderDao = new OrderDAOImpl(conn);
+        StockDAO stockDao = new StockDAOImpl(conn);
+        this.eventScheduleDao = new EventScheduleDAOImpl(conn);
+
         this.pcCafeService = new PcCafeService(pcCafeDao);
         this.customerService = new CustomerService(conn, customerDao, logDao, memberDao);
         this.pcMemberService = new PC_MemberService(memberDao);
         this.foodService = new FoodService(foodDao);
-        this.orderService = new OrderService(conn, orderDao, null, foodDao, null);
+        this.stockService = new StockService(stockDao);
+        this.orderService = new OrderService(conn, orderDao, stockService, foodDao, eventScheduleDao);
         this.reviewService = new ReviewService(reviewDao);
     }
 
@@ -247,8 +260,8 @@ public class UserController {
         int minutes = remainTime % 60;
         dashboard.updateRemainingTime(hours, minutes, 0);
 
-        dashboard.setFoodOrderButtonListener(e -> showFoodOrderView(dashboard, customer.getPcCafeId()));
-        dashboard.setReviewButtonListener(e -> showReviewView(dashboard, customer.getPcCafeId()));
+        dashboard.setFoodOrderButtonListener(e -> showFoodOrderView(dashboard, customer.getPcCafeId(), seatNumber));
+        dashboard.setReviewButtonListener(e -> showReviewView(dashboard, customer.getPcCafeId(), member));
         dashboard.setLogoutButtonListener(e -> {
             customerService.checkOut(customer);
             dashboard.dispose();
@@ -258,12 +271,47 @@ public class UserController {
         dashboard.setVisible(true);
     }
 
-    private void showFoodOrderView(JFrame parent, String pcCafeId) {
+    private void showFoodOrderView(JFrame parent, String pcCafeId, int seatNumber) {
         try {
             ensureOpenConnection();
             UserFoodOrderView foodOrderView = new UserFoodOrderView(parent);
             List<Food> foods = foodService.getMenuBoard();
-            
+            Map<String, Integer> stockMap = new HashMap<>();
+            stockService.getCafeStockList(pcCafeId).forEach(stock -> stockMap.put(stock.getFoodName(), stock.getStockQuantity()));
+            double paymentRate = eventScheduleDao.findCurrentOrderPaymentRate(pcCafeId);
+
+            foodOrderView.setMenuData(foods, stockMap, paymentRate);
+            Runnable refreshTotal = () -> foodOrderView.setTotalPrice(foodOrderView.getSelectedFoodPrice() * foodOrderView.getSelectedQuantity());
+            foodOrderView.setFoodTableSelectionListener(e -> refreshTotal.run());
+            foodOrderView.setQuantityChangeListener(e -> refreshTotal.run());
+
+            foodOrderView.setOrderButtonListener(e -> {
+                String selectedFood = foodOrderView.getSelectedFoodName();
+                if (selectedFood == null) {
+                    foodOrderView.setStatusMessage("음식을 먼저 선택해 주세요.");
+                    return;
+                }
+                int quantity = foodOrderView.getSelectedQuantity();
+                if (quantity <= 0) {
+                    foodOrderView.setStatusMessage("수량을 올바르게 입력해 주세요.");
+                    return;
+                }
+
+                try {
+                    boolean success = orderService.placeOrder(pcCafeId, seatNumber, selectedFood, quantity);
+                    if (success) {
+                        foodOrderView.setStatusMessage("주문이 완료되었습니다.");
+                        stockMap.clear();
+                        stockService.getCafeStockList(pcCafeId).forEach(stock -> stockMap.put(stock.getFoodName(), stock.getStockQuantity()));
+                        foodOrderView.setMenuData(foods, stockMap, paymentRate);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    foodOrderView.setStatusMessage("주문에 실패했습니다. 재고 또는 DB를 확인하세요.");
+                }
+            });
+
+            foodOrderView.setCancelButtonListener(e -> foodOrderView.dispose());
             foodOrderView.setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -271,12 +319,50 @@ public class UserController {
         }
     }
 
-    private void showReviewView(JFrame parent, String pcCafeId) {
+    private void showReviewView(JFrame parent, String pcCafeId, PC_Member member) {
         try {
             ensureOpenConnection();
             UserReviewManageView reviewView = new UserReviewManageView();
-            List<Review> reviews = reviewService.checkReviewByPcCafeId(pcCafeId);
-            
+            PcCafe pcCafe = pcCafeService.getPcCafe(pcCafeId);
+            if (pcCafe != null) {
+                reviewView.setBranchName(pcCafe.getPcName());
+            }
+            reviewView.refreshReviews(reviewService.checkReviewByPcCafeId(pcCafeId));
+
+            reviewView.setSubmitReviewButtonListener(e -> {
+                String memberId = member == null ? null : member.getMemberId();
+                if (memberId == null || memberId.isEmpty()) {
+                    reviewView.setStatusMessage("리뷰 작성은 회원만 가능합니다.");
+                    return;
+                }
+
+                String content = reviewView.getReviewText().trim();
+                if (content.isEmpty()) {
+                    reviewView.setStatusMessage("리뷰 내용을 입력해 주세요.");
+                    return;
+                }
+
+                Review review = new Review();
+                review.setMemberId(memberId);
+                review.setPcCafeId(pcCafeId);
+                review.setStarRating(reviewView.getSelectedRating());
+                String title = content.length() > 10 ? content.substring(0, 10) : content;
+                review.setReviewTitle(title);
+                review.setReviewContent(content);
+
+                try {
+                    reviewService.writeReview(review);
+                    reviewView.setStatusMessage("리뷰가 등록되었습니다.");
+                    reviewView.clearReviewInput();
+                    reviewView.refreshReviews(reviewService.checkReviewByPcCafeId(pcCafeId));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    reviewView.setStatusMessage("리뷰 등록에 실패했습니다. 다시 시도해 주세요.");
+                }
+            });
+
+            reviewView.setClearButtonListener(e -> reviewView.clearReviewInput());
+
             JFrame reviewFrame = new JFrame("리뷰 관리");
             reviewFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             reviewFrame.setSize(800, 600);
