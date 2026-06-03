@@ -17,8 +17,11 @@ public interface PC_MemberDAO {
 	//특정 회원 조회, 로그인 기능으로 연결
 	PC_Member findByID(String memberId);
 	
-	//회원 전체 조회
+	//회원 전체 조회 (owner 포함)
 	List<PC_Member> findAll();
+
+	//user 타입 회원만 조회 (운영자 뷰 회원 관리용)
+	List<PC_Member> findAllUsers();
 	
 	//잔여 시간 조회
 	int getRemainTime(String memberId);

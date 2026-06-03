@@ -1,6 +1,5 @@
 package daoImpl;
 
-import db.DatabaseConnector;
 import model.Employee;
 
 import java.sql.Connection;
@@ -14,18 +13,19 @@ import java.util.List;
 import dao.EmployeeDAO;
 
 public class EmployeeDAOImpl implements EmployeeDAO {
-    public EmployeeDAOImpl() {
-		// TODO Auto-generated constructor stub
-	}
 
+    private final Connection conn;
 
-	@Override
+    public EmployeeDAOImpl(Connection conn) {
+        this.conn = conn;
+    }
+
+    @Override
     public int insert(Employee employee) throws SQLException {
         // 직원 1명 추가 후 자동 생성된 ID 반환 / Insert one employee and return the generated id.
         String sql = "INSERT INTO employee (employee_name, pc_cafe_id, employee_position, hour_wage, is_currently_working) VALUES (?, ?, ?, ?, ?)";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, employee.getEmployeeName());
             statement.setString(2, employee.getPcId());
             statement.setString(3, employee.getEmployeePosition());
@@ -50,8 +50,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         // 기본키로 직원 1명 조회 / Select one employee by primary key.
         String sql = "SELECT * FROM employee WHERE employee_id = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, employeeId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -70,8 +69,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         String sql = "SELECT * FROM employee";
         List<Employee> employees = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
+        try (PreparedStatement statement = conn.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 employees.add(mapToEmployee(resultSet));
@@ -87,8 +85,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         String sql = "SELECT * FROM employee WHERE pc_cafe_id = ?";
         List<Employee> employees = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, pcId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -106,8 +103,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         // 기본키로 직원 정보 수정 / Update employee data by primary key.
         String sql = "UPDATE employee SET employee_name = ?, pc_cafe_id = ?, employee_position = ?, hour_wage = ?, is_currently_working = ? WHERE employee_id = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setString(1, employee.getEmployeeName());
             statement.setString(2, employee.getPcId());
             statement.setString(3, employee.getEmployeePosition());
@@ -123,8 +119,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         // 기본키로 직원 1명 삭제 / Delete one employee by primary key.
         String sql = "DELETE FROM employee WHERE employee_id = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, employeeId);
             statement.executeUpdate();
         }

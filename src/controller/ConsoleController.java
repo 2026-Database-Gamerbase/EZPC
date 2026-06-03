@@ -25,7 +25,7 @@ import service.StockService;
 import service.TicketService;
 import view.View;
 
-public class Controller {
+public class ConsoleController {
 	View view;
 	ChargeService chargeService;
 	CustomerService customerService;
@@ -44,9 +44,9 @@ public class Controller {
 	TicketService ticketService;
 	
 
-	public Controller() {}
+	public ConsoleController() {}
 
-	public Controller(View view, ChargeService chargeService, CustomerService customerService,
+	public ConsoleController(View view, ChargeService chargeService, CustomerService customerService,
 			EmployeeService employeeService, EventInfoService eventInfoService,
 			EventScheduleService eventScheduleService, FoodService foodService, GradeService gradeService,
 			LogService logService, OrderService orderService, PC_MemberService pc_memberService,
@@ -218,7 +218,7 @@ public class Controller {
 					
 					//회원일 경우에만 누적 결제금액 증가 및 등급 반영
 					if (customer.getMemberId() != null) {
-						pc_memberService.chargeTime(customer.getMemberId(), addTime, payAmount); //회원아이디, 추가 시간, 결제 금액
+						//pc_memberService.chargeTime(customer.getMemberId(), addTime, payAmount); //회원아이디, 추가 시간, 결제 금액
 					}
 					
 					System.out.printf("\n[결제 완료] 정상 처리되었습니다. %d분이 충전되었습니다. 총 잔여 시간: %d분\n", addTime, updatedTime);
