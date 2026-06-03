@@ -1,15 +1,12 @@
+// 회원 관리 탭 (등급, 할인율 등)
 package view.owner;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import view.FontUtil;
 
-/**
- * OwnerMemberManageView - 회원 관리 탭
- * 가입된 회원들의 등급 기준(Standard)과 등급별 혜택(Benefit, 할인율)을 조정하고
- * 회원을 관리하는 화면입니다.
- */
 public class OwnerMemberManageView extends JPanel {
     private JTable memberTable;
     private JTable gradeTable;
@@ -33,7 +30,7 @@ public class OwnerMemberManageView extends JPanel {
         titlePanel.setBackground(new Color(240, 240, 240));
         titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JLabel titleLabel = new JLabel("회원 관리");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(20));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
@@ -63,7 +60,7 @@ public class OwnerMemberManageView extends JPanel {
         memberTableModel.addRow(new Object[]{"user005", "정진호", "Silver", "100,000원", "2024-02-01"});
 
         memberTable = new JTable(memberTableModel);
-        memberTable.setFont(new Font("Arial", Font.PLAIN, 11));
+        memberTable.setFont(FontUtil.getKoreanFontPlain(11));
         memberTable.setRowHeight(25);
         memberTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -92,7 +89,7 @@ public class OwnerMemberManageView extends JPanel {
         gradeTableModel.addRow(new Object[]{"Platinum", "500,000원", "15%", "15% 할인"});
 
         gradeTable = new JTable(gradeTableModel);
-        gradeTable.setFont(new Font("Arial", Font.PLAIN, 11));
+        gradeTable.setFont(FontUtil.getKoreanFontPlain(11));
         gradeTable.setRowHeight(25);
         gradeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -147,7 +144,7 @@ public class OwnerMemberManageView extends JPanel {
         bottomPanel.setBackground(new Color(240, 240, 240));
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
         statusLabel = new JLabel(" ");
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        statusLabel.setFont(FontUtil.getKoreanFontPlain(12));
         statusLabel.setForeground(Color.RED);
         bottomPanel.add(statusLabel);
         add(bottomPanel, BorderLayout.SOUTH);

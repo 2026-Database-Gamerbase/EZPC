@@ -1,3 +1,4 @@
+// PC방 지점 선택 화면 (현재 다섯 개 잇음)
 package view.user;
 
 import java.awt.*;
@@ -5,10 +6,6 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import view.FontUtil;
 
-/**
- * UserBranchSelectView - 지점 선택 화면
- * 강남점, 홍대점 등 활성화된 5개 PC방 지점 중 이용할 곳을 선택하는 화면입니다.
- */
 public class UserBranchSelectView extends JPanel {
     private JButton[] branchButtons;
     private JLabel titleLabel;

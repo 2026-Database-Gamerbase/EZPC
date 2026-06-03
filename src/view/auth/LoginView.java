@@ -1,3 +1,4 @@
+// 통합 로그인 화면
 package view.auth;
 
 import java.awt.*;
@@ -5,11 +6,7 @@ import java.awt.event.ActionListener;
 import javax.swing.*;
 import view.FontUtil;
 
-/**
- * LoginView - 통합 로그인 화면
- * 입력된 ID의 member_type을 식별하여 손님(user)이면 좌석 선택으로,
- * 사장님(owner)이면 관리자 창으로 자동 라우팅합니다.
- */
+
 public class LoginView extends JFrame {
     private JTextField idField;
     private JPasswordField passwordField;

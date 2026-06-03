@@ -1,14 +1,11 @@
+// 메인 대시보드 (실시간 잔여 시간 표시 + 음식주문, 리뷰버튼)
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import view.FontUtil;
 
-/**
- * UserMainDashboardView - 메인 대시보드 (위젯형)
- * PC 사용 중 우측 상단 등에 항상 떠있는 메인 대시보드 창입니다.
- * 실시간 잔여 시간을 차감하여 보여주며, 음식 주문 및 리뷰 버튼이 포함됩니다.
- */
 public class UserMainDashboardView extends JFrame {
     private JLabel remainingTimeLabel;
     private JLabel seatNumberLabel;
@@ -41,19 +38,19 @@ public class UserMainDashboardView extends JFrame {
         infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         branchNameLabel = new JLabel("지점: 강남점"); // DB 연결 필요
-        branchNameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        branchNameLabel.setFont(FontUtil.getKoreanFontBold(12));
         branchNameLabel.setForeground(Color.WHITE);
         infoPanel.add(branchNameLabel);
 
         seatNumberLabel = new JLabel("좌석: 1번"); // DB 연결 필요
-        seatNumberLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        seatNumberLabel.setFont(FontUtil.getKoreanFontBold(12));
         seatNumberLabel.setForeground(Color.WHITE);
         infoPanel.add(seatNumberLabel);
 
         // 남은 시간 (실시간 차감)
         // DB 연결 필요: 세션 시작 시간과 구매한 시간으로부터 실시간 계산
         timerLabel = new JLabel("남은 시간: 01:00:00");
-        timerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        timerLabel.setFont(FontUtil.getKoreanFontBold(14));
         timerLabel.setForeground(new Color(100, 200, 100));
         infoPanel.add(timerLabel);
 
@@ -61,7 +58,7 @@ public class UserMainDashboardView extends JFrame {
 
         // 중앙: 잔여 시간 (큰 글씨)
         remainingTimeLabel = new JLabel("1시간 0분");
-        remainingTimeLabel.setFont(new Font("Arial", Font.BOLD, 36));
+        remainingTimeLabel.setFont(FontUtil.getKoreanFontBold(36));
         remainingTimeLabel.setHorizontalAlignment(JLabel.CENTER);
         remainingTimeLabel.setForeground(new Color(100, 200, 100));
         remainingTimeLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
@@ -77,21 +74,21 @@ public class UserMainDashboardView extends JFrame {
         foodOrderButton.setBackground(new Color(255, 140, 0));
         foodOrderButton.setForeground(Color.WHITE);
         foodOrderButton.setFocusPainted(false);
-        foodOrderButton.setFont(new Font("Arial", Font.BOLD, 11));
+        foodOrderButton.setFont(FontUtil.getKoreanFontBold(11));
         buttonPanel.add(foodOrderButton);
 
         reviewButton = new JButton("리뷰");
         reviewButton.setBackground(new Color(100, 150, 255));
         reviewButton.setForeground(Color.WHITE);
         reviewButton.setFocusPainted(false);
-        reviewButton.setFont(new Font("Arial", Font.BOLD, 11));
+        reviewButton.setFont(FontUtil.getKoreanFontBold(11));
         buttonPanel.add(reviewButton);
 
         logoutButton = new JButton("로그아웃");
         logoutButton.setBackground(new Color(200, 50, 50));
         logoutButton.setForeground(Color.WHITE);
         logoutButton.setFocusPainted(false);
-        logoutButton.setFont(new Font("Arial", Font.BOLD, 11));
+        logoutButton.setFont(FontUtil.getKoreanFontBold(11));
         buttonPanel.add(logoutButton);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);

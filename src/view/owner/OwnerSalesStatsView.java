@@ -1,14 +1,11 @@
+// 매출 통계 탭 (지점별 매출 조회, 월별 인기 음식 조회 등등)
 package view.owner;
 
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import view.FontUtil;
 
-/**
- * OwnerSalesStatsView - 매출 통계 탭
- * 지점별 매출 조회, 월별 가장 많이 팔린 음식, 가장 인기가 많은 게임 등
- * 통계 데이터를 시각적으로 확인하는 화면입니다.
- */
 public class OwnerSalesStatsView extends JPanel {
     private JComboBox<String> periodCombo;
     private JLabel totalSalesLabel;
@@ -36,6 +33,7 @@ public class OwnerSalesStatsView extends JPanel {
         JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         filterPanel.setBackground(new Color(240, 240, 240));
         JLabel periodLabel = new JLabel("기간:");
+        periodLabel.setFont(FontUtil.getKoreanFontPlain(12));
         // DB 연결 필요: 조회 기간 선택
         String[] periods = {"오늘", "이번 주", "이번 달", "3개월", "6개월", "1년"};
         periodCombo = new JComboBox<>(periods);
@@ -52,10 +50,10 @@ public class OwnerSalesStatsView extends JPanel {
         totalSalesPanel.setBackground(new Color(100, 150, 255));
         totalSalesPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         JLabel totalSalesTextLabel = new JLabel("총 매출");
-        totalSalesTextLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        totalSalesTextLabel.setFont(FontUtil.getKoreanFontBold(12));
         totalSalesTextLabel.setForeground(Color.WHITE);
         totalSalesLabel = new JLabel("1,234,560원"); // DB 연결 필요
-        totalSalesLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        totalSalesLabel.setFont(FontUtil.getKoreanFontBold(20));
         totalSalesLabel.setForeground(Color.WHITE);
         totalSalesLabel.setHorizontalAlignment(JLabel.CENTER);
         totalSalesPanel.add(totalSalesTextLabel, BorderLayout.NORTH);
@@ -67,10 +65,10 @@ public class OwnerSalesStatsView extends JPanel {
         userCountPanel.setBackground(new Color(255, 140, 0));
         userCountPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         JLabel userCountTextLabel = new JLabel("사용자 수");
-        userCountTextLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        userCountTextLabel.setFont(FontUtil.getKoreanFontBold(12));
         userCountTextLabel.setForeground(Color.WHITE);
         userCountLabel = new JLabel("456명"); // DB 연결 필요
-        userCountLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        userCountLabel.setFont(FontUtil.getKoreanFontBold(20));
         userCountLabel.setForeground(Color.WHITE);
         userCountLabel.setHorizontalAlignment(JLabel.CENTER);
         userCountPanel.add(userCountTextLabel, BorderLayout.NORTH);
@@ -82,10 +80,10 @@ public class OwnerSalesStatsView extends JPanel {
         averagePanel.setBackground(new Color(100, 200, 100));
         averagePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
         JLabel averageTextLabel = new JLabel("평균 결제액");
-        averageTextLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        averageTextLabel.setFont(FontUtil.getKoreanFontBold(12));
         averageTextLabel.setForeground(Color.WHITE);
         averagePriceLabel = new JLabel("2,700원"); // DB 연결 필요
-        averagePriceLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        averagePriceLabel.setFont(FontUtil.getKoreanFontBold(20));
         averagePriceLabel.setForeground(Color.WHITE);
         averagePriceLabel.setHorizontalAlignment(JLabel.CENTER);
         averagePanel.add(averageTextLabel, BorderLayout.NORTH);
@@ -121,7 +119,7 @@ public class OwnerSalesStatsView extends JPanel {
         salesTableModel.addRow(new Object[]{"노량진점", "300,000원", "80명", "3,750원"});
 
         JTable salesTable = new JTable(salesTableModel);
-        salesTable.setFont(new Font("Arial", Font.PLAIN, 11));
+        salesTable.setFont(FontUtil.getKoreanFontPlain(11));
         salesTable.setRowHeight(25);
         leftPanel.add(new JScrollPane(salesTable), BorderLayout.CENTER);
 
@@ -149,7 +147,7 @@ public class OwnerSalesStatsView extends JPanel {
         foodTableModel.addRow(new Object[]{"핫도그", "80개", "280,000원", "5위"});
 
         JTable popularFoodTable = new JTable(foodTableModel);
-        popularFoodTable.setFont(new Font("Arial", Font.PLAIN, 11));
+        popularFoodTable.setFont(FontUtil.getKoreanFontPlain(11));
         popularFoodTable.setRowHeight(25);
         rightPanel.add(new JScrollPane(popularFoodTable), BorderLayout.CENTER);
 

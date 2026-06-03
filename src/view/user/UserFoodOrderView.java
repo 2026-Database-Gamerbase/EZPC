@@ -1,15 +1,12 @@
+// 음식 주문 팝업 창 (재고 파악 + 이벤트 있으면 할인율 적용)
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import view.FontUtil;
 
-/**
- * UserFoodOrderView - 음식 주문 팝업 창
- * 해당 지점의 음식 재고(stock) 상황을 파악해 메뉴를 보여주며,
- * 진행 중인 이벤트가 있다면 할인율(payment_rate)을 적용해 주문을 생성합니다.
- */
 public class UserFoodOrderView extends JDialog {
     private JTable foodMenuTable;
     private JLabel eventDiscountLabel;
@@ -41,12 +38,12 @@ public class UserFoodOrderView extends JDialog {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel titleLabel = new JLabel("음식 주문");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(20));
         topPanel.add(titleLabel);
 
         // DB 연결 필요: 진행 중인 이벤트 확인 및 할인율 반영
         eventDiscountLabel = new JLabel("현재 이벤트: 없음 | 할인율: 0%");
-        eventDiscountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        eventDiscountLabel.setFont(FontUtil.getKoreanFontPlain(12));
         eventDiscountLabel.setForeground(new Color(255, 100, 50));
         topPanel.add(eventDiscountLabel);
 
@@ -70,7 +67,7 @@ public class UserFoodOrderView extends JDialog {
         tableModel.addRow(new Object[]{"핫도그", 3500, 3500, "8개"});
 
         foodMenuTable = new JTable(tableModel);
-        foodMenuTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        foodMenuTable.setFont(FontUtil.getKoreanFontPlain(12));
         foodMenuTable.setRowHeight(25);
         foodMenuTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -95,9 +92,9 @@ public class UserFoodOrderView extends JDialog {
         JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pricePanel.setBackground(new Color(240, 240, 240));
         JLabel totalLabel = new JLabel("총 가격:");
-        totalLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        totalLabel.setFont(FontUtil.getKoreanFontBold(14));
         totalPriceLabel = new JLabel("0원");
-        totalPriceLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        totalPriceLabel.setFont(FontUtil.getKoreanFontBold(16));
         totalPriceLabel.setForeground(new Color(0, 100, 200));
         pricePanel.add(totalLabel);
         pricePanel.add(totalPriceLabel);

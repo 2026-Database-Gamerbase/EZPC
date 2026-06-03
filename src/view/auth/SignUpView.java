@@ -1,13 +1,11 @@
+// 일반 회원가입 화면
 package view.auth;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import view.FontUtil;
 
-/**
- * SignUpView - 일반 회원가입 화면
- * 가입 시 기본 등급(bronze)과 일반 유저 타입('user')이 부여됩니다.
- */
 public class SignUpView extends JFrame {
     private JTextField idField;
     private JTextField nameField;
@@ -37,7 +35,7 @@ public class SignUpView extends JFrame {
 
         // 제목
         JLabel titleLabel = new JLabel("회원가입");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(24));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
@@ -47,50 +45,65 @@ public class SignUpView extends JFrame {
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.EAST;
-        mainPanel.add(new JLabel("ID:"), gbc);
+        JLabel idLabel = new JLabel("ID:");
+        idLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        mainPanel.add(idLabel, gbc);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         idField = new JTextField(15);
+        idField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(idField, gbc);
 
         // 이름 입력
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.EAST;
-        mainPanel.add(new JLabel("이름:"), gbc);
+        JLabel nameLabel = new JLabel("이름:");
+        nameLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        mainPanel.add(nameLabel, gbc);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         nameField = new JTextField(15);
+        nameField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(nameField, gbc);
 
         // 비밀번호 입력
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.EAST;
-        mainPanel.add(new JLabel("비밀번호:"), gbc);
+        JLabel pwTextLabel = new JLabel("비밀번호:");
+        pwTextLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        mainPanel.add(pwTextLabel, gbc);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         passwordField = new JPasswordField(15);
+        passwordField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(passwordField, gbc);
 
         // 비밀번호 확인
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.EAST;
-        mainPanel.add(new JLabel("비밀번호 확인:"), gbc);
+        JLabel confirmPwLabel = new JLabel("비밀번호 확인:");
+        confirmPwLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        mainPanel.add(confirmPwLabel, gbc);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         confirmPasswordField = new JPasswordField(15);
+        confirmPasswordField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(confirmPasswordField, gbc);
 
         // 전화번호 입력
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.EAST;
-        mainPanel.add(new JLabel("전화번호:"), gbc);
+        JLabel phoneLabel = new JLabel("전화번호:");
+        phoneLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        mainPanel.add(phoneLabel, gbc);
         gbc.gridx = 1;
         gbc.anchor = GridBagConstraints.WEST;
         phoneField = new JTextField(15);
+        phoneField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(phoneField, gbc);
 
         // 안내 메시지
@@ -98,13 +111,14 @@ public class SignUpView extends JFrame {
         gbc.gridy = 6;
         gbc.gridwidth = 2;
         JLabel noteLabel = new JLabel("기본 등급(Bronze)과 유저 타입(User)이 부여됩니다.");
-        noteLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        noteLabel.setFont(FontUtil.getKoreanFontPlain(11));
         noteLabel.setForeground(new Color(100, 100, 100));
         mainPanel.add(noteLabel, gbc);
 
         // 상태 메시지
         gbc.gridy = 7;
         statusLabel = new JLabel(" ");
+        statusLabel.setFont(FontUtil.getKoreanFontPlain(12));
         statusLabel.setForeground(Color.RED);
         mainPanel.add(statusLabel, gbc);
 
@@ -114,12 +128,14 @@ public class SignUpView extends JFrame {
         gbc.gridx = 0;
         signUpButton = new JButton("회원가입");
         signUpButton.setPreferredSize(new Dimension(100, 35));
+        signUpButton.setFont(FontUtil.getKoreanFontBold(14));
         mainPanel.add(signUpButton, gbc);
 
         // 취소 버튼
         gbc.gridx = 1;
         cancelButton = new JButton("취소");
         cancelButton.setPreferredSize(new Dimension(100, 35));
+        cancelButton.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(cancelButton, gbc);
 
         add(mainPanel);

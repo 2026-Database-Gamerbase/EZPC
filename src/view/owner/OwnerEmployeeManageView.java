@@ -1,15 +1,12 @@
+// 직원 관리 탭
 package view.owner;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import view.FontUtil;
 
-/**
- * OwnerEmployeeManageView - 직원 관리 탭
- * 알바생 및 매니저들의 목록을 조회하고, 시급 조정, 고용/해고,
- * 현재 출근 여부를 관리하는 화면입니다.
- */
 public class OwnerEmployeeManageView extends JPanel {
     private JTable employeeTable;
     private DefaultTableModel tableModel;
@@ -33,7 +30,7 @@ public class OwnerEmployeeManageView extends JPanel {
         titlePanel.setBackground(new Color(240, 240, 240));
         titlePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         JLabel titleLabel = new JLabel("직원 관리");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(20));
         titlePanel.add(titleLabel);
         add(titlePanel, BorderLayout.NORTH);
 
@@ -55,7 +52,7 @@ public class OwnerEmployeeManageView extends JPanel {
         tableModel.addRow(new Object[]{"정진호", "알바", "10,000원", "출근중", "2024-02-01"});
 
         employeeTable = new JTable(tableModel);
-        employeeTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        employeeTable.setFont(FontUtil.getKoreanFontPlain(12));
         employeeTable.setRowHeight(25);
         employeeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -141,7 +138,7 @@ public class OwnerEmployeeManageView extends JPanel {
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         statusPanel.setBackground(new Color(240, 240, 240));
         statusLabel = new JLabel(" ");
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        statusLabel.setFont(FontUtil.getKoreanFontPlain(12));
         statusLabel.setForeground(Color.RED);
         statusPanel.add(statusLabel);
         bottomPanel.add(statusPanel);

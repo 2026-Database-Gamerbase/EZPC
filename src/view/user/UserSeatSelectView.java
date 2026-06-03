@@ -1,13 +1,11 @@
+// 좌석 선택 화면 (실시간 좌석 현황 + 좌석 선택)
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import view.FontUtil;
 
-/**
- * UserSeatSelectView - 좌석 선택 화면
- * 선택한 지점의 실시간 좌석 배치도를 보여주고, 비어있는 좌석을 선택하는 화면입니다.
- */
 public class UserSeatSelectView extends JPanel {
     private JButton[][] seatButtons;
     private JLabel branchNameLabel;
@@ -34,7 +32,7 @@ public class UserSeatSelectView extends JPanel {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         branchNameLabel = new JLabel("지점명: 강남점");
-        branchNameLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        branchNameLabel.setFont(FontUtil.getKoreanFontBold(18));
         topPanel.add(branchNameLabel);
 
         JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -45,7 +43,9 @@ public class UserSeatSelectView extends JPanel {
         JButton usedLegend = new JButton("사용 중");
         usedLegend.setBackground(new Color(255, 99, 71));
         usedLegend.setEnabled(false);
-        legendPanel.add(new JLabel("범례:"));
+        JLabel legendLabel = new JLabel("범례:");
+        legendLabel.setFont(FontUtil.getKoreanFontPlain(12));
+        legendPanel.add(legendLabel);
         legendPanel.add(emptyLegend);
         legendPanel.add(usedLegend);
         topPanel.add(legendPanel);
@@ -66,7 +66,7 @@ public class UserSeatSelectView extends JPanel {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 JButton seatButton = new JButton((i * COLS + j + 1) + "");
-                seatButton.setFont(new Font("Arial", Font.BOLD, 12));
+                seatButton.setFont(FontUtil.getKoreanFontBold(12));
                 seatButton.setPreferredSize(new Dimension(40, 40));
                 // DB 연결 필요: 실제 상태에 따라 색상 설정
                 seatButton.setBackground(new Color(144, 238, 144)); // 초기값: 빈 좌석
