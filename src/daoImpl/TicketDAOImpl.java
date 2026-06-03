@@ -1,6 +1,5 @@
 package daoImpl;
 
-import db.DatabaseConnector;
 import model.Ticket;
 
 import java.sql.Connection;
@@ -13,12 +12,18 @@ import java.util.List;
 import dao.TicketDAO;
 
 public class TicketDAOImpl implements TicketDAO {
+
+    private final Connection conn;
+
+    public TicketDAOImpl(Connection conn) {
+        this.conn = conn;
+    }
+
     @Override
     public void insert(Ticket ticket) throws SQLException {
         String sql = "INSERT INTO ticket (ticket_time, price) VALUES (?, ?)";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, ticket.getTicketTime());
             statement.setInt(2, ticket.getPrice());
             statement.executeUpdate();
@@ -29,8 +34,7 @@ public class TicketDAOImpl implements TicketDAO {
     public Ticket findByTime(int ticketTime) throws SQLException {
         String sql = "SELECT * FROM ticket WHERE ticket_time = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, ticketTime);
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -48,8 +52,7 @@ public class TicketDAOImpl implements TicketDAO {
         String sql = "SELECT * FROM ticket";
         List<Ticket> tickets = new ArrayList<>();
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
+        try (PreparedStatement statement = conn.prepareStatement(sql);
              ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 tickets.add(mapToTicket(resultSet));
@@ -63,8 +66,7 @@ public class TicketDAOImpl implements TicketDAO {
     public void update(Ticket ticket) throws SQLException {
         String sql = "UPDATE ticket SET price = ? WHERE ticket_time = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, ticket.getPrice());
             statement.setInt(2, ticket.getTicketTime());
             statement.executeUpdate();
@@ -75,8 +77,7 @@ public class TicketDAOImpl implements TicketDAO {
     public void deleteByTime(int ticketTime) throws SQLException {
         String sql = "DELETE FROM ticket WHERE ticket_time = ?";
 
-        try (Connection connection = DatabaseConnector.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
             statement.setInt(1, ticketTime);
             statement.executeUpdate();
         }
