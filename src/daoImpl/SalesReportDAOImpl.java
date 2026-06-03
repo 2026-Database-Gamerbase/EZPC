@@ -110,9 +110,9 @@ public class SalesReportDAOImpl implements SalesReportDAO {
             "       ROUND((totalSales - LAG(totalSales) OVER (ORDER BY yearMonth)) / NULLIF(LAG(totalSales) OVER (ORDER BY yearMonth), 0) * 100, 2) AS growthRate, " +
             "       " +
             "       CASE " +
-            "           WHEN LAG(totalSales) OVER (ORDER BY yearMonth) IS NULL THEN ''신규 입점'' " +
-            "           WHEN LAG(totalSales) OVER (ORDER BY yearMonth) = 0 THEN ''신규 입점'' " +
-            "           WHEN (totalSales - LAG(totalSales) OVER (ORDER BY yearMonth)) / LAG(totalSales) OVER (ORDER BY yearMonth) <= -0.1 THEN '부진' " +
+            "           WHEN LAG(totalSales) OVER (ORDER BY yearMonth) IS NULL THEN '신규 입점' " +
+            "           WHEN LAG(totalSales) OVER (ORDER BY yearMonth) = 0 THEN '신규 입점' " +
+            "           WHEN (totalSales - LAG(totalSales) OVER (ORDER BY yearMonth)) / NULLIF(LAG(totalSales) OVER (ORDER BY yearMonth), 0) <= -0.1 THEN '부진' " +
             "           ELSE '정상' " +
             "       END AS status " +
             "FROM MonthlySum";
