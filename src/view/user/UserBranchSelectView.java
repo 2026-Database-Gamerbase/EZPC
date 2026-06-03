@@ -1,16 +1,16 @@
+// 지점 선택 화면
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
+import model.PcCafe;
 import view.FontUtil;
 
-/**
- * UserBranchSelectView - 지점 선택 화면
- * 강남점, 홍대점 등 활성화된 5개 PC방 지점 중 이용할 곳을 선택하는 화면입니다.
- */
 public class UserBranchSelectView extends JPanel {
-    private JButton[] branchButtons;
+    private List<JButton> branchButtons;
     private JLabel titleLabel;
     private JPanel buttonPanel;
 
@@ -22,64 +22,67 @@ public class UserBranchSelectView extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(240, 240, 240));
 
-        // 제목
         titleLabel = new JLabel("이용할 지점을 선택하세요");
         titleLabel.setFont(FontUtil.getKoreanFontBold(24));
         titleLabel.setHorizontalAlignment(JLabel.CENTER);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         add(titleLabel, BorderLayout.NORTH);
 
-        // 버튼 패널
         buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(3, 2, 15, 15));
+        buttonPanel.setLayout(new GridLayout(0, 1, 15, 15));
         buttonPanel.setBackground(new Color(240, 240, 240));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 50, 50));
+        buttonPanel.setOpaque(false);
 
-        // DB 연결 필요: 활성화된 PC방 지점 목록 로드
-        // 현재는 샘플 5개 지점으로 구성
-        String[] branchNames = {
-            "강남점",
-            "홍대점",
-            "명동점",
-            "서초점",
-            "노량진점"
-        };
+        JScrollPane scrollPane = new JScrollPane(buttonPanel);
+        scrollPane.setBorder(null);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        add(scrollPane, BorderLayout.CENTER);
 
-        branchButtons = new JButton[branchNames.length];
-        for (int i = 0; i < branchNames.length; i++) {
-            branchButtons[i] = new JButton(branchNames[i]);
-            branchButtons[i].setFont(FontUtil.getKoreanFontPlain(18));
-            branchButtons[i].setPreferredSize(new Dimension(150, 100));
-            branchButtons[i].setBackground(new Color(100, 150, 255));
-            branchButtons[i].setForeground(Color.WHITE);
-            branchButtons[i].setFocusPainted(false);
-            buttonPanel.add(branchButtons[i]);
-        }
-
-        add(buttonPanel, BorderLayout.CENTER);
+        branchButtons = new ArrayList<>();
     }
 
-    // 선택된 지점 ID 반환 (버튼 인덱스로 식별)
-    public int getSelectedBranchIndex() {
-        for (int i = 0; i < branchButtons.length; i++) {
-            if (branchButtons[i].getModel().isPressed()) {
-                return i;
+    public void setBranches(java.util.List<PcCafe> pcCafes) {
+        buttonPanel.removeAll();
+        branchButtons.clear();
+
+        if (pcCafes == null || pcCafes.isEmpty()) {
+            JLabel emptyLabel = new JLabel("등록된 지점이 없습니다.");
+            emptyLabel.setFont(FontUtil.getKoreanFontPlain(18));
+            emptyLabel.setHorizontalAlignment(JLabel.CENTER);
+            emptyLabel.setOpaque(true);
+            emptyLabel.setBackground(new Color(255, 255, 255));
+            emptyLabel.setBorder(BorderFactory.createEmptyBorder(60, 0, 60, 0));
+            buttonPanel.add(emptyLabel);
+        } else {
+            for (PcCafe cafe : pcCafes) {
+                JButton button = new JButton(cafe.getPcName() + " (" + cafe.getPcId() + ")");
+                button.setFont(FontUtil.getKoreanFontPlain(18));
+                button.setPreferredSize(new Dimension(150, 70));
+                button.setBackground(new Color(50, 120, 220));
+                button.setForeground(Color.WHITE);
+                button.setOpaque(true);
+                button.setContentAreaFilled(true);
+                button.setBorder(BorderFactory.createLineBorder(new Color(30, 90, 180), 2, true));
+                button.setFocusPainted(false);
+                button.setActionCommand(cafe.getPcId());
+                buttonPanel.add(button);
+                branchButtons.add(button);
             }
         }
-        return -1;
+
+        revalidate();
+        repaint();
     }
 
-    // 지점 버튼에 리스너 설정
-    public void setBranchButtonListener(int index, ActionListener listener) {
-        if (index >= 0 && index < branchButtons.length) {
-            branchButtons[index].addActionListener(listener);
-        }
-    }
-
-    // 모든 지점 버튼에 리스너 설정
-    public void setAllBranchButtonListener(ActionListener listener) {
+    public void setBranchButtonListener(ActionListener listener) {
         for (JButton button : branchButtons) {
             button.addActionListener(listener);
         }
+    }
+
+    public void setAllBranchButtonListener(ActionListener listener) {
+        setBranchButtonListener(listener);
     }
 }

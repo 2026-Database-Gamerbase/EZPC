@@ -1,15 +1,14 @@
+// 리뷰 관리 화면
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import model.Review;
+import view.FontUtil;
 
-/**
- * UserReviewManageView - 리뷰 관리 화면
- * 사용자가 지점에 대해 별점과 후기를 남기거나
- * 다른 사람의 리뷰를 조회하는 화면입니다.
- */
 public class UserReviewManageView extends JPanel {
     private JLabel branchNameLabel;
     private JSpinner ratingSpinner;
@@ -35,11 +34,11 @@ public class UserReviewManageView extends JPanel {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel titleLabel = new JLabel("리뷰 관리");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(20));
         topPanel.add(titleLabel, BorderLayout.WEST);
 
         branchNameLabel = new JLabel("지점: 강남점"); // DB 연결 필요
-        branchNameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        branchNameLabel.setFont(FontUtil.getKoreanFontBold(14));
         topPanel.add(branchNameLabel, BorderLayout.EAST);
 
         add(topPanel, BorderLayout.NORTH);
@@ -63,7 +62,7 @@ public class UserReviewManageView extends JPanel {
 
         // 별점 선택
         JLabel ratingLabel = new JLabel("별점:");
-        ratingLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        ratingLabel.setFont(FontUtil.getKoreanFontBold(12));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
@@ -74,21 +73,21 @@ public class UserReviewManageView extends JPanel {
         writePanel.add(ratingSpinner, gbc);
 
         JLabel starsLabel = new JLabel("★★★★★");
-        starsLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        starsLabel.setFont(FontUtil.getKoreanFontPlain(14));
         starsLabel.setForeground(new Color(255, 215, 0));
         gbc.gridx = 2;
         writePanel.add(starsLabel, gbc);
 
         // 리뷰 텍스트 입력
         JLabel reviewLabel = new JLabel("후기:");
-        reviewLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        reviewLabel.setFont(FontUtil.getKoreanFontBold(12));
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         writePanel.add(reviewLabel, gbc);
 
         reviewTextArea = new JTextArea(8, 20);
-        reviewTextArea.setFont(new Font("Arial", Font.PLAIN, 12));
+        reviewTextArea.setFont(FontUtil.getKoreanFontPlain(12));
         reviewTextArea.setLineWrap(true);
         reviewTextArea.setWrapStyleWord(true);
         reviewTextArea.setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -124,7 +123,7 @@ public class UserReviewManageView extends JPanel {
         leftBottomPanel.setBackground(new Color(240, 240, 240));
         statusLabel = new JLabel(" ");
         statusLabel.setForeground(Color.RED);
-        statusLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        statusLabel.setFont(FontUtil.getKoreanFontPlain(11));
         leftBottomPanel.add(statusLabel);
         leftPanel.add(leftBottomPanel, BorderLayout.SOUTH);
 
@@ -145,13 +144,8 @@ public class UserReviewManageView extends JPanel {
             }
         };
 
-        // 샘플 데이터 (DB 연결 필요)
-        tableModel.addRow(new Object[]{"user001", "★★★★★", "정말 좋은 시설입니다!", "2024-05-20"});
-        tableModel.addRow(new Object[]{"user002", "★★★★", "쾌적하고 편합니다.", "2024-05-19"});
-        tableModel.addRow(new Object[]{"user003", "★★★", "보통 수준입니다.", "2024-05-18"});
-
         reviewListTable = new JTable(tableModel);
-        reviewListTable.setFont(new Font("Arial", Font.PLAIN, 11));
+        reviewListTable.setFont(FontUtil.getKoreanFontPlain(11));
         reviewListTable.setRowHeight(25);
         reviewListTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -167,6 +161,25 @@ public class UserReviewManageView extends JPanel {
     // DB 연결 필요: 지점명 설정
     public void setBranchName(String branchName) {
         branchNameLabel.setText("지점: " + branchName);
+    }
+
+    public void refreshReviews(List<Review> reviews) {
+        tableModel.setRowCount(0);
+        if (reviews == null || reviews.isEmpty()) {
+            return;
+        }
+        for (Review review : reviews) {
+            String starText = "";
+            int rating = (int) review.getStarRating();
+            for (int i = 0; i < rating; i++) {
+                starText += "★";
+            }
+            tableModel.addRow(new Object[]{review.getMemberId(), starText, review.getReviewContent(), "-"});
+        }
+    }
+
+    public void refreshReviewList() {
+        tableModel.setRowCount(0);
     }
 
     // 입력된 별점 반환
@@ -192,14 +205,6 @@ public class UserReviewManageView extends JPanel {
     // 초기화 버튼 리스너 설정
     public void setClearButtonListener(ActionListener listener) {
         clearButton.addActionListener(listener);
-    }
-
-    // 리뷰 목록 새로고침 (DB 연결 필요)
-    public void refreshReviewList() {
-        tableModel.setRowCount(0);
-        // DB 연결 필요: 해당 지점의 리뷰 목록 다시 로드
-        tableModel.addRow(new Object[]{"user001", "★★★★★", "정말 좋은 시설입니다!", "2024-05-20"});
-        tableModel.addRow(new Object[]{"user002", "★★★★", "쾌적하고 편합니다.", "2024-05-19"});
     }
 
     // 리뷰 입력 초기화

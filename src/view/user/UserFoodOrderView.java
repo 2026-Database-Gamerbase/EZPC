@@ -1,15 +1,17 @@
+// 음식 주문창 (+할인율 적용)
 package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Map;
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import model.Food;
+import view.FontUtil;
 
-/**
- * UserFoodOrderView - 음식 주문 팝업 창
- * 해당 지점의 음식 재고(stock) 상황을 파악해 메뉴를 보여주며,
- * 진행 중인 이벤트가 있다면 할인율(payment_rate)을 적용해 주문을 생성합니다.
- */
 public class UserFoodOrderView extends JDialog {
     private JTable foodMenuTable;
     private JLabel eventDiscountLabel;
@@ -19,6 +21,7 @@ public class UserFoodOrderView extends JDialog {
     private JButton cancelButton;
     private JLabel statusLabel;
     private DefaultTableModel tableModel;
+    private double paymentRate = 1.0;
 
     public UserFoodOrderView(JFrame parent) {
         super(parent, "음식 주문", true);
@@ -41,12 +44,12 @@ public class UserFoodOrderView extends JDialog {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel titleLabel = new JLabel("음식 주문");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(20));
         topPanel.add(titleLabel);
 
         // DB 연결 필요: 진행 중인 이벤트 확인 및 할인율 반영
         eventDiscountLabel = new JLabel("현재 이벤트: 없음 | 할인율: 0%");
-        eventDiscountLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        eventDiscountLabel.setFont(FontUtil.getKoreanFontPlain(12));
         eventDiscountLabel.setForeground(new Color(255, 100, 50));
         topPanel.add(eventDiscountLabel);
 
@@ -62,15 +65,8 @@ public class UserFoodOrderView extends JDialog {
             }
         };
 
-        // 샘플 데이터 (DB 연결 필요)
-        tableModel.addRow(new Object[]{"라면", 4000, 4000, "5개"});
-        tableModel.addRow(new Object[]{"우동", 5000, 4500, "3개"});
-        tableModel.addRow(new Object[]{"김밥", 3000, 3000, "10개"});
-        tableModel.addRow(new Object[]{"떡볶이", 4500, 4050, "7개"});
-        tableModel.addRow(new Object[]{"핫도그", 3500, 3500, "8개"});
-
         foodMenuTable = new JTable(tableModel);
-        foodMenuTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        foodMenuTable.setFont(FontUtil.getKoreanFontPlain(12));
         foodMenuTable.setRowHeight(25);
         foodMenuTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -95,9 +91,9 @@ public class UserFoodOrderView extends JDialog {
         JPanel pricePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         pricePanel.setBackground(new Color(240, 240, 240));
         JLabel totalLabel = new JLabel("총 가격:");
-        totalLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        totalLabel.setFont(FontUtil.getKoreanFontBold(14));
         totalPriceLabel = new JLabel("0원");
-        totalPriceLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        totalPriceLabel.setFont(FontUtil.getKoreanFontBold(16));
         totalPriceLabel.setForeground(new Color(0, 100, 200));
         pricePanel.add(totalLabel);
         pricePanel.add(totalPriceLabel);
@@ -177,5 +173,31 @@ public class UserFoodOrderView extends JDialog {
     // 취소 버튼 리스너 설정
     public void setCancelButtonListener(ActionListener listener) {
         cancelButton.addActionListener(listener);
+    }
+
+    public void setMenuData(List<Food> foods, Map<String, Integer> stockMap, double paymentRate) {
+        this.paymentRate = paymentRate;
+        tableModel.setRowCount(0);
+        for (Food food : foods) {
+            int basePrice = food.getPrice();
+            int currentPrice = (int) Math.floor(basePrice * paymentRate);
+            int stockQty = stockMap.getOrDefault(food.getFoodName(), 0);
+            tableModel.addRow(new Object[]{food.getFoodName(), basePrice, currentPrice, stockQty + "개"});
+        }
+        if (paymentRate >= 1.0) {
+            setEventDiscount("없음", 0);
+        } else {
+            int discountRate = (int) Math.round((1.0 - paymentRate) * 100);
+            setEventDiscount("할인 중", discountRate);
+        }
+        setTotalPrice(getSelectedFoodPrice() * getSelectedQuantity());
+    }
+
+    public void setFoodTableSelectionListener(ListSelectionListener listener) {
+        foodMenuTable.getSelectionModel().addListSelectionListener(listener);
+    }
+
+    public void setQuantityChangeListener(ChangeListener listener) {
+        quantitySpinner.addChangeListener(listener);
     }
 }
