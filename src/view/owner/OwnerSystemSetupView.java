@@ -263,11 +263,18 @@ public class OwnerSystemSetupView extends JPanel {
         for (int i = 0; i < values.length && i < 4; i++) {
             inputs[i].setText(values[i]);
         }
+        // 테이블 데이터를 불러왔을 때 = 수정 모드이므로 PK(field1) 수정 불가 처리
+        field1Input.setEditable(false);
+        field1Input.setBackground(Color.LIGHT_GRAY);
     }
 
     public void clearForm() {
         field1Input.setText(""); field2Input.setText("");
         field3Input.setText(""); field4Input.setText("");
         dataTable.clearSelection();
+
+        // 신규 추가 모드이므로 PK 입력 가능하게 롤백
+        field1Input.setEditable(true);
+        field1Input.setBackground(Color.WHITE);
     }
 }
