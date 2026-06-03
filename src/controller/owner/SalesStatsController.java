@@ -12,6 +12,7 @@ import model.MonthlySalesReport;
 import model.FoodRankingReport;
 import model.PeakTimeSalesReport;
 import model.EventSalesReport;
+import model.EventSchedule;
 import model.Food;
 import model.PcCafe;
 
@@ -26,6 +27,7 @@ import service.SalesReportService;
 import service.OrderService;
 import service.LogService;
 import service.PcCafeService;
+import service.EventScheduleService;
 
 public class SalesStatsController {
     private final OwnerSalesStatsView view;
@@ -34,18 +36,21 @@ public class SalesStatsController {
     private final OrderService orderService;
     private final LogService logService;
     private final PcCafeService pcCafeService;
+    private final EventScheduleService eventScheduleService;
     
     private String currentBranchId;
 
     public SalesStatsController(OwnerSalesStatsView view, JFrame parentFrame, 
                                 SalesReportService salesReportService, OrderService orderService, 
-                                LogService logService, PcCafeService pcCafeService) {
+                                LogService logService, PcCafeService pcCafeService, 
+                                EventScheduleService eventScheduleService) {
         this.view = view;
         this.parentFrame = parentFrame;
         this.salesReportService = salesReportService;
         this.orderService = orderService;
         this.logService = logService;
         this.pcCafeService = pcCafeService;
+        this.eventScheduleService = eventScheduleService;
 
         initEventBindings();
     }
@@ -71,10 +76,7 @@ public class SalesStatsController {
             long totalSales = salesReportService.getBranchTotalSalesAmount(branchId);
             List<MonthlySalesReport> monthlyReport = salesReportService.getMonthlySalesAnalysis(branchId);
             
-            // 모든 월별 사용자 수를 YYYY-MM 형태로 가져오기
             Map<String, Integer> entryLogs = logService.findCustomerEntryCounts(branchId, "ALL_MONTHS", 0, 0, 0);
-            
-            // 가져온 모든 월별 방문객을 합산해서 상단 전체 사용자 수 카드에 뿌려줌
             int totalUserCount = entryLogs.values().stream().mapToInt(Integer::intValue).sum();
             
             PcCafe pcCafe = pcCafeService.getPcCafe(branchId);
@@ -85,13 +87,9 @@ public class SalesStatsController {
             Object[][] salesData = new Object[monthlyReport.size()][5];
             for (int i = 0; i < monthlyReport.size(); i++) {
                 MonthlySalesReport report = monthlyReport.get(i);
-                
                 salesData[i][0] = report.getYearMonth(); 
                 salesData[i][1] = String.format("%,d원", report.getTotalSales());
-                
-                int count = entryLogs.getOrDefault(report.getYearMonth(), 0);
-                salesData[i][2] = count + "명";
-                
+                salesData[i][2] = entryLogs.getOrDefault(report.getYearMonth(), 0) + "명";
                 salesData[i][3] = String.format("%.1f%%", report.getGrowthRate());
                 salesData[i][4] = report.getStatus();
             }
@@ -121,7 +119,7 @@ public class SalesStatsController {
             return;
         }
 
-        StringBuilder sb = new StringBuilder("💡 " + foodName + "의 인기 연관 메뉴: ");
+        StringBuilder sb = new StringBuilder(foodName + "의 인기 연관 메뉴: ");
         for (int i = 0; i < recommendations.size(); i++) {
             sb.append((i + 1)).append("위 ").append(recommendations.get(i).getFoodName());
             if (i < recommendations.size() - 1) sb.append(", ");
@@ -186,51 +184,59 @@ public class SalesStatsController {
         dialog.setVisible(true);
     }
 
+    // 콤보박스에서 이벤트 선택 후 분석
     private void openEventAnalysisDialog() {
         if (currentBranchId == null) {
             JOptionPane.showMessageDialog(parentFrame, "우측 상단에서 관리 지점을 먼저 선택해주세요.", "알림", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        OwnerEventAnalysisDialog dialog = new OwnerEventAnalysisDialog(parentFrame);
-        
-        dialog.setAnalyzeButtonListener(evt -> {
-            String start = dialog.getStartDate();
-            String end = dialog.getEndDate();
+        try {
+            // DB에서 해당 지점의 전체 이벤트 목록을 가져옴
+            List<EventSchedule> eventList = eventScheduleService.getEventSchedulesByPc(currentBranchId);
             
-            try {
-                LocalDate startDate = LocalDate.parse(start);
-                LocalDate endDate = LocalDate.parse(end);
-                long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1;
-                
-                if (daysBetween <= 0) {
-                    throw new IllegalArgumentException("종료일은 시작일과 같거나 이후여야 합니다.");
-                }
-
-                List<EventSalesReport> performanceList = salesReportService.analyzeEventPerformance(currentBranchId, start, end);
-                
-                Object[][] tableData = new Object[performanceList.size()][5];
-                for (int i = 0; i < performanceList.size(); i++) {
-                    EventSalesReport r = performanceList.get(i);
-                    tableData[i][0] = r.getPeriodType(); 
-                    tableData[i][1] = r.getPeriodType().equals("이벤트기간") ? start + " ~ " + end : "직전 동일 기간";
-                    tableData[i][2] = String.format("%,d원", r.getTotalSales());
-                    
-                    long dailyAverage = r.getTotalSales() / daysBetween;
-                    tableData[i][3] = String.format("%,d원", dailyAverage);
-                    tableData[i][4] = "-";
-                }
-                dialog.setAnalysisTableData(tableData);
-                
-            } catch (java.time.format.DateTimeParseException ex) {
-                JOptionPane.showMessageDialog(dialog, "날짜 형식이 올바르지 않습니다. (YYYY-MM-DD)", "입력 오류", JOptionPane.WARNING_MESSAGE);
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(dialog, ex.getMessage(), "입력 오류", JOptionPane.WARNING_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "분석 도중 시스템 에러가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
-                ex.printStackTrace();
+            if (eventList == null || eventList.isEmpty()) {
+                JOptionPane.showMessageDialog(parentFrame, "해당 지점에 진행되었거나 진행 중인 이벤트가 없습니다.", "알림", JOptionPane.INFORMATION_MESSAGE);
+                return;
             }
-        });
-        dialog.setVisible(true);
+
+            OwnerEventAnalysisDialog dialog = new OwnerEventAnalysisDialog(parentFrame);
+            
+            // 콤보박스에 보여줄 텍스트 배열 생성 (예: "신규_가입_혜택 (2025-01-01 ~ 2025-01-31)")
+            String[] comboItems = eventList.stream()
+                .map(e -> e.getEventType() + " (" + e.getEventStartDate() + " ~ " + e.getEventEndDate() + ")")
+                .toArray(String[]::new);
+            
+            dialog.setEventList(comboItems);
+            
+            // "분석하기" 버튼 리스너
+            dialog.setAnalyzeButtonListener(evt -> {
+                int selectedIdx = dialog.getSelectedEventIndex();
+                if (selectedIdx < 0) return;
+                
+                EventSchedule selectedEvent = eventList.get(selectedIdx);
+                String start = selectedEvent.getEventStartDate().toString();
+                String end = selectedEvent.getEventEndDate().toString();
+                
+                try {
+                    List<EventSalesReport> performanceList = salesReportService.analyzeEventPerformance(currentBranchId, start, end);
+
+                    // performanceList[0] = 이벤트기간, [1] = 직전기간 (DAO sortOrder ASC 기준)
+                    EventSalesReport eventReport = performanceList.size() > 0 ? performanceList.get(0) : new EventSalesReport();
+                    EventSalesReport prevReport  = performanceList.size() > 1 ? performanceList.get(1) : new EventSalesReport();
+                    dialog.showAnalysisResult(eventReport, prevReport, start, end);
+                    
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(dialog, "데이터 분석 도중 시스템 에러가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
+                }
+            });
+            
+            dialog.setVisible(true);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(parentFrame, "이벤트 목록을 불러오는 중 오류가 발생했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
