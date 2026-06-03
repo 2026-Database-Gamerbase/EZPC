@@ -100,6 +100,20 @@ public class SalesReportService {
             throw new IllegalArgumentException("날짜는 'YYYY-MM-DD' 형식으로 입력해 주세요.");
         }
 
-        return salesReportDAO.compareEventSales(pcCafeId, eventStartDate, eventEndDate);
+        List<EventSalesReport> result = salesReportDAO.compareEventSales(pcCafeId, eventStartDate, eventEndDate);
+
+        // 성장률 계산: (이벤트기간 - 직전기간) / 직전기간 * 100
+        // result[0] = 이벤트기간, result[1] = 직전기간 (DAO SQL ORDER BY sortOrder ASC 기준)
+        if (result.size() == 2) {
+            int eventTotal = result.get(0).getTotalSales();
+            int prevTotal  = result.get(1).getTotalSales();
+            if (prevTotal != 0) {
+                double growthRate = Math.round(((double)(eventTotal - prevTotal) / prevTotal * 100) * 100.0) / 100.0;
+                result.get(0).setGrowthRate(growthRate);
+            }
+            // 직전기간 행의 성장률은 기준이 없으므로 0.0 (기본값) 유지
+        }
+
+        return result;
     }
 }

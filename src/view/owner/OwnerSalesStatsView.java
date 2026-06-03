@@ -117,7 +117,7 @@ public class OwnerSalesStatsView extends JPanel {
         JPanel recommendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         recommendPanel.setBackground(new Color(255, 250, 205)); // 옅은 노란색 배경
         recommendPanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-        recommendationLabel = new JLabel("💡 표에서 음식을 선택하면 연관 추천 메뉴가 분석됩니다.");
+        recommendationLabel = new JLabel("표에서 음식을 선택하면 연관 추천 메뉴가 분석됩니다.");
         recommendationLabel.setFont(FontUtil.getKoreanFontBold(12));
         recommendPanel.add(recommendationLabel);
         rightPanel.add(recommendPanel, BorderLayout.SOUTH);
