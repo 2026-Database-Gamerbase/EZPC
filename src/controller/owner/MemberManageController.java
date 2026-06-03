@@ -26,8 +26,32 @@ public class MemberManageController {
         // 체크박스 누르면 바로 리스트 갱신
         view.setDormantFilterListener(e -> refreshMemberAndGradeData());
         
+        // 우측 등급 테이블 행 클릭 시 하단 수정 폼 자동 채우기
+        view.setGradeTableSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                handleGradeTableSelect();
+            }
+        });
+        
         // 등급 기준 저장 버튼 
         view.setSaveGradeButtonListener(e -> handleUpdateGradeStandard());
+    }
+
+    // 우측 등급표 클릭 시 하단 수정 폼에 값 세팅
+    private void handleGradeTableSelect() {
+        String standardStr = view.getSelectedGradeStandardString();
+        String discountStr = view.getSelectedGradeDiscountString();
+
+        if (standardStr != null && discountStr != null) {
+            try {
+                // 숫자만 추출
+                int standard = Integer.parseInt(standardStr.replaceAll("[^0-9]", ""));
+                int discount = Integer.parseInt(discountStr.replaceAll("[^0-9]", ""));
+
+                view.setStandardAmount(standard);
+                view.setDiscountRate(discount);
+            } catch (NumberFormatException ignored) {}
+        }
     }
 
     // 좌측 회원 목록이랑 우측 등급표 한 번에 새로고침
