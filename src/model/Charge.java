@@ -9,24 +9,23 @@ public class Charge {
     private int ticketTime;
     private String memberId;
     private int chargePayAmount;
+    private double paymentRate;
     private Timestamp chargedAt;
 
     public Charge() {
     }
 
-    public Charge(int chargeId, String pcCafeId, int seatNum, int ticketTime, String memberId, int chargePayAmount, Timestamp chargedAt) {
+    public Charge(int chargeId, String pcCafeId, int seatNum, int ticketTime, String memberId, int chargePayAmount, double paymentRate, Timestamp chargedAt) {
         this.chargeId = chargeId;
         this.pcCafeId = pcCafeId;
         this.seatNum = seatNum;
         this.ticketTime = ticketTime;
         this.memberId = memberId;
         this.chargePayAmount = chargePayAmount;
+        this.paymentRate = paymentRate;
         this.chargedAt = chargedAt;
     }
 
-    public Charge(String pcCafeId, int seatNum, int ticketTime, String memberId, int chargePayAmount) {
-        this(0, pcCafeId, seatNum, ticketTime, memberId, chargePayAmount, null);
-    }
 
     public int getChargeId() {
         return chargeId;
@@ -75,8 +74,17 @@ public class Charge {
     public void setChargePayAmount(int chargePayAmount) {
         this.chargePayAmount = chargePayAmount;
     }
+    
 
-    public Timestamp getChargedAt() {
+	public double getPaymentRate() {
+		return paymentRate;
+	}
+
+	public void setPaymentRate(double paymentRate) {
+		this.paymentRate = paymentRate;
+	}
+
+	public Timestamp getChargedAt() {
         return chargedAt;
     }
 
