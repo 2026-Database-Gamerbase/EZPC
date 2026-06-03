@@ -1,6 +1,5 @@
-package db;
 
-import javax.swing.SwingUtilities;
+
 import controller.LoginController;
 
 public class Main {
