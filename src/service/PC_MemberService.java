@@ -2,9 +2,9 @@ package service;
 
 import dao.GradeDAO;
 import dao.PC_MemberDAO;
+import java.util.List;
 import model.Grade;
 import model.PC_Member;
-import java.util.List;
 
 public class PC_MemberService {
 
@@ -80,6 +80,19 @@ public class PC_MemberService {
     // 7. user 타입 회원만 조회 (운영자 뷰 회원 관리용)
     public List<PC_Member> getAllUsers(){
     	return memberDao.findAllUsers();
+    }
+    // 8. 30일 이상 미방문 회원 조회
+    public List<PC_Member> getDormantMembers() {
+        System.out.println("[Service] 휴면 회원(30일 이상 미방문) 조회를 요청합니다.");
+        List<PC_Member> dormantList = memberDao.findDormantMembers();
+        
+        if(dormantList.isEmpty()) {
+            System.out.println("[Service] 현재 휴면 상태인 회원이 없습니다.");
+        } else {
+            System.out.println("[Service] 총 " + dormantList.size() + "명의 휴면 회원이 조회되었습니다.");
+        }
+        
+        return dormantList;
     }
     
     // 7. 잔여시간 추가
