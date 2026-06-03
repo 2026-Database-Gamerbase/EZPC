@@ -18,6 +18,7 @@ public class UserSeatSelectView extends JPanel {
     private int selectedSeatCol = -1;
     private static final int ROWS = 5;
     private static final int COLS = 6;
+    private boolean[][] seatAvailability = new boolean[ROWS][COLS];
 
     public UserSeatSelectView() {
         initializeUI();
@@ -27,7 +28,6 @@ public class UserSeatSelectView extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(240, 240, 240));
 
-        // 상단: 지점명과 범례
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new GridLayout(2, 1));
         topPanel.setBackground(new Color(240, 240, 240));
@@ -51,8 +51,6 @@ public class UserSeatSelectView extends JPanel {
         topPanel.add(legendPanel);
         add(topPanel, BorderLayout.NORTH);
 
-        // 중앙: 좌석 배치도
-        // DB 연결 필요: 각 좌석의 상태(available, occupied) 로드
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout());
         centerPanel.setBackground(new Color(240, 240, 240));
@@ -68,18 +66,17 @@ public class UserSeatSelectView extends JPanel {
                 JButton seatButton = new JButton((i * COLS + j + 1) + "");
                 seatButton.setFont(new Font("Arial", Font.BOLD, 12));
                 seatButton.setPreferredSize(new Dimension(40, 40));
-                // DB 연결 필요: 실제 상태에 따라 색상 설정
-                seatButton.setBackground(new Color(144, 238, 144)); // 초기값: 빈 좌석
+                seatButton.setBackground(new Color(144, 238, 144));
                 seatButton.setFocusPainted(false);
                 seatButtons[i][j] = seatButton;
                 seatPanel.add(seatButton);
+                seatAvailability[i][j] = true;
             }
         }
 
         centerPanel.add(seatPanel, BorderLayout.CENTER);
         add(centerPanel, BorderLayout.CENTER);
 
-        // 하단: 선택 상태 및 버튼
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new GridLayout(2, 1));
         bottomPanel.setBackground(new Color(240, 240, 240));
@@ -102,45 +99,45 @@ public class UserSeatSelectView extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    // 지점명 설정
     public void setBranchName(String branchName) {
         branchNameLabel.setText("지점명: " + branchName);
     }
 
-    // 좌석 상태 설정 (row, col, isAvailable)
-    // DB 연결 필요: 실제 상태 데이터로 업데이트
     public void setSeatStatus(int row, int col, boolean isAvailable) {
         if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
+            seatAvailability[row][col] = isAvailable;
             if (isAvailable) {
-                seatButtons[row][col].setBackground(new Color(144, 238, 144)); // 초록색: 사용가능
+                seatButtons[row][col].setBackground(new Color(144, 238, 144));
                 seatButtons[row][col].setEnabled(true);
             } else {
-                seatButtons[row][col].setBackground(new Color(255, 99, 71)); // 빨강색: 사용중
+                seatButtons[row][col].setBackground(new Color(255, 99, 71));
                 seatButtons[row][col].setEnabled(false);
             }
         }
     }
 
-    // 좌석 버튼에 리스너 설정
     public void setSeatButtonListener(int row, int col, ActionListener listener) {
         if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
             seatButtons[row][col].addActionListener(listener);
         }
     }
 
-    // 선택된 좌석 설정
     public void setSelectedSeat(int row, int col) {
+        if (selectedSeatRow >= 0 && selectedSeatCol >= 0) {
+            boolean available = seatAvailability[selectedSeatRow][selectedSeatCol];
+            seatButtons[selectedSeatRow][selectedSeatCol].setBackground(available ? new Color(144, 238, 144) : new Color(255, 99, 71));
+        }
+
         this.selectedSeatRow = row;
         this.selectedSeatCol = col;
         if (row >= 0 && col >= 0) {
             seatStatusLabel.setText("선택된 좌석: " + (row * COLS + col + 1));
-            seatButtons[row][col].setBackground(new Color(255, 215, 0)); // 노란색: 선택됨
+            seatButtons[row][col].setBackground(new Color(255, 215, 0));
         } else {
             seatStatusLabel.setText("선택된 좌석: 없음");
         }
     }
 
-    // 선택된 좌석 반환
     public int getSelectedSeatRow() {
         return selectedSeatRow;
     }
@@ -149,12 +146,10 @@ public class UserSeatSelectView extends JPanel {
         return selectedSeatCol;
     }
 
-    // 확인 버튼 리스너 설정
     public void setConfirmButtonListener(ActionListener listener) {
         confirmButton.addActionListener(listener);
     }
 
-    // 돌아가기 버튼 리스너 설정
     public void setBackButtonListener(ActionListener listener) {
         backButton.addActionListener(listener);
     }

@@ -49,11 +49,18 @@ public class LoginController {
             return;
         }
 
+        Connection roleConn = null;
         try {
-            if (authConn != null && !authConn.isClosed()) authConn.close();
+            roleConn = DatabaseConnector.getConnection(member.getMemberType());
+            if (roleConn == null || roleConn.isClosed()) {
+                throw new SQLException("역할별 DB 연결을 생성할 수 없습니다.");
+            }
 
-            Connection roleConn = DatabaseConnector.getConnection(member.getMemberType());
+            if (authConn != null && !authConn.isClosed()) {
+                authConn.close();
+            }
 
+            System.out.println("[LoginController] roleConn open: " + !roleConn.isClosed());
             loginView.dispose();
 
             if ("owner".equalsIgnoreCase(member.getMemberType())) {

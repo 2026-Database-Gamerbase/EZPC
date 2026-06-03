@@ -1,13 +1,12 @@
 package daoImpl;
 
+import dao.CustomerDAO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import dao.CustomerDAO;
 import model.Customer;
 
 public class CustomerDAOImpl implements CustomerDAO {
@@ -34,6 +33,12 @@ public class CustomerDAOImpl implements CustomerDAO {
 			
 		} catch (SQLException e) {
 			// 누군가 0.1초 차이로 먼저 자리를 차지해서 DB 유니크 에러가 났을 때
+			System.out.println("[CustomerDAOImpl] insertCustomer 실패:");
+			System.out.println("  - 지점: " + customer.getPcCafeId());
+			System.out.println("  - 좌석: " + customer.getSeatNum());
+			System.out.println("  - 회원ID: " + customer.getMemberId());
+			System.out.println("  - 오류: " + e.getMessage());
+			e.printStackTrace();
 			return false; 
 		}
 	}
