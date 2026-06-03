@@ -135,13 +135,12 @@ public class SalesStatsController {
 
         OwnerPeakTimeDialog dialog = new OwnerPeakTimeDialog(parentFrame);
         List<PeakTimeSalesReport> peakList = salesReportService.getPeakTimeAnalysis(currentBranchId);
-        
-        Object[][] dialogData = new Object[peakList.size()][3];
+
+        Object[][] dialogData = new Object[peakList.size()][2];
         for (int i = 0; i < peakList.size(); i++) {
             PeakTimeSalesReport p = peakList.get(i);
             dialogData[i][0] = p.getTimeSlot() + "시 ~ " + (Integer.parseInt(p.getTimeSlot()) + 1) + "시";
             dialogData[i][1] = String.format("%,d원", p.getTotalSales());
-            dialogData[i][2] = "-"; 
         }
         dialog.setPeakTimeData(dialogData);
         dialog.setVisible(true);
