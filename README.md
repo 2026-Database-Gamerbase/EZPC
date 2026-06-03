@@ -71,32 +71,193 @@
 
 <br>
 
-#### PR 템플릿
+## 동작흐름
+# EZPC 전체 동작 흐름
 
-## 📍PR 유형 (하나 이상 선택)
+---
 
-- [ ] 새로운 기능 추가
-- [ ] 버그 수정
-- [ ] 코드에 영향을 주지 않는 변경사항(오타 수정, 탭 사이즈 변경, 변수명 변경)
-- [ ] 코드 리팩토링
-- [ ] 주석 추가 및 수정
-- [ ] 문서 수정
-- [ ] 테스트 추가, 테스트 리팩토링
-- [ ] 빌드 부분 혹은 패키지 매니저 수정
-- [ ] 파일 혹은 폴더명 수정
-- [ ] 파일 혹은 폴더 삭제
+## 1. DB 계정 구조
 
-## ✅ PR 체크리스트
+| 계정 | 권한 | 사용 시점 |
+|------|------|-----------|
+| `ezpc_auth` | `pc_member` SELECT만 | 로그인 화면 — 인증 전용, 즉시 해제 |
+| `ezpc_user` | 사용자 업무 테이블 + 프로시저 실행 | 로그인 성공 후 — UserController 전체 생애 |
+| `ezpc_owner` | `EZPC.*` ALL | 로그인 성공 후 — OwnerController 전체 생애 |
 
-<!-- PR이 다음 요구 사항을 충족하는지 확인하세요. -->
+> 계정 생성 쿼리: `db 권한 설정 쿼리.sql` (HeidiSQL에서 root로 실행)
 
-- [ ] 커밋 메시지 컨벤션에 맞게 작성했습니다.
-- [ ] 변경 사항에 대한 테스트를 했습니다.(버그 수정/기능에 대한 테스트).
+---
 
-## 👩🏻‍💻 작업 사항
+## 2. 앱 시작
 
-<!-- 주요 작업 내용을 간단히 작성해주세요.(스크린샷도 있으면 좋아요!) -->
+```
+Main.java
+  └─ SwingUtilities.invokeLater()
+       └─ new LoginController()
+            ├─ DatabaseConnector.getAuthConnection()  →  ezpc_auth 연결
+            └─ LoginView 표시
+```
 
-## 📢 기타(공유 사항)
+---
 
-<!-- 공유할 내용, 추가 논의가 필요한 사항, 배포 시 유의사항 등을 작성해주세요. -->
+## 3. 로그인 처리
+
+```
+LoginView — 로그인 버튼 클릭
+  └─ LoginController.handleLogin()
+       ├─ PC_MemberService.login(id, pw)
+       │    └─ PC_MemberDAOImpl.findByID()
+       │         └─ ezpc_auth 연결로 pc_member SELECT
+       │
+       ├─ 실패
+       │    └─ LoginView.setStatusMessage("아이디 또는 비밀번호가 올바르지 않습니다.")
+       │
+       └─ 성공
+            ├─ authConn.close()                              ← 인증 전용 연결 즉시 해제
+            ├─ DatabaseConnector.getConnection(memberType)   ← 역할별 연결 새로 생성
+            │
+            ├─ memberType = "owner"  →  new OwnerController(ownerConn, member).start()
+            └─ memberType = "user"   →  new UserController(userConn, member).start()
+```
+
+---
+
+## 4. 회원가입 처리
+
+```
+LoginView — 회원가입 버튼 클릭
+  └─ LoginController.handleSignUp()
+       └─ SignUpView 표시
+            └─ 회원가입 버튼 클릭
+                 ├─ 비밀번호 확인 불일치 → SignUpView.setStatusMessage("비밀번호 불일치")
+                 └─ 일치
+                      └─ PC_MemberService.signUp(id, pw, name)
+                           ├─ 중복 ID 검사 (findByID)
+                           └─ insertMember()  →  member_type = "user" 고정, grade = "bronze"
+```
+
+> 회원가입은 `ezpc_auth` 연결을 재사용하므로 별도 DB 연결 불필요  
+> (단, `ezpc_auth`에 `pc_member INSERT` 권한이 없다면 회원가입 전용 연결을 별도로 사용)
+
+---
+
+## 5. 사용자 흐름 (ezpc_user 계정)
+
+```
+UserController(userConn, member)
+  └─ 모든 DAO를 userConn으로 생성
+```
+
+### 5-1. 지점 선택
+
+```
+UserBranchSelectView 표시
+  └─ 지점 버튼 클릭
+       └─ PcCafeService.getAllPcCafes()
+            └─ PcCafeDAOImpl.findAll()  →  pc_cafe SELECT
+```
+
+### 5-2. 좌석 선택
+
+```
+UserSeatSelectView 표시
+  ├─ CustomerService.getCustomersInPcCafe(pcCafeId)  →  현재 이용 중인 좌석 목록
+  └─ 좌석 선택
+       └─ CustomerService.checkIn(customer)
+            ├─ CustomerDAOImpl.insertCustomer()   →  customer INSERT
+            └─ LogDAOImpl.insertLog()             →  use_log INSERT (login_time 기록)
+```
+
+### 5-3. 이용 중 (UserMainDashboardView)
+
+#### 이용권 충전
+```
+충전 버튼 클릭
+  └─ ChargeService.recordCharge(charge)
+       └─ ChargeDAOImpl.chargeByCustomer()
+            └─ CALL charge_by_customer(pc_cafe_id, seat_num, member_id, ticket_time)
+                 ├─ charge INSERT                        (충전 기록)
+                 ├─ customer.remain_time UPDATE          (현재 손님 잔여 시간)
+                 ├─ pc_member.total_payment_amount UPDATE (누적 결제 금액, 회원만)
+                 └─ pc_member.grade_type UPDATE          (등급 재산정, 회원만)
+```
+
+#### 음식 주문
+```
+음식주문 버튼 클릭
+  └─ UserFoodOrderView 표시
+       ├─ FoodService.getAllFoods()             →  음식 메뉴 조회
+       ├─ StockService.getStock(pcCafeId)       →  재고 확인
+       └─ OrderService.placeOrder(order)
+            ├─ EventScheduleDAOImpl.findCurrentOrderPaymentRate()  →  이벤트 할인율 조회
+            ├─ food_order INSERT                (주문 기록)
+            └─ StockDAOImpl.decreaseStock()     (재고 차감)
+```
+
+#### 리뷰 작성
+```
+리뷰 버튼 클릭  (회원만 가능)
+  └─ UserReviewManageView 표시
+       └─ ReviewService.addReview(review)
+            └─ ReviewDAOImpl.insert()           →  review INSERT
+```
+
+#### 로그아웃 (퇴실)
+```
+로그아웃 버튼 클릭
+  └─ CustomerService.checkOut(customer)         ← 트랜잭션
+       ├─ LogDAOImpl.updateLogoutTime()         →  use_log.logout_time UPDATE
+       ├─ LogDAOImpl.findLatestLogoutLog()      →  로그인/아웃 시간 조회
+       ├─ 사용 시간 계산 (logout - login, 분 단위)
+       ├─ PC_MemberDAOImpl.updateRemainTimeAfterUse()  →  remain_time 차감 (회원만)
+       └─ CustomerDAOImpl.deleteCustomer()      →  customer DELETE
+```
+
+---
+
+## 6. 운영자 흐름 (ezpc_owner 계정)
+
+```
+OwnerController(ownerConn, member)
+  └─ 모든 DAO를 ownerConn으로 생성
+       └─ OwnerMainFrameView 표시  (탭 5개)
+```
+
+| 탭 | 서비스 | 주요 기능 |
+|----|--------|-----------|
+| 좌석 모니터링 | `CustomerService` | 지점별 현재 이용 중인 손님 조회 |
+| 매출 통계 | `SalesReportService` | 월별·이벤트별·피크타임별 매출 조회 |
+| 음식 재고 | `StockService` | 지점별 재고 조회 및 수정 |
+| 직원 관리 | `EmployeeService` | 직원 추가·수정·삭제 |
+| 회원 관리 | `PC_MemberService` | user 타입 회원 조회 (owner 계정 제외) |
+
+---
+
+## 7. 계층별 역할 요약
+
+```
+View        — 화면 표시 + 버튼 리스너 노출만 담당, 비즈니스 로직 없음
+Controller  — View와 Service 연결, 화면 전환, DB 연결 생성·관리
+Service     — 비즈니스 로직 처리
+DAOImpl     — SQL 실행, 외부에서 주입받은 conn만 사용
+```
+
+---
+
+## 8. DatabaseConnector 사용 규칙
+
+- `DatabaseConnector`를 직접 호출하는 곳은 **`LoginController` 하나뿐**
+- 모든 DAOImpl은 **생성자로 주입받은 `conn`만 사용** (내부에서 직접 연결 생성 금지)
+- 역할별 `conn`은 Controller 생성 시 한 번만 만들어지고 해당 Controller 생애 동안 유지
+
+```java
+// LoginController에서만 호출
+Connection authConn  = DatabaseConnector.getAuthConnection();           // 로그인용
+Connection roleConn  = DatabaseConnector.getConnection(memberType);     // 역할별
+
+// Controller 내부에서 DAO 생성
+EmployeeDAO employeeDao = new EmployeeDAOImpl(roleConn);
+GradeDAO    gradeDao    = new GradeDAOImpl(roleConn);
+TicketDAO   ticketDao   = new TicketDAOImpl(roleConn);
+// ... 나머지 동일
+```
