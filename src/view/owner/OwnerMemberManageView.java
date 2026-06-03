@@ -63,7 +63,7 @@ public class OwnerMemberManageView extends JPanel {
         
         leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
-        String[] memberColumnNames = {"ID", "이름", "현재등급", "누적금액", "가입일"};
+        String[] memberColumnNames = {"ID", "이름", "현재등급", "누적금액", "잔여시간"};
         memberTableModel = new DefaultTableModel(memberColumnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -94,12 +94,6 @@ public class OwnerMemberManageView extends JPanel {
                 return false;
             }
         };
-
-        // 등급 초기 데이터
-        gradeTableModel.addRow(new Object[]{"Bronze", "0원", "0%", "기본 등급"});
-        gradeTableModel.addRow(new Object[]{"Silver", "100,000원", "5%", "5% 할인"});
-        gradeTableModel.addRow(new Object[]{"Gold", "200,000원", "10%", "10% 할인"});
-        gradeTableModel.addRow(new Object[]{"Platinum", "500,000원", "15%", "15% 할인"});
 
         gradeTable = new JTable(gradeTableModel);
         gradeTable.setFont(FontUtil.getKoreanFontPlain(12));
@@ -235,18 +229,16 @@ public class OwnerMemberManageView extends JPanel {
         }
     }
 
-    public void refreshGradeTable() {
+    /**
+     * DB 데이터로 등급 목록 표를 덮어씌웁니다.
+     * @param data Object[][] 형태의 배열 (등급명, 기준금액, 할인율, 혜택설명)
+     */
+    public void setGradeTableData(Object[][] data) {
         gradeTableModel.setRowCount(0);
-        gradeTableModel.addRow(new Object[]{"Bronze", "0원", "0%", "기본 등급"});
-        gradeTableModel.addRow(new Object[]{"Silver", "100,000원", "5%", "5% 할인"});
-        gradeTableModel.addRow(new Object[]{"Gold", "200,000원", "10%", "10% 할인"});
-        gradeTableModel.addRow(new Object[]{"Platinum", "500,000원", "15%", "15% 할인"});
-    }
-
-    public void updateGradeRow(int row, int standardAmount, int discountRate) {
-        if (row >= 0 && row < gradeTableModel.getRowCount()) {
-            gradeTableModel.setValueAt(String.format("%,d원", standardAmount), row, 1);
-            gradeTableModel.setValueAt(discountRate + "%", row, 2);
+        if (data != null) {
+            for (Object[] row : data) {
+                gradeTableModel.addRow(row);
+            }
         }
     }
 }
