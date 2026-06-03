@@ -3,6 +3,7 @@ package dao;
 import java.util.List;
 
 import model.PC_Member;
+import model.PcCafeReviewGradeReport;
 import model.Review;
 
 public interface ReviewDAO {
@@ -27,6 +28,9 @@ public interface ReviewDAO {
 	
 	//전체 리뷰 보기
 	List<Review> findAll(); 
+	
+	//PC방 1~4등급으로 나누기 
+	List<PcCafeReviewGradeReport> getPcCafeReviewGradeReport();
 	
 
 }

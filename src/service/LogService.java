@@ -4,6 +4,7 @@ package service;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import dao.LogDAO;
 import daoImpl.LogDAOImpl;
@@ -50,5 +51,11 @@ public class LogService {
 
     public void deleteLog(int logId) throws SQLException {
         logDAO.deleteById(logId);
+    }
+    
+    
+    public Map<String, Integer> findCustomerEntryCounts(String pcCafeId,String periodType,int year,int month,int date) {
+
+        return logDAO.findCustomerEntryCounts(pcCafeId, periodType, year, month, date);
     }
 }

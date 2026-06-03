@@ -13,7 +13,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class LogDAOImpl implements LogDAO {
@@ -191,6 +193,71 @@ public class LogDAOImpl implements LogDAO {
             statement.executeUpdate();
         }
     }
+    
+    // 연별, 월별, 일별 가능한 해당 PC방의  시간 대 별 입장 손님 수 
+    // 예시: 일별 findCustomerEntryCounts(pcCafeId, "DAY", 2026, 6, 2);
+    // 월별:findCustomerEntryCounts(pcCafeId, "MONTH", 2026, 6, 0); -> date 쪽은 보지 않음
+    // 년별: findCustomerEntryCounts(pcCafeId, "YEAR", 2026, 0, 0); -> month, date 쪽은 보지 않음 
+    @Override
+    public Map<String, Integer> findCustomerEntryCounts(String pcCafeId, String periodType,int year,int month,int date) {
+        Map<String, Integer> result = new LinkedHashMap<>(); // 시간대와 손님 수 두 값만 반환하므로 Map 사용 (model X)
+
+        // 로그인(login_time)의 Hour 를 기준으로 손님수를 셈 
+        //기본 sql은 YEAR 만 조건문으로 있음 
+        String sql =
+            "SELECT DATE_FORMAT(login_time, '%H') AS timeSlot, " +
+            "       COUNT(*) AS customerCount " +
+            "FROM use_log " +
+            "WHERE pc_cafe_id = ? " +
+            "  AND login_time IS NOT NULL " +
+            "  AND YEAR(login_time) = ? ";
+
+        
+        // MONTH 거나 DAY가 period type이면 month 조건문 추가 (년-월) 
+        if ("MONTH".equals(periodType) || "DAY".equals(periodType)) {
+            sql += "  AND MONTH(login_time) = ? ";
+        }
+        
+        // DAY가 period type이면 day 조건문 추가(년-월-일)
+        if ("DAY".equals(periodType)) {
+            sql += "  AND DAY(login_time) = ? ";
+        }
+        //년,월,일 상관 없이 시간대별로 group by
+        //시간대 별로 오름차순 0-23시 
+        sql +=
+            "GROUP BY DATE_FORMAT(login_time, '%H') " +
+            "ORDER BY timeSlot ASC";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            int index = 1;
+
+            pstmt.setString(index++, pcCafeId);
+            pstmt.setInt(index++, year);
+
+            if ("MONTH".equals(periodType) || "DAY".equals(periodType)) {
+                pstmt.setInt(index++, month);
+            }
+
+            if ("DAY".equals(periodType)) {
+                pstmt.setInt(index++, date);
+            }
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.put(
+                        rs.getString("timeSlot"),
+                        rs.getInt("customerCount")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("시간대별 손님 입장 수 조회 중 오류 발생");
+        }
+
+        return result;
+    }
+
 
     private Log mapToLog(ResultSet resultSet) throws SQLException {
         return new Log(
