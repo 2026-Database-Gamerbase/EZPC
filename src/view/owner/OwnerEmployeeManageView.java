@@ -3,6 +3,7 @@ package view.owner;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import view.FontUtil;
 
@@ -121,12 +122,18 @@ public class OwnerEmployeeManageView extends JPanel {
 
         hireButton = new JButton("신규 채용");
         hireButton.setPreferredSize(new Dimension(100, 30));
+        hireButton.setBackground(new Color(40, 167, 69));
+        hireButton.setForeground(Color.WHITE);
+        hireButton.setOpaque(true); 
+        hireButton.setBorderPainted(false); 
         buttonPanel.add(hireButton);
 
         fireButton = new JButton("해고");
         fireButton.setPreferredSize(new Dimension(100, 30));
         fireButton.setBackground(new Color(255, 99, 71));
         fireButton.setForeground(Color.WHITE);
+        fireButton.setOpaque(true); 
+        fireButton.setBorderPainted(false); 
         buttonPanel.add(fireButton);
 
         gbc.gridx = 0;
@@ -180,6 +187,22 @@ public class OwnerEmployeeManageView extends JPanel {
         return null;
     }
 
+    public String getSelectedWageString() {
+        int row = employeeTable.getSelectedRow();
+        if (row >= 0) {
+            return (String) tableModel.getValueAt(row, 3);
+        }
+        return null;
+    }
+
+    public String getSelectedAttendanceString() {
+        int row = employeeTable.getSelectedRow();
+        if (row >= 0) {
+            return (String) tableModel.getValueAt(row, 4);
+        }
+        return null;
+    }
+
     public int getWage() {
         return (int) wageSpinner.getValue();
     }
@@ -191,6 +214,14 @@ public class OwnerEmployeeManageView extends JPanel {
     // ==========================================
     // Setter
     // ==========================================
+    public void setWage(int wage) {
+        wageSpinner.setValue(wage);
+    }
+
+    public void setAttendanceChecked(boolean checked) {
+        attendanceCheckBox.setSelected(checked);
+    }
+
     public void setStatusMessage(String message) {
         statusLabel.setText(message);
     }
@@ -210,6 +241,9 @@ public class OwnerEmployeeManageView extends JPanel {
         fireButton.addActionListener(listener);
     }
 
+    public void setTableSelectionListener(ListSelectionListener listener) {
+        employeeTable.getSelectionModel().addListSelectionListener(listener);
+    }
     
     // ==========================================
     // 상태 갱신용 메서드
