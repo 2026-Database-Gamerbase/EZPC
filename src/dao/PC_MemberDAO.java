@@ -1,7 +1,6 @@
 package dao;
 
 import java.util.List;
-
 import model.PC_Member;
 
 public interface PC_MemberDAO {
@@ -35,5 +34,7 @@ public interface PC_MemberDAO {
 	
 	//로그아웃 시 회원의 잔여 시간 갱신 
 	void updateRemainTimeAfterUse(String memberId, int remainTime, int usedTime);
-	
+    
+    // 30일 이상 미방문 휴면 회원 조회
+    List<PC_Member> findDormantMembers();
 }

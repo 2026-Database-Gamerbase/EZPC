@@ -1,13 +1,12 @@
 package daoImpl;
 
+import dao.PC_MemberDAO;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import dao.PC_MemberDAO;
 import model.PC_Member;
 
 public class PC_MemberDAOImpl implements PC_MemberDAO{
@@ -217,6 +216,32 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
         } catch (SQLException e) {
             throw new RuntimeException("회원 잔여시간 업데이트 실패", e);
         }
+    }
+
+	@Override
+    public List<PC_Member> findDormantMembers() {
+        String sql = """
+            SELECT * FROM pc_member
+            WHERE member_type = 'user'
+              AND member_id NOT IN (
+                  SELECT DISTINCT member_id
+                  FROM use_log
+                  WHERE login_time > DATE_SUB(NOW(), INTERVAL 30 DAY)
+                    AND member_id IS NOT NULL
+              )
+        """;
+        List<PC_Member> members = new ArrayList<>();
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                members.add(mapRowToMember(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return members;
     }
 
 	private PC_Member mapRowToMember(ResultSet rs) throws SQLException {
