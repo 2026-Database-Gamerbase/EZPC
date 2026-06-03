@@ -40,7 +40,7 @@ public class OwnerFoodStockView extends JPanel {
         // ==========================================
         // 중앙: 재고 테이블
         // ==========================================
-        String[] columnNames = {"음식명", "현재 재고", "최소 재고", "상태"};
+        String[] columnNames = {"음식명", "현재 재고"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -52,31 +52,6 @@ public class OwnerFoodStockView extends JPanel {
         stockTable.setFont(FontUtil.getKoreanFontPlain(12));
         stockTable.setRowHeight(25);
         stockTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        // 상태에 따라 색상 표시
-        stockTable.getColumnModel().getColumn(3).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                String status = (String) value;
-                
-                // null 체크 안전장치 추가
-                if (status != null) {
-                    if ("긴급".equals(status)) {
-                        c.setBackground(new Color(255, 99, 71)); // 빨강색
-                        c.setForeground(Color.WHITE);
-                    } else if ("부족".equals(status)) {
-                        c.setBackground(new Color(255, 200, 100)); // 주황색
-                        c.setForeground(Color.BLACK);
-                    } else {
-                        c.setBackground(new Color(144, 238, 144)); // 초록색
-                        c.setForeground(Color.BLACK);
-                    }
-                }
-                return c;
-            }
-        });
 
         add(new JScrollPane(stockTable), BorderLayout.CENTER);
 
@@ -171,7 +146,7 @@ public class OwnerFoodStockView extends JPanel {
     
     /**
      * Controller에서 DB 연동 후, 선택된 지점의 최신 재고 데이터를 테이블에 덮어씌웁니다.
-     * @param data Object[][] 형태의 재고 배열 (음식명, 현재 재고, 최소 재고, 상태)
+     * @param data Object[][] 형태의 재고 배열 (음식명, 현재 재고)
      */
     public void setStockTableData(Object[][] data) {
         tableModel.setRowCount(0);
