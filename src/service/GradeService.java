@@ -10,10 +10,6 @@ import model.Grade;
 public class GradeService {
     private final GradeDAO gradeDAO;
 
-    public GradeService() {
-        this(new GradeDAOImpl());
-    }
-
     public GradeService(GradeDAO gradeDAO) {
         this.gradeDAO = gradeDAO;
     }
