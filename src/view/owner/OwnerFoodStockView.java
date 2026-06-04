@@ -15,7 +15,6 @@ public class OwnerFoodStockView extends JPanel {
     private DefaultTableModel tableModel;
     private JSpinner quantitySpinner;
     private JButton updateButton;
-    private JButton refreshButton;
     private JLabel statusLabel;
 
     public OwnerFoodStockView() {
@@ -77,10 +76,6 @@ public class OwnerFoodStockView extends JPanel {
         updateButton.setPreferredSize(new Dimension(100, 25));
         editPanel.add(updateButton);
 
-        refreshButton = new JButton("새로고침");
-        refreshButton.setPreferredSize(new Dimension(100, 25));
-        editPanel.add(refreshButton);
-
         bottomPanel.add(editPanel);
 
         // 상태 메시지 패널
@@ -134,10 +129,6 @@ public class OwnerFoodStockView extends JPanel {
     // ==========================================
     public void setUpdateButtonListener(ActionListener listener) {
         updateButton.addActionListener(listener);
-    }
-
-    public void setRefreshButtonListener(ActionListener listener) {
-        refreshButton.addActionListener(listener);
     }
 
     // ==========================================
