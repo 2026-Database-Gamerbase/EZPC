@@ -1,4 +1,3 @@
-// 좌석 선택 화면
 package view.user;
 
 import java.awt.*;
@@ -12,6 +11,7 @@ public class UserSeatSelectView extends JPanel {
     private JLabel seatStatusLabel;
     private JButton confirmButton;
     private JButton backButton;
+    private JButton refreshButton;
     private int selectedSeatRow = -1;
     private int selectedSeatCol = -1;
     private static final int ROWS = 5;
@@ -26,16 +26,39 @@ public class UserSeatSelectView extends JPanel {
         setLayout(new BorderLayout());
         setBackground(new Color(240, 240, 240));
 
+        // 상단 패널 (지점명, 새로고침 버튼, 범례)
         JPanel topPanel = new JPanel();
-        topPanel.setLayout(new GridLayout(2, 1));
+        topPanel.setLayout(new BorderLayout());
         topPanel.setBackground(new Color(240, 240, 240));
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // 새로고침 버튼
+        JPanel refreshPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        refreshPanel.setBackground(new Color(240, 240, 240));
+        
+        refreshButton = new JButton("새로고침");
+        refreshButton.setFont(new Font("Malgun Gothic", Font.PLAIN, 11));
+        refreshButton.setPreferredSize(new Dimension(85, 25));
+        refreshButton.setBackground(Color.WHITE);
+        refreshButton.setFocusPainted(false);
+        refreshButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        refreshPanel.add(refreshButton);
+        
+        topPanel.add(refreshPanel, BorderLayout.NORTH);
+
+        // 지점명 및 범례 패널
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new GridLayout(2, 1));
+        infoPanel.setBackground(new Color(240, 240, 240));
+
+        JPanel branchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        branchPanel.setBackground(new Color(240, 240, 240));
         branchNameLabel = new JLabel("지점명: 강남점");
         branchNameLabel.setFont(FontUtil.getKoreanFontBold(18));
-        topPanel.add(branchNameLabel);
+        branchPanel.add(branchNameLabel);
+        infoPanel.add(branchPanel);
 
-        JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
         legendPanel.setBackground(new Color(240, 240, 240));
         JButton emptyLegend = new JButton("빈 좌석");
         emptyLegend.setBackground(new Color(144, 238, 144));
@@ -43,12 +66,16 @@ public class UserSeatSelectView extends JPanel {
         JButton usedLegend = new JButton("사용 중");
         usedLegend.setBackground(new Color(255, 99, 71));
         usedLegend.setEnabled(false);
-        legendPanel.add(new JLabel("범례:"));
+        legendPanel.add(new JLabel("범례: "));
         legendPanel.add(emptyLegend);
         legendPanel.add(usedLegend);
-        topPanel.add(legendPanel);
+        infoPanel.add(legendPanel);
+
+        topPanel.add(infoPanel, BorderLayout.CENTER);
+        
         add(topPanel, BorderLayout.NORTH);
 
+        // 중앙 패널 (좌석 현황)
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout());
         centerPanel.setBackground(new Color(240, 240, 240));
@@ -56,7 +83,7 @@ public class UserSeatSelectView extends JPanel {
         JPanel seatPanel = new JPanel();
         seatPanel.setLayout(new GridLayout(ROWS, COLS, 5, 5));
         seatPanel.setBackground(new Color(240, 240, 240));
-        seatPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        seatPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
 
         seatButtons = new JButton[ROWS][COLS];
         for (int i = 0; i < ROWS; i++) {
@@ -75,6 +102,7 @@ public class UserSeatSelectView extends JPanel {
         centerPanel.add(seatPanel, BorderLayout.CENTER);
         add(centerPanel, BorderLayout.CENTER);
 
+        // 하단 패널 (좌석 상태 및 버튼)
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new GridLayout(2, 1));
         bottomPanel.setBackground(new Color(240, 240, 240));
@@ -150,5 +178,11 @@ public class UserSeatSelectView extends JPanel {
 
     public void setBackButtonListener(ActionListener listener) {
         backButton.addActionListener(listener);
+    }
+
+    public void setRefreshButtonListener(ActionListener listener) {
+        if (refreshButton != null) {
+            refreshButton.addActionListener(listener);
+        }
     }
 }

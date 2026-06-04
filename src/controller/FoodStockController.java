@@ -20,14 +20,6 @@ public class FoodStockController {
     private void initEventBindings() {
         // 재고 업데이트 버튼
         view.setUpdateButtonListener(e -> handleUpdateStock());
-        
-        // 새로고침 버튼
-        view.setRefreshButtonListener(e -> {
-            if (currentBranchId != null) {
-                refreshStockList(currentBranchId);
-                view.setStatusMessage("재고 현황이 새로고침되었습니다.");
-            }
-        });
     }
 
     // 선택한 지점 재고 목록 불러와서 테이블 세팅

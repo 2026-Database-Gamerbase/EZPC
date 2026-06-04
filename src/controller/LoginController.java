@@ -1,6 +1,8 @@
 package controller;
 
+import dao.CustomerDAO;
 import dao.PC_MemberDAO;
+import daoImpl.CustomerDAOImpl;
 import daoImpl.PC_MemberDAOImpl;
 import db.DatabaseConnector;
 import java.sql.Connection;
@@ -25,7 +27,8 @@ public class LoginController {
         try {
             authConn = DatabaseConnector.getAuthConnection();
             PC_MemberDAO memberDao = new PC_MemberDAOImpl(authConn);
-            memberService = new PC_MemberService(memberDao);
+            CustomerDAO customerDao = new CustomerDAOImpl(authConn);
+            memberService = new PC_MemberService(memberDao, customerDao);
         } catch (SQLException e) {
             String msg = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
             System.err.println("=================================================");
@@ -59,10 +62,11 @@ public class LoginController {
         String id = loginView.getInputId();
         String pw = loginView.getInputPassword();
 
-        PC_Member member = memberService.login(id, pw);
-
-        if (member == null) {
-            loginView.setStatusMessage("아이디 또는 비밀번호가 올바르지 않습니다.");
+        PC_Member member;
+        try {
+            member = memberService.login(id, pw);
+        } catch (RuntimeException e) {
+            loginView.setStatusMessage(e.getMessage());
             return;
         }
 
