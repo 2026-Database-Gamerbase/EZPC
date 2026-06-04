@@ -197,16 +197,25 @@ public class UserController {
 
             UserSeatSelectView seatView = new UserSeatSelectView();
             seatView.setBranchName(cafe.getPcName());
-
+            
+            int totalSeats = cafe.getTotalSeats();
+            seatView.setupSeats(totalSeats);
+            
             Set<Integer> occupiedSeats = new HashSet<>();
             List<Customer> activeCustomers = customerService.getCustomersInPcCafe(pcCafeId);
             for (Customer customer : activeCustomers) {
                 occupiedSeats.add(customer.getSeatNum());
             }
 
-            for (int row = 0; row < 5; row++) {
-                for (int col = 0; col < 6; col++) {
-                    int seatNum = row * 6 + col + 1;
+            int viewRows = seatView.getRows();
+            int viewCols = seatView.getCols();
+
+            for (int row = 0; row < viewRows; row++) {
+                for (int col = 0; col < viewCols; col++) {
+                    int seatNum = row * viewCols + col + 1; // 🚀 상수를 변수로 변경
+                    
+                    if (seatNum > totalSeats) continue; // 🚀 실제 좌석 범위를 초과하는 빈 공간은 이벤트 생략
+
                     boolean available = !occupiedSeats.contains(seatNum);
                     seatView.setSeatStatus(row, col, available);
                     final int r = row;
@@ -228,7 +237,7 @@ public class UserController {
                     return;
                 }
 
-                int seatNum = row * 6 + col + 1;
+                int seatNum = row * viewCols + col + 1;
                 Customer newCustomer = new Customer();
                 newCustomer.setPcCafeId(pcCafeId);
                 newCustomer.setSeatNum(seatNum);
@@ -286,10 +295,11 @@ public class UserController {
                     }
 
                     // 3. UI의 5x6 좌석 전체를 반복하면서 상태 최신화
-                    for (int row = 0; row < 5; row++) {
-                        for (int col = 0; col < 6; col++) {
-                            int seatNum = row * 6 + col + 1;
-                            // 새로 가져온 목록에 없으면 빈 좌석(true)
+                    for (int row = 0; row < viewRows; row++) {
+                        for (int col = 0; col < viewCols; col++) {
+                            int seatNum = row * viewCols + col + 1;
+                            if (seatNum > totalSeats) continue; // 🚀 실제 좌석 범위 넘어가면 패스
+                            
                             boolean available = !newOccupiedSeats.contains(seatNum); 
                             seatView.setSeatStatus(row, col, available);
                         }
