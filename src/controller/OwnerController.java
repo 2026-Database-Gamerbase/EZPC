@@ -121,6 +121,9 @@ public class OwnerController {
         // 다른 탭으로 넘어갈 때마다 데이터 새로고침
         mainView.addTabChangeListener(e -> triggerCurrentTabRefresh());
 
+        // 새로고침: 현재 탭 데이터 갱신
+        mainView.setRefreshButtonListener(e -> triggerCurrentTabRefresh());
+
         // 로그아웃: 현재 창 닫고 로그인 화면으로 복귀
         mainView.setLogoutButtonListener(e -> {
             mainView.dispose();

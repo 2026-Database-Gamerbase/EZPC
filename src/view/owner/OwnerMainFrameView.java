@@ -13,6 +13,7 @@ import view.FontUtil;
 public class OwnerMainFrameView extends JFrame {
     private JTabbedPane tabbedPane;
     private JComboBox<String> branchComboBox;
+    private JButton refreshButton;
     private JButton logoutButton;
     
     // 하위 탭 뷰들
@@ -101,6 +102,17 @@ public class OwnerMainFrameView extends JFrame {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 6));
         bottomPanel.setBackground(new Color(40, 40, 40));
 
+        refreshButton = new JButton("새로고침");
+        refreshButton.setFont(FontUtil.getKoreanFontPlain(12));
+        refreshButton.setBackground(new Color(80, 80, 80));
+        refreshButton.setForeground(Color.WHITE);
+        refreshButton.setOpaque(true);
+        refreshButton.setBorderPainted(false);
+        refreshButton.setFocusPainted(false);
+        refreshButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        refreshButton.setPreferredSize(new Dimension(90, 28));
+        bottomPanel.add(refreshButton);
+
         logoutButton = new JButton("로그아웃");
         logoutButton.setFont(FontUtil.getKoreanFontBold(12));
         logoutButton.setBackground(new Color(200, 60, 60));
@@ -154,6 +166,10 @@ public class OwnerMainFrameView extends JFrame {
     // 사용자가 다른 탭을 클릭했을 때 발생하는 이벤트를 컨트롤러에 연결
     public void addTabChangeListener(ChangeListener listener) {
         tabbedPane.addChangeListener(listener);
+    }
+
+    public void setRefreshButtonListener(ActionListener listener) {
+        refreshButton.addActionListener(listener);
     }
 
     public void setLogoutButtonListener(ActionListener listener) {
