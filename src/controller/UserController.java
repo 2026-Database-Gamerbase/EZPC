@@ -353,78 +353,73 @@ public class UserController {
             UserFoodOrderView foodOrderView = new UserFoodOrderView(parent);
             List<Food> foods = foodService.getMenuBoard();
             Map<String, Integer> stockMap = new HashMap<>();
-            stockService.getCafeStockList(pcCafeId).forEach(stock -> stockMap.put(stock.getFoodName(), stock.getStockQuantity()));
+            stockService.getCafeStockList(pcCafeId).forEach(s -> stockMap.put(s.getFoodName(), s.getStockQuantity()));
             double paymentRate = eventScheduleDao.findCurrentOrderPaymentRate(pcCafeId);
 
             foodOrderView.setMenuData(foods, stockMap, paymentRate);
-            foodOrderView.setFoodTableSelectionListener(new ListSelectionListener() {
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    if (!e.getValueIsAdjusting()) {
-                        // 총 가격 업데이트
-                        int price = foodOrderView.getSelectedFoodPrice();
-                        int qty = foodOrderView.getSelectedQuantity();
-                        foodOrderView.setTotalPrice(price * qty);
 
-                        // 추천 메뉴 DB 연동 및 업데이트
-                        String selectedFood = foodOrderView.getSelectedFoodName();
-                        if (selectedFood != null) {
-                            try {
-                                // UserController에 OrderDAO가 멤버 변수로 없으므로 직접 생성해서 사용
-                                OrderDAO orderDao = new OrderDAOImpl(conn);
-                                List<Food> recommendedFoods = orderDao.getRecommendedFoods(selectedFood);
-
-                                if (recommendedFoods != null && !recommendedFoods.isEmpty()) {
-                                    StringBuilder sb = new StringBuilder("[" + selectedFood + "] 추천 조합: ");
-                                    for (int i = 0; i < recommendedFoods.size(); i++) {
-                                        sb.append(i + 1).append("위 ").append(recommendedFoods.get(i).getFoodName());
-                                        if (i < recommendedFoods.size() - 1) sb.append(", ");
-                                    }
-                                    foodOrderView.setRecommendMessage(sb.toString());
-                                } else {
-                                    foodOrderView.setRecommendMessage("아직 [" + selectedFood + "]와(과) 함께 많이 주문된 메뉴가 없습니다.");
+            // 메뉴 선택 시 추천 메뉴 표시
+            foodOrderView.setFoodTableSelectionListener(e -> {
+                if (!e.getValueIsAdjusting()) {
+                    String selectedFood = foodOrderView.getSelectedFoodName();
+                    if (selectedFood != null) {
+                        try {
+                            OrderDAO orderDao = new OrderDAOImpl(conn);
+                            List<Food> recommended = orderDao.getRecommendedFoods(selectedFood);
+                            if (recommended != null && !recommended.isEmpty()) {
+                                StringBuilder sb = new StringBuilder("[" + selectedFood + "] 추천 조합: ");
+                                for (int i = 0; i < recommended.size(); i++) {
+                                    sb.append(i + 1).append("위 ").append(recommended.get(i).getFoodName());
+                                    if (i < recommended.size() - 1) sb.append(", ");
                                 }
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
+                                foodOrderView.setRecommendMessage(sb.toString());
+                            } else {
+                                foodOrderView.setRecommendMessage("아직 [" + selectedFood + "]와(과) 함께 많이 주문된 메뉴가 없습니다.");
                             }
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                     }
                 }
             });
 
-            // 2. 수량(Spinner) 변경 이벤트 리스너 (람다식 미사용)
-            foodOrderView.setQuantityChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent e) {
-                    int price = foodOrderView.getSelectedFoodPrice();
-                    int qty = foodOrderView.getSelectedQuantity();
-                    foodOrderView.setTotalPrice(price * qty);
+            // 담기 버튼: 선택한 음식 + 수량을 장바구니에 추가
+            foodOrderView.setAddToCartButtonListener(e -> {
+                String foodName = foodOrderView.getSelectedFoodName();
+                if (foodName == null) {
+                    foodOrderView.setStatusMessage("담을 음식을 메뉴에서 선택해 주세요.");
+                    return;
                 }
+                int qty   = foodOrderView.getSelectedQuantity();
+                int price = foodOrderView.getSelectedFoodCurrentPrice();
+                int stock = stockMap.getOrDefault(foodName, 0);
+                if (qty > stock) {
+                    foodOrderView.setStatusMessage("재고가 부족합니다. (재고: " + stock + "개)");
+                    return;
+                }
+                foodOrderView.addToCart(foodName, qty, price);
+                foodOrderView.setStatusMessage("[" + foodName + "] " + qty + "개가 장바구니에 담겼습니다.");
             });
 
+            // 주문하기 버튼: 장바구니 전체를 한 번에 주문
             foodOrderView.setOrderButtonListener(e -> {
-                String selectedFood = foodOrderView.getSelectedFoodName();
-                if (selectedFood == null) {
-                    foodOrderView.setStatusMessage("음식을 먼저 선택해 주세요.");
+                if (foodOrderView.isCartEmpty()) {
+                    foodOrderView.setStatusMessage("장바구니가 비어있습니다. 음식을 먼저 담아주세요.");
                     return;
                 }
-                int quantity = foodOrderView.getSelectedQuantity();
-                if (quantity <= 0) {
-                    foodOrderView.setStatusMessage("수량을 올바르게 입력해 주세요.");
-                    return;
-                }
-
+                Map<String, Integer> cart = foodOrderView.getCartQuantities();
                 try {
-                    boolean success = orderService.placeOrder(pcCafeId, seatNumber, selectedFood, quantity);
+                    boolean success = orderService.placeCartOrder(pcCafeId, seatNumber, cart);
                     if (success) {
-                        foodOrderView.setStatusMessage("주문이 완료되었습니다.");
+                        foodOrderView.setStatusMessage("주문이 완료되었습니다!");
+                        foodOrderView.clearCart();
                         stockMap.clear();
-                        stockService.getCafeStockList(pcCafeId).forEach(stock -> stockMap.put(stock.getFoodName(), stock.getStockQuantity()));
-                        foodOrderView.setMenuData(foods, stockMap, paymentRate);
+                        stockService.getCafeStockList(pcCafeId).forEach(s -> stockMap.put(s.getFoodName(), s.getStockQuantity()));
+                        foodOrderView.refreshMenuStock(stockMap);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    foodOrderView.setStatusMessage("주문에 실패했습니다. 재고 또는 DB를 확인하세요.");
+                    foodOrderView.setStatusMessage("주문에 실패했습니다: " + ex.getMessage());
                 }
             });
 
