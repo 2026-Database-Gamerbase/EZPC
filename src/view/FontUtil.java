@@ -11,7 +11,7 @@ import javax.swing.plaf.FontUIResource;
  * 한글 깨짐 문제를 해결합니다.
  */
 public class FontUtil {
-    
+
     // 한글 지원 폰트 목록 (우선순위 순)
     private static final String[] KOREAN_FONTS = {
         "나눔고딕",           // Noto Sans CJK KR
@@ -23,26 +23,33 @@ public class FontUtil {
         "Dialog"              // JVM 기본 폰트
     };
 
+    // 폰트 탐색 결과를 캐싱 (최초 1회만 탐색)
+    private static String cachedFontName = null;
+
     /**
      * 시스템에서 사용 가능한 한글 폰트를 찾아 반환
      */
     public static String getAvailableKoreanFont() {
+        if (cachedFontName != null) {
+            return cachedFontName;
+        }
+
         String[] fontNames = java.awt.GraphicsEnvironment
             .getLocalGraphicsEnvironment()
             .getAvailableFontFamilyNames();
-        
+
         for (String koreanFont : KOREAN_FONTS) {
             for (String systemFont : fontNames) {
                 if (systemFont.equalsIgnoreCase(koreanFont)) {
-                    System.out.println("✓ 한글 폰트 선택: " + koreanFont);
-                    return koreanFont;
+                    cachedFontName = koreanFont;
+                    return cachedFontName;
                 }
             }
         }
-        
+
         // 폴백: Dialog 폰트 (모든 시스템에 존재)
-        System.out.println("⚠ 기본 한글 폰트를 찾을 수 없어 Dialog 폰트 사용");
-        return "Dialog";
+        cachedFontName = "Dialog";
+        return cachedFontName;
     }
 
     /**
