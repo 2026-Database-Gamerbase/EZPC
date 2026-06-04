@@ -1,5 +1,8 @@
 package controller;
 
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import javax.swing.JOptionPane;
 import model.*;
@@ -14,16 +17,24 @@ public class SystemSetupController {
     private final FoodService foodService;
     private final TicketService ticketService;
     private final EventInfoService eventInfoService;
+    private final EventScheduleService eventScheduleService;
+    private String currentBranchId;
 
     public SystemSetupController(OwnerSystemSetupView view, PcCafeService pcCafeService, 
-                                 FoodService foodService, TicketService ticketService, EventInfoService eventInfoService) {
+                                 FoodService foodService, TicketService ticketService, EventInfoService eventInfoService,
+                                 EventScheduleService eventScheduleService) {
         this.view = view;
         this.pcCafeService = pcCafeService;
         this.foodService = foodService;
         this.ticketService = ticketService;
         this.eventInfoService = eventInfoService;
+        this.eventScheduleService = eventScheduleService;
 
         initEventBindings();
+    }
+
+    public void setCurrentBranchId(String currentBranchId) {
+        this.currentBranchId = currentBranchId;
     }
 
     private void initEventBindings() {
@@ -78,6 +89,14 @@ public class SystemSetupController {
                         new String[]{"이벤트 타입", "내역 설명", "타입 번호 (0 또는 1)", "결제 비율 (0.0~1.0)"});
                     loadEventInfoData();
                     break;
+                case 4: // 이벤트 스케줄 관리
+                    view.setViewMode("이벤트 스케줄 관리",
+                        new String[]{"이벤트 타입", "지점 코드", "시작일", "종료일"},
+                        new String[]{"이벤트 타입", "시작일 (YYYY-MM-DD)", "종료일 (YYYY-MM-DD)"});
+                    view.setUseEventTypeComboBox(true);
+                    loadEventTypeOptions();
+                    loadEventScheduleData();
+                    break;
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -127,6 +146,33 @@ public class SystemSetupController {
         view.setTableData(data);
     }
 
+    private void loadEventTypeOptions() throws Exception {
+        List<EventInfo> list = eventInfoService.getAllEventInfos();
+        String[] eventTypes = list.stream()
+                .map(EventInfo::getEventType)
+                .toArray(String[]::new);
+        view.setEventTypeOptions(eventTypes);
+    }
+
+    private void loadEventScheduleData() throws Exception {
+        if (currentBranchId == null || currentBranchId.trim().isEmpty()) {
+            view.setTableData(new Object[0][4]);
+            view.setStatusMessage("상단에서 관리 지점을 먼저 선택해 주세요.");
+            return;
+        }
+
+        List<EventSchedule> list = eventScheduleService.getEventSchedulesByPc(currentBranchId);
+        Object[][] data = new Object[list.size()][4];
+        for (int i = 0; i < list.size(); i++) {
+            EventSchedule schedule = list.get(i);
+            data[i][0] = schedule.getEventType();
+            data[i][1] = schedule.getPcId();
+            data[i][2] = schedule.getEventStartDate();
+            data[i][3] = schedule.getEventEndDate();
+        }
+        view.setTableData(data);
+    }
+
     // 표에서 항목을 클릭했을 때 선택한 데이터를 하단 폼에 띄워줌
     private void handleTableLineSelect() {
         String selectedRowId = view.getSelectedRowId();
@@ -165,6 +211,12 @@ public class SystemSetupController {
                             view.fillFormInputs(new String[]{ev.getEventType(), ev.getEventContent(), String.valueOf(ev.getEventTypeNum()), String.valueOf(ev.getPaymentRate())});
                             break;
                         }
+                    }
+                    break;
+                case 4: // 이벤트 스케줄
+                    String[] selectedValues = view.getSelectedRowValues();
+                    if (selectedValues != null && selectedValues.length >= 4) {
+                        view.fillFormInputs(new String[]{selectedValues[0], selectedValues[2], selectedValues[3]});
                     }
                     break;
             }
@@ -215,11 +267,27 @@ public class SystemSetupController {
                         eventInfoService.insertEventInfo(ev);
                     }
                     break;
+                case 4:
+                    if (currentBranchId == null || currentBranchId.trim().isEmpty()) {
+                        throw new IllegalArgumentException("상단에서 관리 지점을 먼저 선택해 주세요.");
+                    }
+                    EventSchedule schedule = new EventSchedule(
+                        inputs[0],
+                        currentBranchId,
+                        LocalDate.parse(inputs[1]),
+                        LocalDate.parse(inputs[2])
+                    );
+                    if (isUpdate) {
+                        eventScheduleService.updateEventSchedule(schedule);
+                    } else {
+                        eventScheduleService.insertEventSchedule(schedule);
+                    }
+                    break;
             }
             view.setStatusMessage(isUpdate ? "데이터가 성공적으로 수정되었습니다." : "새 데이터가 추가되었습니다.");
             refreshCurrentCategory();
         } catch (Exception ex) {
-            view.setStatusMessage("저장 실패: " + ex.getMessage());
+            view.setStatusMessage("저장 실패: " + getEventErrorMessage(index, ex));
             ex.printStackTrace();
         }
     }
@@ -240,11 +308,47 @@ public class SystemSetupController {
                 case 1: foodService.removeFood(targetId); break;
                 case 2: ticketService.removeTicket(Integer.parseInt(targetId)); break;
                 case 3: eventInfoService.deleteEventInfo(targetId); break;
+                case 4:
+                    String[] selectedValues = view.getSelectedRowValues();
+                    if (selectedValues != null && selectedValues.length >= 3) {
+                        eventScheduleService.deleteEventSchedule(
+                            selectedValues[0],
+                            selectedValues[1],
+                            LocalDate.parse(selectedValues[2])
+                        );
+                    }
+                    break;
             }
             view.setStatusMessage("선택한 항목이 삭제되었습니다.");
             refreshCurrentCategory();
         } catch (Exception ex) {
-            view.setStatusMessage("삭제 실패: " + ex.getMessage());
+            view.setStatusMessage("삭제 실패: " + getEventErrorMessage(index, ex));
         }
+    }
+
+    private String getEventErrorMessage(int categoryIndex, Exception ex) {
+        if (categoryIndex != 3 && categoryIndex != 4) {
+            return ex.getMessage();
+        }
+
+        if (ex instanceof NumberFormatException) {
+            return "숫자 입력값을 올바르게 입력해 주세요.";
+        }
+        if (ex instanceof DateTimeParseException) {
+            return "날짜는 YYYY-MM-DD 형식으로 입력해 주세요.";
+        }
+        if (ex instanceof SQLIntegrityConstraintViolationException) {
+            if (categoryIndex == 3) {
+                return "이미 존재하는 이벤트 타입이거나, 사용 중인 이벤트 정보입니다.";
+            }
+            return "event_info에 등록된 이벤트 타입만 스케줄에 추가할 수 있으며, 중복된 일정은 등록할 수 없습니다.";
+        }
+        if (ex instanceof IllegalArgumentException && ex.getMessage() != null) {
+            return ex.getMessage();
+        }
+
+        return categoryIndex == 3
+                ? "이벤트 정보 처리 중 오류가 발생했습니다."
+                : "이벤트 스케줄 처리 중 오류가 발생했습니다.";
     }
 }

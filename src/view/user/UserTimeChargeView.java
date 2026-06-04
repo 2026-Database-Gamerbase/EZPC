@@ -1,4 +1,4 @@
-// 시간 충전 결제 화면 (등급별 할인 적용)
+// 시간 충전 결제 화면 (등급별 + 이벤트 할인 적용)
 // UserTimeChargeView.java
 package view.user;
 
@@ -12,7 +12,8 @@ import view.FontUtil;
 public class UserTimeChargeView extends JPanel {
     private JLabel userNameLabel;
     private JLabel userGradeLabel;
-    private JLabel discountRateLabel;
+    private JLabel gradeDiscountLabel;
+    private JLabel eventDiscountLabel;     // 이벤트 할인율 표시
     private JComboBox<String> timeOptionCombo;
     private JLabel basePriceLabel;
     private JLabel discountAmountLabel;
@@ -21,7 +22,8 @@ public class UserTimeChargeView extends JPanel {
     private JButton cancelButton;
     private JLabel statusLabel;
 
-    private int currentDiscountRate = 0;
+    private int currentGradeDiscountRate = 0;   // 등급 할인율 (%)
+    private double currentEventPaymentRate = 1.00; // 이벤트 결제비율 (1.0 = 할인없음)
     private List<Ticket> tickets;
 
     public UserTimeChargeView(List<Ticket> tickets) {
@@ -48,50 +50,51 @@ public class UserTimeChargeView extends JPanel {
         centerPanel.setBackground(new Color(240, 240, 240));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 50));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(7, 10, 7, 10);
         gbc.anchor = GridBagConstraints.WEST;
 
-        // 사용자 정보
-        JLabel userLabel = new JLabel("사용자:");
-        userLabel.setFont(FontUtil.getKoreanFontBold(14));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        centerPanel.add(userLabel, gbc);
+        int row = 0;
+
+        // 사용자
+        addLabel(centerPanel, gbc, row, "사용자:");
         userNameLabel = new JLabel("사용자명");
         userNameLabel.setFont(FontUtil.getKoreanFontPlain(14));
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = row++;
         centerPanel.add(userNameLabel, gbc);
 
-        // 사용자 등급
-        JLabel gradeLabel = new JLabel("회원 등급:");
-        gradeLabel.setFont(FontUtil.getKoreanFontBold(14));
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        centerPanel.add(gradeLabel, gbc);
-        userGradeLabel = new JLabel("Bronze");
+        // 회원 등급
+        addLabel(centerPanel, gbc, row, "회원 등급:");
+        userGradeLabel = new JLabel("브론즈");
         userGradeLabel.setFont(FontUtil.getKoreanFontPlain(14));
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = row++;
         centerPanel.add(userGradeLabel, gbc);
 
-        // 할인율
-        JLabel discountLabel = new JLabel("할인율:");
-        discountLabel.setFont(FontUtil.getKoreanFontBold(14));
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        centerPanel.add(discountLabel, gbc);
-        discountRateLabel = new JLabel("0%");
-        discountRateLabel.setFont(FontUtil.getKoreanFontPlain(14));
-        discountRateLabel.setForeground(new Color(255, 100, 100));
-        gbc.gridx = 1;
-        centerPanel.add(discountRateLabel, gbc);
+        // 등급 할인율
+        addLabel(centerPanel, gbc, row, "등급 할인:");
+        gradeDiscountLabel = new JLabel("0%");
+        gradeDiscountLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        gradeDiscountLabel.setForeground(new Color(255, 100, 100));
+        gbc.gridx = 1; gbc.gridy = row++;
+        centerPanel.add(gradeDiscountLabel, gbc);
 
-        // 시간 옵션 선택
-        JLabel timeOptionLabel = new JLabel("시간 선택:");
-        timeOptionLabel.setFont(FontUtil.getKoreanFontBold(14));
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        centerPanel.add(timeOptionLabel, gbc);
-        
+        // 이벤트 할인율
+        addLabel(centerPanel, gbc, row, "이벤트 할인:");
+        eventDiscountLabel = new JLabel("없음");
+        eventDiscountLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        eventDiscountLabel.setForeground(new Color(255, 100, 100));
+        gbc.gridx = 1; gbc.gridy = row++;
+        centerPanel.add(eventDiscountLabel, gbc);
+
+        // 구분선
+        gbc.gridx = 0; gbc.gridy = row++;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        centerPanel.add(new JSeparator(), gbc);
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.NONE;
+
+        // 시간 선택
+        addLabel(centerPanel, gbc, row, "시간 선택:");
         timeOptionCombo = new JComboBox<>();
         for (Ticket t : tickets) {
             int hours = t.getTicketTime() / 60;
@@ -99,65 +102,50 @@ public class UserTimeChargeView extends JPanel {
             String label = (hours > 0 ? hours + "시간" : "") + (mins > 0 ? " " + mins + "분" : "");
             timeOptionCombo.addItem(label.trim() + " - " + String.format("%,d", t.getPrice()) + "원");
         }
-        
-        // 💡 콤보박스 값이 바뀔 때마다 가격을 다시 계산하도록 이벤트 추가
         timeOptionCombo.addActionListener(e -> updatePriceDisplay());
-        
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = row++;
         centerPanel.add(timeOptionCombo, gbc);
 
         // 기본 가격
-        JLabel basePriceTextLabel = new JLabel("기본 가격:");
-        basePriceTextLabel.setFont(FontUtil.getKoreanFontBold(14));
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        centerPanel.add(basePriceTextLabel, gbc);
-        basePriceLabel = new JLabel("2,000원");
+        addLabel(centerPanel, gbc, row, "기본 가격:");
+        basePriceLabel = new JLabel("0원");
         basePriceLabel.setFont(FontUtil.getKoreanFontPlain(14));
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = row++;
         centerPanel.add(basePriceLabel, gbc);
 
         // 할인액
-        JLabel discountAmountTextLabel = new JLabel("할인액:");
-        discountAmountTextLabel.setFont(FontUtil.getKoreanFontBold(14));
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        centerPanel.add(discountAmountTextLabel, gbc);
+        addLabel(centerPanel, gbc, row, "할인액:");
         discountAmountLabel = new JLabel("0원");
         discountAmountLabel.setFont(FontUtil.getKoreanFontPlain(14));
         discountAmountLabel.setForeground(new Color(100, 200, 100));
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = row++;
         centerPanel.add(discountAmountLabel, gbc);
 
         // 최종 결제액
-        gbc.gridy = 6;
-        gbc.gridx = 0;
-        JLabel finalPriceTextLabel = new JLabel("최종 결제액:");
-        finalPriceTextLabel.setFont(FontUtil.getKoreanFontBold(16));
-        centerPanel.add(finalPriceTextLabel, gbc);
-        finalPriceLabel = new JLabel("2,000원");
+        addLabel(centerPanel, gbc, row, "최종 결제액:");
+        ((JLabel) centerPanel.getComponent(centerPanel.getComponentCount() - 1))
+                .setFont(FontUtil.getKoreanFontBold(16));
+        finalPriceLabel = new JLabel("0원");
         finalPriceLabel.setFont(FontUtil.getKoreanFontBold(16));
         finalPriceLabel.setForeground(new Color(0, 100, 200));
-        gbc.gridx = 1;
+        gbc.gridx = 1; gbc.gridy = row++;
         centerPanel.add(finalPriceLabel, gbc);
 
         add(centerPanel, BorderLayout.CENTER);
 
-        // 하단: 상태 메시지
-        JPanel statusPanel = new JPanel();
-        statusPanel.setBackground(new Color(240, 240, 240));
+        // 하단
         statusLabel = new JLabel(" ");
         statusLabel.setForeground(Color.RED);
+        JPanel statusPanel = new JPanel();
+        statusPanel.setBackground(new Color(240, 240, 240));
         statusPanel.add(statusLabel);
-        add(statusPanel, BorderLayout.SOUTH);
 
-        // 하단 우측: 버튼
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.setBackground(new Color(240, 240, 240));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         paymentButton = new JButton("결제");
         paymentButton.setPreferredSize(new Dimension(100, 35));
-        cancelButton = new JButton("취소");
+        cancelButton  = new JButton("취소");
         cancelButton.setPreferredSize(new Dimension(100, 35));
         buttonPanel.add(paymentButton);
         buttonPanel.add(cancelButton);
@@ -169,13 +157,26 @@ public class UserTimeChargeView extends JPanel {
         add(southPanel, BorderLayout.SOUTH);
     }
 
-    // 가격을 다시 계산하여 화면에 표시하는 메서드
+    private void addLabel(JPanel panel, GridBagConstraints gbc, int row, String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(FontUtil.getKoreanFontBold(14));
+        gbc.gridx = 0; gbc.gridy = row;
+        panel.add(label, gbc);
+    }
+
+    // 가격 계산: 기본가 * 이벤트비율 * (1 - 등급할인율)
     private void updatePriceDisplay() {
         Ticket t = getSelectedTicket();
         if (t == null) return;
-        int basePrice     = t.getPrice();
-        int discountAmount = basePrice * currentDiscountRate / 100;
-        setPriceInfo(basePrice, discountAmount, basePrice - discountAmount);
+
+        int basePrice  = t.getPrice();
+        // 프로시저와 동일한 공식
+        int finalPrice = (int) Math.round(basePrice * currentEventPaymentRate * (1.0 - currentGradeDiscountRate / 100.0));
+        int discountAmount = basePrice - finalPrice;
+
+        basePriceLabel.setText(String.format("%,d원", basePrice));
+        discountAmountLabel.setText(String.format("%,d원", discountAmount));
+        finalPriceLabel.setText(String.format("%,d원", finalPrice));
     }
 
     // 현재 선택된 Ticket 객체 반환
@@ -184,25 +185,30 @@ public class UserTimeChargeView extends JPanel {
         return (idx >= 0 && idx < tickets.size()) ? tickets.get(idx) : null;
     }
 
-    // 사용자 정보 설정할 때 초기 가격 표시도 갱신
-    public void setUserInfo(String userName, String grade, int discountRate) {
+    /**
+     * 사용자 정보 및 할인율 세팅
+     * @param eventPaymentRate  1.0 = 이벤트 없음, 0.9 = 10% 이벤트 할인
+     */
+    public void setUserInfo(String userName, String grade, int gradeDiscountRate, double eventPaymentRate) {
         userNameLabel.setText(userName);
         userGradeLabel.setText(grade);
-        discountRateLabel.setText(discountRate + "%");
-        
-        this.currentDiscountRate = discountRate;
+
+        // 등급 할인 표시
+        gradeDiscountLabel.setText(gradeDiscountRate + "%");
+
+        // 이벤트 할인 표시
+        if (eventPaymentRate < 1.00) {
+            int eventDiscountPercent = (int) Math.round((1.0 - eventPaymentRate) * 100);
+            eventDiscountLabel.setText(eventDiscountPercent + "% (이벤트 진행 중)");
+            eventDiscountLabel.setForeground(new Color(200, 80, 0)); // 주황색으로 강조
+        } else {
+            eventDiscountLabel.setText("없음");
+            eventDiscountLabel.setForeground(Color.GRAY);
+        }
+
+        this.currentGradeDiscountRate  = gradeDiscountRate;
+        this.currentEventPaymentRate   = eventPaymentRate;
         updatePriceDisplay();
-    }
-
-    // 가격 정보 설정
-    public void setPriceInfo(int basePrice, int discountAmount, int finalPrice) {
-        basePriceLabel.setText(basePrice + "원");
-        discountAmountLabel.setText(discountAmount + "원");
-        finalPriceLabel.setText(finalPrice + "원");
-    }
-
-    public String getSelectedTimeOption() {
-        return (String) timeOptionCombo.getSelectedItem();
     }
 
     public void setPaymentButtonListener(ActionListener listener) {

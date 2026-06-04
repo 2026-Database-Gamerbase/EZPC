@@ -107,6 +107,27 @@ public double findCurrentOrderPaymentRate(String pcCafeId) throws SQLException {
 
 
     @Override
+    public double findCurrentChargePaymentRate(String pcCafeId) throws SQLException {
+        String sql = """
+            SELECT COALESCE(MIN(ei.payment_rate), 1.00) AS payment_rate
+            FROM event_schedule es
+            JOIN event_info ei ON es.event_type = ei.event_type
+            WHERE es.pc_cafe_id = ?
+              AND ei.event_type_num = 1
+              AND CURDATE() BETWEEN es.event_start_date AND es.event_end_date
+        """;
+        try (PreparedStatement statement = conn.prepareStatement(sql)) {
+            statement.setString(1, pcCafeId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getDouble("payment_rate");
+                }
+            }
+        }
+        return 1.00;
+    }
+
+    @Override
     public List<EventSchedule> findByPcId(String pcId) throws SQLException {
         //특정 PC방의 이벤트 일정 조회 / Select event schedules for one pc cafe.
         String sql = "SELECT * FROM event_schedule WHERE pc_cafe_id = ?";
