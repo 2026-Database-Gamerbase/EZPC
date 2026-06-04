@@ -71,6 +71,37 @@
 
 <br>
 
+## 🚀 시작하기
+
+### 1. 데이터베이스 설정
+
+**HeidiSQL**에 접속한 후, `src/sql` 경로의 쿼리를 아래 순서대로 실행합니다.
+
+| 순서 | 파일 |
+|:---:|---|
+| 1 | DB 생성 쿼리 |
+| 2 | 권한 쿼리 |
+| 3 | 로그인 트리거 쿼리 |
+| 4 | 리뷰 트리거 쿼리 |
+| 5 | 주문 트리거 쿼리 |
+| 6 | 충전 프로시저 쿼리 |
+| 7 | 더미 데이터 생성 쿼리 |
+
+### 2. DB 연결 설정
+
+`src/db/DatabaseConnector.java`를 열어 본인 환경에 맞게 수정합니다.
+
+```java
+private static final String URL      = "jdbc:mysql://IP주소/EZPC";
+private static final String ROOT_USER = "root";
+private static final String ROOT_Password = "";
+```
+
+### 3. 실행
+
+`src/Main.java`를 실행합니다.
+
+
 ## EZPC 전체 동작 흐름
 
 ---
