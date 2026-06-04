@@ -9,7 +9,9 @@ import model.Food;
 import model.Order;
 import model.FoodRankingReport;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import java.sql.SQLException;
 
@@ -139,6 +141,50 @@ public class OrderService {
      @return 주문 상세 내역 리스트
      
     **/
+    // 장바구니 전체 주문 - 동일 order_id로 여러 음식을 한 트랜잭션에 저장
+    public boolean placeCartOrder(String pcCafeId, int seatNum, Map<String, Integer> cart) throws SQLException {
+        if (cart == null || cart.isEmpty()) {
+            throw new IllegalArgumentException("장바구니가 비어있습니다.");
+        }
+
+        boolean oldAutoCommit = conn.getAutoCommit();
+        try {
+            conn.setAutoCommit(false);
+
+            int orderId = orderDAO.getNextOrderId();
+            double paymentRate = eventScheduleDAO.findCurrentOrderPaymentRate(pcCafeId);
+
+            for (Map.Entry<String, Integer> entry : cart.entrySet()) {
+                String foodName = entry.getKey();
+                int    quantity = entry.getValue();
+
+                stockService.reduceStock(pcCafeId, foodName, quantity);
+
+                int singlePrice = foodDAO.findPriceByFoodName(foodName);
+                int payAmount   = (int) Math.floor(singlePrice * quantity * paymentRate);
+
+                Order order = new Order();
+                order.setOrderId(orderId);
+                order.setFoodName(foodName);
+                order.setPcCafeId(pcCafeId);
+                order.setSeatNum(seatNum);
+                order.setFoodQuantity(quantity);
+                order.setPaymentRate(paymentRate);
+                order.setFoodPayAmount(payAmount);
+                orderDAO.insertOrder(order);
+            }
+
+            conn.commit();
+            return true;
+
+        } catch (SQLException | RuntimeException e) {
+            conn.rollback();
+            throw e;
+        } finally {
+            conn.setAutoCommit(oldAutoCommit);
+        }
+    }
+
     public List<Order> getReceipt(int orderId) {
         List<Order> receipt = orderDAO.getOrdersByOrderId(orderId);
         if (receipt == null || receipt.isEmpty()) {
