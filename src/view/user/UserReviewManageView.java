@@ -136,7 +136,7 @@ public class UserReviewManageView extends JPanel {
         rightPanel.setBorder(BorderFactory.createTitledBorder("다른 사용자 리뷰"));
 
         // DB 연결 필요: 해당 지점의 다른 사용자 리뷰 로드
-        String[] columnNames = {"사용자", "별점", "후기", "작성일"};
+        String[] columnNames = {"사용자", "별점", "후기"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -174,7 +174,7 @@ public class UserReviewManageView extends JPanel {
             for (int i = 0; i < rating; i++) {
                 starText += "★";
             }
-            tableModel.addRow(new Object[]{review.getMemberId(), starText, review.getReviewContent(), "-"});
+            tableModel.addRow(new Object[]{review.getMemberId(), starText, review.getReviewContent()});
         }
     }
 
