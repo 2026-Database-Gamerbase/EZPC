@@ -55,9 +55,15 @@ BEGIN
     END IF;
 
 
-    -- 최종 결제 금액 계산
-    --  실제 가격 * 결제 비율 * 등급 할인(1-benefit) 
-    SET v_charge_pay_amount = ROUND(v_ticket_price * v_payment_rate * (1 - v_benefit));
+ 
+    
+     -- 최종 결제 금액 먼저 계산 (payment_rate이 decimal을 잘라서 정확한 계산이 안됌)
+     --  실제 가격 * 결제 비율 * 등급 할인(1-benefit) 
+		SET v_charge_pay_amount = ROUND(v_ticket_price * v_payment_rate * (1 - v_benefit));
+
+		-- 그 다음 저장용 payment_rate 계산
+		SET v_payment_rate = v_payment_rate * (1 - v_benefit);
+
 
     -- 충전 이력 저장
     -- charged_at은 DEFAULT CURRENT_TIMESTAMP이므로 직접 넣지 않는다.
