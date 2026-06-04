@@ -81,9 +81,12 @@ public class StockDAOImpl implements StockDAO {
             pstmt.setInt(1, newQuantity);
             pstmt.setString(2, pcCafeId);
             pstmt.setString(3, foodName);
-            pstmt.executeUpdate();
+            int updatedRows = pstmt.executeUpdate();
+            if (updatedRows == 0) {
+                throw new SQLException("No stock row found for pcCafeId=" + pcCafeId + ", foodName=" + foodName);
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to update stock quantity.", e);
         }
     }
 
