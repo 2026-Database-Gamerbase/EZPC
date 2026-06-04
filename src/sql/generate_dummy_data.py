@@ -47,7 +47,7 @@ DB_CONFIG = {
     'host'      : 'localhost',
     'port'      : 3306,
     'user'      : 'root',       # ← MariaDB 계정
-    'password'  : 'Zxcvbn4657@',           # ← 비밀번호
+    'password'  : '',           # ← 비밀번호
     'database'  : 'EZPC',
     'charset'   : 'utf8mb4',
     'autocommit': False,
