@@ -1,19 +1,17 @@
+// 일반 회원가입 화면
 package view.auth;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
-/**
- * SignUpView - 일반 회원가입 화면
- * 가입 시 기본 등급(bronze)과 일반 유저 타입('user')이 부여됩니다.
- */
+import view.FontUtil;
+
 public class SignUpView extends JFrame {
     private JTextField idField;
     private JTextField nameField;
     private JPasswordField passwordField;
     private JPasswordField confirmPasswordField;
-    private JTextField phoneField;
     private JButton signUpButton;
     private JButton cancelButton;
     private JLabel statusLabel;
@@ -21,7 +19,7 @@ public class SignUpView extends JFrame {
     public SignUpView() {
         setTitle("PC방 회원가입");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(450, 500);
+        setSize(450, 430);
         setLocationRelativeTo(null);
         setResizable(false);
 
@@ -37,11 +35,13 @@ public class SignUpView extends JFrame {
 
         // 제목
         JLabel titleLabel = new JLabel("회원가입");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setFont(FontUtil.getKoreanFontBold(24));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         mainPanel.add(titleLabel, gbc);
+
+        Font labelFont = FontUtil.getKoreanFontPlain(14);
 
         // ID 입력
         gbc.gridy = 1;
@@ -83,28 +83,19 @@ public class SignUpView extends JFrame {
         confirmPasswordField = new JPasswordField(15);
         mainPanel.add(confirmPasswordField, gbc);
 
-        // 전화번호 입력
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.anchor = GridBagConstraints.EAST;
-        mainPanel.add(new JLabel("전화번호:"), gbc);
-        gbc.gridx = 1;
-        gbc.anchor = GridBagConstraints.WEST;
-        phoneField = new JTextField(15);
-        mainPanel.add(phoneField, gbc);
-
         // 안내 메시지
         gbc.gridx = 0;
         gbc.gridy = 6;
         gbc.gridwidth = 2;
         JLabel noteLabel = new JLabel("기본 등급(Bronze)과 유저 타입(User)이 부여됩니다.");
-        noteLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+        noteLabel.setFont(FontUtil.getKoreanFontPlain(12));
         noteLabel.setForeground(new Color(100, 100, 100));
         mainPanel.add(noteLabel, gbc);
 
         // 상태 메시지
         gbc.gridy = 7;
         statusLabel = new JLabel(" ");
+        statusLabel.setFont(FontUtil.getKoreanFontBold(12));
         statusLabel.setForeground(Color.RED);
         mainPanel.add(statusLabel, gbc);
 
@@ -113,12 +104,14 @@ public class SignUpView extends JFrame {
         gbc.gridwidth = 1;
         gbc.gridx = 0;
         signUpButton = new JButton("회원가입");
+        signUpButton.setFont(FontUtil.getKoreanFontBold(14));
         signUpButton.setPreferredSize(new Dimension(100, 35));
         mainPanel.add(signUpButton, gbc);
 
         // 취소 버튼
         gbc.gridx = 1;
         cancelButton = new JButton("취소");
+        cancelButton.setFont(FontUtil.getKoreanFontBold(14));
         cancelButton.setPreferredSize(new Dimension(100, 35));
         mainPanel.add(cancelButton, gbc);
 
@@ -142,10 +135,6 @@ public class SignUpView extends JFrame {
         return new String(confirmPasswordField.getPassword());
     }
 
-    public String getInputPhoneNumber() {
-        return phoneField.getText();
-    }
-
     // 상태 메시지 설정
     public void setStatusMessage(String message) {
         statusLabel.setText(message);
@@ -167,7 +156,6 @@ public class SignUpView extends JFrame {
         nameField.setText("");
         passwordField.setText("");
         confirmPasswordField.setText("");
-        phoneField.setText("");
         statusLabel.setText(" ");
     }
 }

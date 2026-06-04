@@ -7,6 +7,9 @@ import daoImpl.PC_MemberDAOImpl;
 import db.DatabaseConnector;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import javax.swing.JOptionPane;
+
 import model.PC_Member;
 import service.PC_MemberService;
 import view.auth.LoginView;
@@ -105,13 +108,28 @@ public class LoginController {
             String pw = signUpView.getInputPassword();
             String name = signUpView.getInputName();
 
+            if (id.isEmpty() || pw.isEmpty() || name.isEmpty()) {
+                signUpView.setStatusMessage("모든 항목을 입력해주세요.");
+                return;
+            }
+
             if (!pw.equals(signUpView.getConfirmPassword())) {
                 signUpView.setStatusMessage("비밀번호가 일치하지 않습니다.");
                 return;
             }
 
-            memberService.signUp(id, pw, name);
-            signUpView.dispose();
+            // 회원가입 시도 및 실패 처리 (창 꺼짐 방지)
+            try {
+                // 성공적으로 가입 완료되면
+                memberService.signUp(id, pw, name);
+                JOptionPane.showMessageDialog(signUpView, "회원가입이 완료되었습니다!", "가입 성공", JOptionPane.INFORMATION_MESSAGE);
+                signUpView.dispose(); // 정상 가입 시에만 창을 닫음
+                
+            } catch (Exception ex) {
+                // 중복 아이디 등으로 실패하면 (예외가 발생하면)
+                // 창을 닫지 않고 아래 메시지 라벨에 원인을 띄워줌
+                signUpView.setStatusMessage(ex.getMessage());
+            }
         });
 
         signUpView.setCancelButtonListener(e -> signUpView.dispose());
