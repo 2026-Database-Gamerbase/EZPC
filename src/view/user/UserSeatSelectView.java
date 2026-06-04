@@ -70,6 +70,7 @@ public class UserSeatSelectView extends JPanel {
         emptyLegend.setEnabled(false);
         JButton usedLegend = new JButton("사용 중");
         usedLegend.setBackground(new Color(255, 99, 71));
+        usedLegend.setForeground(Color.WHITE);
         usedLegend.setEnabled(false);
         legendPanel.add(new JLabel("범례: "));
         legendPanel.add(emptyLegend);
@@ -174,10 +175,12 @@ public class UserSeatSelectView extends JPanel {
             seatAvailability[row][col] = isAvailable;
             if (isAvailable) {
                 seatButtons[row][col].setBackground(new Color(144, 238, 144));
+                seatButtons[row][col].setForeground(Color.BLACK);
                 seatButtons[row][col].setEnabled(true);
             } else {
                 seatButtons[row][col].setBackground(new Color(255, 99, 71));
-                seatButtons[row][col].setEnabled(false);
+                seatButtons[row][col].setForeground(Color.WHITE);
+                seatButtons[row][col].setEnabled(true);
             }
         }
     }
