@@ -55,7 +55,7 @@ public class EmployeeManageController {
         try {
             List<Employee> employees = employeeService.getEmployeesByPc(branchId);
             
-            Object[][] tableData = new Object[employees.size()][6];
+            Object[][] tableData = new Object[employees.size()][5];
             for (int i = 0; i < employees.size(); i++) {
                 Employee emp = employees.get(i);
                 tableData[i][0] = emp.getEmployeeId();
@@ -63,7 +63,6 @@ public class EmployeeManageController {
                 tableData[i][2] = emp.getEmployeePosition();
                 tableData[i][3] = String.format("%,d원", emp.getHourWage());
                 tableData[i][4] = emp.isCurrentlyWorking() ? "출근중" : "퇴근";
-                tableData[i][5] = "2026-01-01";
             }
             view.setEmployeeTableData(tableData);
         } catch (Exception e) {
