@@ -74,7 +74,8 @@ public class UserController {
     public UserController(Connection conn, PC_Member member) {
         this.conn = conn;
         this.member = member;
-        this.memberType = member.getMemberType();
+        //비회원일 경우 자동으로 user 처리
+        this.memberType = (member != null) ? member.getMemberType() : "user";
         ensureOpenConnection();
         System.out.println("[UserController] connection open: " + isConnectionOpen());
     }
@@ -216,33 +217,31 @@ public class UserController {
                 newCustomer.setPcCafeId(pcCafeId);
                 newCustomer.setSeatNum(seatNum);
                 
-                String memberId = member.getMemberId();
-                try {
-                    PC_Member existingMember = pcMemberService.getMember(member);
-                    if (existingMember == null) {
-                        System.out.println("[UserController] 회원 '" + memberId + "'이 DB에 없어서 비회원으로 처리합니다.");
-                        memberId = null;
+                String memberId = null;
+                if (member != null) {
+                    try {
+                        PC_Member existingMember = pcMemberService.getMember(member);
+                        if (existingMember == null) { //비회원인 경우
+                            System.out.println("[UserController] 회원 '" + member.getMemberId() + "'이 DB에 없어서 비회원으로 처리합니다.");
+                        } else { //회원인 경우
+                            memberId = member.getMemberId();
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("[UserController] 회원 확인 중 오류 발생, 비회원으로 처리: " + ex.getMessage());
                     }
-                } catch (Exception ex) {
-                    System.out.println("[UserController] 회원 확인 중 오류 발생, 비회원으로 처리: " + ex.getMessage());
-                    memberId = null;
                 }
-                
+
                 newCustomer.setMemberId(memberId);
-                int remainTime = member.getRemainTime();
+                int remainTime = (member != null) ? member.getRemainTime() : 0;
                 if (remainTime <= 0) {
-                    remainTime = 60;
-                    System.out.println("[UserController] remainTime이 0 이하여서 기본값 60분으로 설정");
+                    remainTime = 0;
                 }
                 newCustomer.setRemainTime(remainTime);
 
                 boolean success = customerService.checkIn(newCustomer);
                 if (!success) {
-                    System.out.println("[UserController] checkIn 실패 상세 정보:");
-                    System.out.println("  - 지점: " + pcCafeId);
-                    System.out.println("  - 좌석: " + seatNum);
-                    System.out.println("  - 회원ID: " + member.getMemberId());
-                    System.out.println("  - 남은시간: " + member.getRemainTime());
+                    System.out.println("[UserController] checkIn 실패 - 지점: " + pcCafeId
+                        + ", 좌석: " + seatNum + ", 회원ID: " + memberId);
                     JOptionPane.showMessageDialog(frame, "선택한 좌석을 점유할 수 없습니다. 다시 시도해주세요. (콘솔 확인)", "알림", JOptionPane.WARNING_MESSAGE);
                     showSeatSelection(pcCafeId);
                     frame.dispose();
@@ -307,7 +306,13 @@ public class UserController {
         dashboard.startTimer(customer.getRemainTime()); 
 
         dashboard.setFoodOrderButtonListener(e -> showFoodOrderView(dashboard, customer.getPcCafeId(), seatNumber));
-        dashboard.setReviewButtonListener(e -> showReviewView(dashboard, customer.getPcCafeId(), member));
+        dashboard.setReviewButtonListener(e -> {
+            if (member == null) { //비회원이 리뷰 작성 버튼을 누를 경우
+                JOptionPane.showMessageDialog(dashboard, "리뷰 작성은 회원만 가능합니다.", "알림", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            showReviewView(dashboard, customer.getPcCafeId(), member);
+        });
         dashboard.setTimeChargeButtonListener(e -> showTimeChargeView(dashboard, customer, member));
         
         dashboard.setLogoutButtonListener(e -> {
