@@ -330,3 +330,30 @@ CREATE TABLE use_log (
         
     CHECK (logout_time IS NULL OR login_time <= logout_time)
 );
+
+
+-- 15. 인덱스
+-- 매출 통계 탭 조회 성능 개선
+-- food_order: pc_cafe_id 기준 필터 후 ordered_at 범위 스캔
+CREATE INDEX idx_food_order_cafe_time  ON food_order (pc_cafe_id, ordered_at);
+-- food_order: 연관 메뉴 추천 CTE 에서 food_name 조회
+CREATE INDEX idx_food_order_food_name  ON food_order (food_name, order_id);
+-- charge: pc_cafe_id 기준 필터 후 charged_at 범위 스캔
+CREATE INDEX idx_charge_cafe_time      ON charge (pc_cafe_id, charged_at);
+-- use_log: pc_cafe_id 기준 필터 후 login_time 범위 스캔 (월별/시간대별 손님 수)
+CREATE INDEX idx_use_log_cafe_login    ON use_log (pc_cafe_id, login_time);
+-- use_log: 퇴실 로그 단건 조회/업데이트
+CREATE INDEX idx_use_log_cafe_seat     ON use_log (pc_cafe_id, seat_num, logout_time, log_id);
+
+-- 휴면 회원 조회 성능 개선
+-- use_log: member_id 기준 GROUP BY + MAX(login_time) 커버링 인덱스
+CREATE INDEX idx_use_log_member_login  ON use_log (member_id, login_time);
+-- pc_member: member_type 필터
+CREATE INDEX idx_pc_member_type        ON pc_member (member_type);
+
+-- 음식 주문 뷰 성능 개선
+-- event_schedule: pc_cafe_id 필터 후 event_start_date 범위 스캔, event_end_date 커버링
+-- 주문/충전 이벤트 조회 공통 적용 (findCurrentOrderPaymentRate, findCurrentChargePaymentRate)
+CREATE INDEX idx_event_schedule_cafe_date  ON event_schedule (pc_cafe_id, event_start_date, event_end_date);
+-- event_info: event_type_num(0=주문, 1=충전) 필터
+CREATE INDEX idx_event_info_type_num       ON event_info (event_type_num);
