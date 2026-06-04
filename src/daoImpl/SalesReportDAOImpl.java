@@ -57,26 +57,52 @@ public class SalesReportDAOImpl implements SalesReportDAO {
         return list;
     }
 
-    // 특정 지점의 총 매출액
+//    // 특정 지점의 총 매출액
+//    @Override
+//    public long getTotalSalesAmount(String pcCafeId) {
+//        long totalAmount = 0;
+//        
+//        String sql = 
+//            "SELECT SUM(payAmount) AS total " +
+//            "FROM (" +
+//            "    SELECT food_pay_amount AS payAmount FROM food_order WHERE pc_cafe_id = ? " +
+//            "    UNION ALL " +
+//            "    SELECT charge_pay_amount AS payAmount FROM charge WHERE pc_cafe_id = ?" +
+//            ") AS UnifiedSales";
+//        
+//        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+//            pstmt.setString(1, pcCafeId);
+//            pstmt.setString(2, pcCafeId);
+//            
+//            try (ResultSet rs = pstmt.executeQuery()) {
+//                if (rs.next()) {
+//                    totalAmount = rs.getLong("total");
+//                }
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            System.out.println("총 매출액 조회 중 오류 발생");
+//        }
+//        return totalAmount;
+//    }
+//    
+    
+    // 특정 지점의 총 매출액 (select문으로 refactor)
     @Override
     public long getTotalSalesAmount(String pcCafeId) {
         long totalAmount = 0;
         
         String sql = 
-            "SELECT SUM(payAmount) AS total " +
-            "FROM (" +
-            "    SELECT food_pay_amount AS payAmount FROM food_order WHERE pc_cafe_id = ? " +
-            "    UNION ALL " +
-            "    SELECT charge_pay_amount AS payAmount FROM charge WHERE pc_cafe_id = ?" +
-            ") AS UnifiedSales";
-        
+            "SELECT total_sales " +
+            "FROM pc_cafe " +
+            "WHERE pc_cafe_id = ?";
+           
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, pcCafeId);
-            pstmt.setString(2, pcCafeId);
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    totalAmount = rs.getLong("total");
+                    totalAmount = rs.getLong("total_sales");
                 }
             }
         } catch (SQLException e) {
