@@ -10,6 +10,7 @@
 -- ------------------------------------------------------------
 CREATE USER IF NOT EXISTS 'ezpc_auth'@'%' IDENTIFIED BY 'auth1234';
 GRANT SELECT, INSERT ON EZPC.pc_member TO 'ezpc_auth'@'%';
+GRANT SELECT ON EZPC.customer TO 'ezpc_auth'@'%'; -- 중복 로그인 체크용
 
 
 -- ------------------------------------------------------------

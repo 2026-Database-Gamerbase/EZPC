@@ -25,8 +25,7 @@ public class PC_MemberService {
     public void signUp(String id, String pw, String name) {
         // 중복 검사
         if (memberDao.findByID(id) != null) {
-            System.out.println("회원가입 실패: 이미 존재하는 아이디입니다.");
-            return;
+            throw new RuntimeException("이미 존재하는 아이디입니다.");
         }
 
         // 새 회원 객체 생성 (초기값 세팅)

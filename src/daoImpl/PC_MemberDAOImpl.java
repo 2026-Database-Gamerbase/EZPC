@@ -274,6 +274,24 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 		);
 	}
 
+	// 데이터베이스에 이미 해당 ID가 있는지 확인하는 메서드
+	public boolean existsById(String id) {
+		// 💡 본인의 테이블명(예: pc_member 또는 member)과 ID 컬럼명에 맞게 SQL을 수정하세요.
+		String sql = "SELECT COUNT(*) FROM pc_member WHERE id = ?"; 
+		
+		// authConn 또는 DAO 내부에서 사용하는 Connection 객체를 사용하세요.
+		try (PreparedStatement pstmt = this.conn.prepareStatement(sql)) { 
+			pstmt.setString(1, id);
+			try (ResultSet rs = pstmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt(1) > 0; // 0보다 크면 이미 존재하는 것(true)
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return false; // 없으면 false
+	}
 
 
 }
