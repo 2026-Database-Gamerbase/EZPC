@@ -1,5 +1,6 @@
 package service;
 
+import dao.CustomerDAO;
 import dao.GradeDAO;
 import dao.PC_MemberDAO;
 import java.util.List;
@@ -9,10 +10,15 @@ import model.PC_Member;
 public class PC_MemberService {
 
     private PC_MemberDAO memberDao;
+    private CustomerDAO customerDao;
 
-    // 의존성 주입
     public PC_MemberService(PC_MemberDAO memberDao) {
         this.memberDao = memberDao;
+    }
+
+    public PC_MemberService(PC_MemberDAO memberDao, CustomerDAO customerDao) {
+        this.memberDao = memberDao;
+        this.customerDao = customerDao;
     }
     
     // 회원 가입
@@ -40,17 +46,22 @@ public class PC_MemberService {
     // 2. 로그인
     public PC_Member login(String memberId, String password) {
         PC_Member member = memberDao.findByID(memberId);
-        
+
         if (member == null) {
             System.out.println("로그인 실패: 존재하지 않는 아이디입니다.");
             return null;
         }
-        
+
         if (!member.getMemberPassword().equals(password)) {
             System.out.println("로그인 실패: 비밀번호가 일치하지 않습니다.");
             return null;
         }
-        
+
+        if (customerDao != null && customerDao.findByMemberId(memberId) != null) {
+            System.out.println("로그인 실패: 이미 다른 기기에서 이용 중인 계정입니다.");
+            return null;
+        }
+
         System.out.println(member.getMemberName() + "님 환영합니다!");
         return member; // 리턴된 객체의 getMemberType()으로 화면 분기 가능
     }

@@ -1,6 +1,8 @@
 package controller;
 
+import dao.CustomerDAO;
 import dao.PC_MemberDAO;
+import daoImpl.CustomerDAOImpl;
 import daoImpl.PC_MemberDAOImpl;
 import db.DatabaseConnector;
 import java.sql.Connection;
@@ -25,7 +27,8 @@ public class LoginController {
         try {
             authConn = DatabaseConnector.getAuthConnection();
             PC_MemberDAO memberDao = new PC_MemberDAOImpl(authConn);
-            memberService = new PC_MemberService(memberDao);
+            CustomerDAO customerDao = new CustomerDAOImpl(authConn);
+            memberService = new PC_MemberService(memberDao, customerDao);
         } catch (SQLException e) {
             String msg = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
             System.err.println("=================================================");
