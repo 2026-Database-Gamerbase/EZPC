@@ -8,6 +8,7 @@ import javax.swing.*;
 import view.FontUtil;
 
 public class UserMainDashboardView extends JFrame {
+	private JLabel nameLabel;
     private JLabel remainingTimeLabel;
     private JLabel seatNumberLabel;
     private JLabel branchNameLabel;
@@ -40,14 +41,19 @@ public class UserMainDashboardView extends JFrame {
 
         // 상단: 사용 정보
         JPanel infoPanel = new JPanel();
-        infoPanel.setLayout(new GridLayout(4, 1));
+        infoPanel.setLayout(new GridLayout(5, 1));
         infoPanel.setBackground(new Color(50, 50, 50));
         infoPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        branchNameLabel = new JLabel("지점: 강남점"); // DB 연결 필요
+        branchNameLabel = new JLabel("지점: 강남점");
         branchNameLabel.setFont(FontUtil.getKoreanFontBold(12));
         branchNameLabel.setForeground(Color.WHITE);
         infoPanel.add(branchNameLabel);
+        
+        nameLabel = new JLabel("이름: 로딩중...");
+        nameLabel.setFont(FontUtil.getKoreanFontBold(12));
+        nameLabel.setForeground(Color.WHITE);
+        infoPanel.add(nameLabel);
         
         // 3. 등급 라벨 UI 초기화 및 추가
         gradeLabel = new JLabel("등급: (알 수 없음)"); 
@@ -118,15 +124,24 @@ public class UserMainDashboardView extends JFrame {
     }
     
     // 등급 표시
-    public void setSessionInfo(String branchName, int seatNumber, String memberGrade) {
+    public void setSessionInfo(String branchName, int seatNumber, String memberGrade, String memberName) {
         branchNameLabel.setText("지점: " + branchName);
         seatNumberLabel.setText("좌석: " + seatNumber + "번");
         
+        // 이름 표시 분기 처리
+        if (memberName == null || memberName.isEmpty()) {
+            nameLabel.setText("이름: 비회원");
+        } else {
+            nameLabel.setText("이름: " + memberName + "님");
+        }
+        
+        // 등급 표시 분기 처리
         if (memberGrade == null || memberGrade.isEmpty()) {
             gradeLabel.setText("등급: 비회원");
             gradeLabel.setForeground(Color.LIGHT_GRAY);
         } else {
             gradeLabel.setText("등급: " + memberGrade.toUpperCase());
+            gradeLabel.setForeground(new Color(255, 215, 0)); // 회원일 땐 다시 황금색으로 복구
         }
     }
 
