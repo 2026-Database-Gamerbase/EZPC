@@ -6,11 +6,11 @@ import java.sql.SQLException;
 
 public class DatabaseConnector {
 
-    private static final String URL = "jdbc:mysql://localhost/EZPC";
+    private static final String URL = "jdbc:mysql://10.240.203.10/EZPC";
     
     //루트 계정
     private static final String ROOT_USER = "root";
-    private static final String ROOT_Password = "";
+    private static final String ROOT_Password = "1493512";
 
     //로그인 인증 전용 계정 (pc_member SELECT, INSERT만 허용)
     private static final String AUTH_USER = "ezpc_auth";
