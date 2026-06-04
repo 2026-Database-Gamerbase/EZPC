@@ -326,7 +326,8 @@ public class UserController {
     private void showDashboard(String branchName, int seatNumber, Customer customer) {
         UserMainDashboardView dashboard = new UserMainDashboardView();
         String grade = (member != null) ? member.getGradeType() : null;
-        dashboard.setSessionInfo(branchName, seatNumber, grade);
+        String name = (member != null) ? member.getMemberName() : null;
+        dashboard.setSessionInfo(branchName, seatNumber, grade, name);
         
         // 💡 1. 정지되어 있던 시간 표시 대신, 1분마다 작동하는 타이머 시작!
         dashboard.startTimer(customer.getRemainTime()); 
