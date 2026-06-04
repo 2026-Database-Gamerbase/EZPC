@@ -10,6 +10,7 @@
 -- ------------------------------------------------------------
 CREATE USER IF NOT EXISTS 'ezpc_auth'@'%' IDENTIFIED BY 'auth1234';
 GRANT SELECT, INSERT ON EZPC.pc_member TO 'ezpc_auth'@'%';
+GRANT SELECT ON EZPC.customer TO 'ezpc_auth'@'%'; -- 중복 로그인 체크용
 
 
 -- ------------------------------------------------------------
@@ -28,7 +29,7 @@ GRANT SELECT ON EZPC.food           TO 'ezpc_user'@'%';
 GRANT SELECT ON EZPC.grade          TO 'ezpc_user'@'%';
 GRANT SELECT ON EZPC.event_info     TO 'ezpc_user'@'%';
 GRANT SELECT ON EZPC.event_schedule TO 'ezpc_user'@'%';
-GRANT SELECT ON EZPC.stock          TO 'ezpc_user'@'%';
+GRANT SELECT, UPDATE ON EZPC.stock  TO 'ezpc_user'@'%'; -- 음식 주문 시 재고 차감
 GRANT SELECT ON EZPC.review         TO 'ezpc_user'@'%';
 GRANT SELECT ON EZPC.charge         TO 'ezpc_user'@'%';
 GRANT SELECT ON EZPC.food_order     TO 'ezpc_user'@'%';
