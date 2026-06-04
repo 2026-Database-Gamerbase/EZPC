@@ -12,11 +12,16 @@ public class UserSeatSelectView extends JPanel {
     private JButton confirmButton;
     private JButton backButton;
     private JButton refreshButton;
+    
     private int selectedSeatRow = -1;
     private int selectedSeatCol = -1;
-    private static final int ROWS = 5;
-    private static final int COLS = 6;
-    private boolean[][] seatAvailability = new boolean[ROWS][COLS];
+    
+    private int rows;
+    private int cols;
+    private int totalSeats;
+    private boolean[][] seatAvailability;
+    
+    private JPanel seatContainerPanel;
 
     public UserSeatSelectView() {
         initializeUI();
@@ -80,26 +85,10 @@ public class UserSeatSelectView extends JPanel {
         centerPanel.setLayout(new BorderLayout());
         centerPanel.setBackground(new Color(240, 240, 240));
 
-        JPanel seatPanel = new JPanel();
-        seatPanel.setLayout(new GridLayout(ROWS, COLS, 5, 5));
-        seatPanel.setBackground(new Color(240, 240, 240));
-        seatPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
-
-        seatButtons = new JButton[ROWS][COLS];
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLS; j++) {
-                JButton seatButton = new JButton((i * COLS + j + 1) + "");
-                seatButton.setFont(FontUtil.getKoreanFontBold(12));
-                seatButton.setPreferredSize(new Dimension(40, 40));
-                seatButton.setBackground(new Color(144, 238, 144));
-                seatButton.setFocusPainted(false);
-                seatButtons[i][j] = seatButton;
-                seatPanel.add(seatButton);
-                seatAvailability[i][j] = true;
-            }
-        }
-
-        centerPanel.add(seatPanel, BorderLayout.CENTER);
+        seatContainerPanel = new JPanel(new BorderLayout());
+        seatContainerPanel.setBackground(new Color(240, 240, 240));
+        centerPanel.add(seatContainerPanel, BorderLayout.CENTER);
+        
         add(centerPanel, BorderLayout.CENTER);
 
         // 하단 패널 (좌석 상태 및 버튼)
@@ -124,13 +113,64 @@ public class UserSeatSelectView extends JPanel {
 
         add(bottomPanel, BorderLayout.SOUTH);
     }
+    
+    public void setupSeats(int totalSeats) {
+        this.totalSeats = totalSeats;
+        this.cols = 10; // 💡 한 줄에 10개씩 배치하도록 설정 (원하면 6이나 8로 변경 가능)
+        this.rows = (int) Math.ceil((double) totalSeats / cols); // 필요한 줄 수 계산
+
+        this.seatButtons = new JButton[rows][cols];
+        this.seatAvailability = new boolean[rows][cols];
+
+        JPanel seatPanel = new JPanel();
+        seatPanel.setLayout(new GridLayout(rows, cols, 5, 5));
+        seatPanel.setBackground(new Color(240, 240, 240));
+        seatPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                int seatNum = i * cols + j + 1;
+                
+                if (seatNum <= totalSeats) {
+                    // 실제 존재하는 좌석만 버튼 생성
+                    JButton seatButton = new JButton(seatNum + "");
+                    seatButton.setFont(FontUtil.getKoreanFontBold(12));
+                    seatButton.setPreferredSize(new Dimension(40, 40));
+                    seatButton.setBackground(new Color(144, 238, 144));
+                    seatButton.setFocusPainted(false);
+                    
+                    seatButtons[i][j] = seatButton;
+                    seatPanel.add(seatButton);
+                    seatAvailability[i][j] = true;
+                } else {
+                    // 마지막 줄의 남는 빈칸은 레이아웃 정렬용으로 투명 라벨 배치
+                    seatPanel.add(new JLabel(""));
+                    seatButtons[i][j] = null;
+                    seatAvailability[i][j] = false;
+                }
+            }
+        }
+
+        // 컨테이너 갱신 및 새로고침
+        seatContainerPanel.removeAll();
+        seatContainerPanel.add(seatPanel, BorderLayout.CENTER);
+        seatContainerPanel.revalidate();
+        seatContainerPanel.repaint();
+    }
+
+    // 🚀 [추가] 컨트롤러에서 루프를 돌릴 수 있도록 Getter 제공
+    public int getRows() { return rows; }
+    public int getCols() { return cols; }
+    public int getTotalSeats() { return totalSeats; }
 
     public void setBranchName(String branchName) {
         branchNameLabel.setText("지점명: " + branchName);
     }
 
     public void setSeatStatus(int row, int col, boolean isAvailable) {
-        if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
+        if (row >= 0 && row < rows && col >= 0 && col < cols) {
+            if (seatButtons[row][col] == null) return; // 공백 구역 패스
+            
             seatAvailability[row][col] = isAvailable;
             if (isAvailable) {
                 seatButtons[row][col].setBackground(new Color(144, 238, 144));
@@ -143,27 +183,32 @@ public class UserSeatSelectView extends JPanel {
     }
 
     public void setSeatButtonListener(int row, int col, ActionListener listener) {
-        if (row >= 0 && row < ROWS && col >= 0 && col < COLS) {
-            seatButtons[row][col].addActionListener(listener);
+        if (row >= 0 && row < rows && col >= 0 && col < cols) {
+            if (seatButtons[row][col] != null) {
+                seatButtons[row][col].addActionListener(listener);
+            }
         }
     }
 
     public void setSelectedSeat(int row, int col) {
         if (selectedSeatRow >= 0 && selectedSeatCol >= 0) {
-            boolean available = seatAvailability[selectedSeatRow][selectedSeatCol];
-            seatButtons[selectedSeatRow][selectedSeatCol].setBackground(available ? new Color(144, 238, 144) : new Color(255, 99, 71));
+            if (seatButtons[selectedSeatRow][selectedSeatCol] != null) {
+                boolean available = seatAvailability[selectedSeatRow][selectedSeatCol];
+                seatButtons[selectedSeatRow][selectedSeatCol].setBackground(available ? new Color(144, 238, 144) : new Color(255, 99, 71));
+            }
         }
 
         this.selectedSeatRow = row;
         this.selectedSeatCol = col;
-        if (row >= 0 && col >= 0) {
-            seatStatusLabel.setText("선택된 좌석: " + (row * COLS + col + 1));
+        if (row >= 0 && col >= 0 && seatButtons[row][col] != null) {
+            seatStatusLabel.setText("선택된 좌석: " + (row * cols + col + 1)); // 🚀 COLS -> cols 변경
             seatButtons[row][col].setBackground(new Color(255, 215, 0));
         } else {
             seatStatusLabel.setText("선택된 좌석: 없음");
         }
     }
-
+    
+    
     public int getSelectedSeatRow() {
         return selectedSeatRow;
     }
