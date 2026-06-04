@@ -62,10 +62,11 @@ public class LoginController {
         String id = loginView.getInputId();
         String pw = loginView.getInputPassword();
 
-        PC_Member member = memberService.login(id, pw);
-
-        if (member == null) {
-            loginView.setStatusMessage("아이디 또는 비밀번호가 올바르지 않습니다.");
+        PC_Member member;
+        try {
+            member = memberService.login(id, pw);
+        } catch (RuntimeException e) {
+            loginView.setStatusMessage(e.getMessage());
             return;
         }
 
