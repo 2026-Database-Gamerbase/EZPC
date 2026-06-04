@@ -85,19 +85,32 @@
 | 4 | 리뷰 트리거 쿼리 |
 | 5 | 주문 트리거 쿼리 |
 | 6 | 충전 프로시저 쿼리 |
-| 7 | 더미 데이터 생성 쿼리 |
 
-### 2. DB 연결 설정
+
+### 2. 더미 데이터 생성
+
+1. Python이 없는 경우 먼저 설치합니다.
+2. 터미널에서 한국어 이름 랜덤 생성 라이브러리를 설치합니다.
+```bash
+   pip install faker pandas pymysql
+```
+3. `src/sql` 경로의 `generate_dummy_data` 파일의 **50번째 줄** `password` 부분을 본인 DB 비밀번호로 수정합니다.
+4. 해당 파일이 위치한 경로에서 실행합니다.
+```bash
+   python generate_dummy_data.py
+```
+
+### 3. DB 연결 설정
 
 `src/db/DatabaseConnector.java`를 열어 본인 환경에 맞게 수정합니다.
 
 ```java
-private static final String URL      = "jdbc:mysql://IP주소/EZPC";
-private static final String ROOT_USER = "root";
+private static final String URL           = "jdbc:mysql://IP주소/EZPC";
+private static final String ROOT_USER     = "root";
 private static final String ROOT_Password = "";
 ```
 
-### 3. 실행
+### 4. 실행
 
 `src/Main.java`를 실행합니다.
 
