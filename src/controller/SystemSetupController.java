@@ -73,9 +73,9 @@ public class SystemSetupController {
                     loadTicketData();
                     break;
                 case 3: // 이벤트 템플릿 관리
-                    view.setViewMode("이벤트 템플릿 관리", 
-                        new String[]{"이벤트 타입", "내역 설명", "타입 번호", "결제 비율"}, 
-                        new String[]{"이벤트 타입", "내역 설명", "타입 번호", "결제 비율 (0.0~1.0)"});
+                    view.setViewMode("이벤트 템플릿 관리",
+                        new String[]{"이벤트 타입", "내역 설명", "할인 종류", "결제 비율"},
+                        new String[]{"이벤트 타입", "내역 설명", "타입 번호 (0 또는 1)", "결제 비율 (0.0~1.0)"});
                     loadEventInfoData();
                     break;
             }
@@ -119,9 +119,9 @@ public class SystemSetupController {
         Object[][] data = new Object[list.size()][4];
         for (int i = 0; i < list.size(); i++) {
             EventInfo ev = list.get(i); 
-            data[i][0] = ev.getEventType(); 
-            data[i][1] = ev.getEventContent(); 
-            data[i][2] = ev.getEventTypeNum(); 
+            data[i][0] = ev.getEventType();
+            data[i][1] = ev.getEventContent();
+            data[i][2] = ev.getEventTypeNum() == 0 ? "음식" : "이용권";
             data[i][3] = ev.getPaymentRate();
         }
         view.setTableData(data);
