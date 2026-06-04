@@ -13,6 +13,7 @@ import view.FontUtil;
 public class OwnerMainFrameView extends JFrame {
     private JTabbedPane tabbedPane;
     private JComboBox<String> branchComboBox;
+    private JButton logoutButton;
     
     // 하위 탭 뷰들
     private OwnerSeatMonitorView seatMonitorView;
@@ -95,15 +96,22 @@ public class OwnerMainFrameView extends JFrame {
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
 
         // ==========================================
-        // 하단: 상태 바
+        // 하단: 로그아웃 버튼
         // ==========================================
-        JPanel statusPanel = new JPanel();
-        statusPanel.setBackground(new Color(200, 200, 200));
-        statusPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        JLabel statusLabel = new JLabel("시스템 준비 완료");
-        statusLabel.setFont(FontUtil.getKoreanFontPlain(12));
-        statusPanel.add(statusLabel);
-        mainPanel.add(statusPanel, BorderLayout.SOUTH);
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 6));
+        bottomPanel.setBackground(new Color(40, 40, 40));
+
+        logoutButton = new JButton("로그아웃");
+        logoutButton.setFont(FontUtil.getKoreanFontBold(12));
+        logoutButton.setBackground(new Color(200, 60, 60));
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setOpaque(true);
+        logoutButton.setBorderPainted(false);
+        logoutButton.setFocusPainted(false);
+        logoutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        logoutButton.setPreferredSize(new Dimension(90, 28));
+        bottomPanel.add(logoutButton);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
     }
@@ -146,6 +154,10 @@ public class OwnerMainFrameView extends JFrame {
     // 사용자가 다른 탭을 클릭했을 때 발생하는 이벤트를 컨트롤러에 연결
     public void addTabChangeListener(ChangeListener listener) {
         tabbedPane.addChangeListener(listener);
+    }
+
+    public void setLogoutButtonListener(ActionListener listener) {
+        logoutButton.addActionListener(listener);
     }
 
     // ==========================================

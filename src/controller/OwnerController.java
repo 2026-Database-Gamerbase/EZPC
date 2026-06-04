@@ -120,6 +120,12 @@ public class OwnerController {
 
         // 다른 탭으로 넘어갈 때마다 데이터 새로고침
         mainView.addTabChangeListener(e -> triggerCurrentTabRefresh());
+
+        // 로그아웃: 현재 창 닫고 로그인 화면으로 복귀
+        mainView.setLogoutButtonListener(e -> {
+            mainView.dispose();
+            new LoginController().start();
+        });
     }
 
     // DB에서 전체 지점 코드를 조회해 상단 콤보박스에 채워 넣습니다.
