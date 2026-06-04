@@ -503,12 +503,14 @@ public class UserController {
             String grade = (member != null && member.getGradeType() != null) ? member.getGradeType() : "NONE";
             
             int tempDiscount = 0;
-            if ("SILVER".equalsIgnoreCase(grade)) tempDiscount = 5;
-            else if ("GOLD".equalsIgnoreCase(grade)) tempDiscount = 10;
-            
+            if ("실버".equals(grade))      tempDiscount = 5;
+            else if ("골드".equals(grade))      tempDiscount = 10;
+            else if ("다이아몬드".equals(grade)) tempDiscount = 15;
+            else if ("루비".equals(grade))      tempDiscount = 20;
+
             final int discountRate = tempDiscount;
-            
-            chargeView.setUserInfo(userName, grade.toUpperCase(), discountRate);
+
+            chargeView.setUserInfo(userName, grade, discountRate);
 
             // 2. 결제 버튼 클릭 시 동작
             chargeView.setPaymentButtonListener(e -> {
