@@ -518,14 +518,14 @@ public class UserController {
 
             JDialog dialog = new JDialog(parent, "시간 충전", true);
             dialog.setContentPane(chargeView);
-            dialog.setSize(450, 450);
+            dialog.setSize(450, 520);
             dialog.setLocationRelativeTo(parent);
 
             // 2. 회원 정보 세팅 (비회원은 null 처리 방어)
             String userName = (member != null && member.getMemberName() != null) ? member.getMemberName() : "비회원";
             String grade = (member != null && member.getGradeType() != null) ? member.getGradeType() : "NONE";
 
-            // 3. grade 테이블에서 할인율 조회 (benefit: 0.0~1.0)
+            // 3. grade 테이블에서 등급 할인율 조회 (benefit: 0.0~1.0)
             int discountRate = 0;
             try {
                 Grade gradeInfo = gradeService.getGrade(grade);
@@ -537,7 +537,16 @@ public class UserController {
             }
             final int finalDiscountRate = discountRate;
 
-            chargeView.setUserInfo(userName, grade, finalDiscountRate);
+            // 4. 충전 이벤트 할인율 조회 (payment_rate: 1.0이면 이벤트 없음)
+            double eventPaymentRate = 1.00;
+            try {
+                eventPaymentRate = eventScheduleDao.findCurrentChargePaymentRate(customer.getPcCafeId());
+            } catch (Exception ex) {
+                System.out.println("[UserController] 충전 이벤트 조회 실패, 이벤트 할인 없음: " + ex.getMessage());
+            }
+            final double finalEventPaymentRate = eventPaymentRate;
+
+            chargeView.setUserInfo(userName, grade, finalDiscountRate, finalEventPaymentRate);
 
             // 4. 결제 버튼 클릭 시 동작
             chargeView.setPaymentButtonListener(e -> {
@@ -546,8 +555,8 @@ public class UserController {
 
                 int addMinutes = selected.getTicketTime();
                 int basePrice = selected.getPrice();
-                int discountAmount = basePrice * finalDiscountRate / 100;
-                int finalPrice = basePrice - discountAmount;
+                // 프로시저·뷰와 동일한 공식: 기본가 × 이벤트비율 × (1 - 등급할인율)
+                int finalPrice = (int) Math.round(basePrice * finalEventPaymentRate * (1.0 - finalDiscountRate / 100.0));
 
                 try {
                     // Charge 객체를 만들어 결제 내역 세팅

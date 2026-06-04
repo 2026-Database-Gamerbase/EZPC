@@ -64,7 +64,7 @@ public class OwnerMemberManageView extends JPanel {
         
         leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
-        String[] memberColumnNames = {"ID", "이름", "현재등급", "누적금액", "잔여시간"};
+        String[] memberColumnNames = {"ID", "이름", "현재등급", "충전누적", "잔여시간"};
         memberTableModel = new DefaultTableModel(memberColumnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
