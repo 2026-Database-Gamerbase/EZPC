@@ -258,6 +258,37 @@ public class UserController {
                 showBranchSelection();
             });
 
+            seatView.setRefreshButtonListener(e -> {
+                try {
+                    // 1. 혹시 사용자가 누르고 있던 좌석 선택 해제 (꼬임 방지)
+                    seatView.setSelectedSeat(-1, -1);
+
+                    // 2. DB에서 현재 지점의 사용 중인(체크인 된) 좌석 목록 다시 가져오기
+                    Set<Integer> newOccupiedSeats = new HashSet<>();
+                    List<Customer> newActiveCustomers = customerService.getCustomersInPcCafe(pcCafeId);
+                    for (Customer c : newActiveCustomers) {
+                        newOccupiedSeats.add(c.getSeatNum());
+                    }
+
+                    // 3. UI의 5x6 좌석 전체를 반복하면서 상태 최신화
+                    for (int row = 0; row < 5; row++) {
+                        for (int col = 0; col < 6; col++) {
+                            int seatNum = row * 6 + col + 1;
+                            // 새로 가져온 목록에 없으면 빈 좌석(true)
+                            boolean available = !newOccupiedSeats.contains(seatNum); 
+                            seatView.setSeatStatus(row, col, available);
+                        }
+                    }
+                    
+                    // 새로고침 완료 알림 (선택사항: 너무 번거로우면 주석 처리하셔도 됩니다)
+                    JOptionPane.showMessageDialog(frame, "좌석 현황이 최신화되었습니다.", "새로고침", JOptionPane.INFORMATION_MESSAGE);
+                    
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(frame, "좌석 정보를 갱신하는데 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+
             frame.add(seatView);
             frame.setVisible(true);
         } catch (Exception e) {
