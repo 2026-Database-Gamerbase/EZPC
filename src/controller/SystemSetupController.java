@@ -1,4 +1,4 @@
-package controller.owner;
+package controller;
 
 import java.util.List;
 import javax.swing.JOptionPane;

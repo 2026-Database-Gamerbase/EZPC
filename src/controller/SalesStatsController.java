@@ -1,4 +1,4 @@
-package controller.owner;
+package controller;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
