@@ -4,7 +4,7 @@ package view.user;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
-import javax.swing.Timer;
+
 import view.FontUtil;
 
 public class UserMainDashboardView extends JFrame {
@@ -140,7 +140,7 @@ public class UserMainDashboardView extends JFrame {
     // DB 연결 필요: 타이머 구현 필요
     public void updateRemainingTime(int hours, int minutes, int seconds) {
         remainingTimeLabel.setText(hours + "시간 " + minutes + "분");
-        timerLabel.setText(String.format("남은 시간: %02d:%02d:%02d", hours, minutes, seconds));
+        timerLabel.setText(String.format("남은 시간: %02d:%02d", hours, minutes));
     }
 
     public void setFoodOrderButtonListener(ActionListener listener) {

@@ -279,22 +279,33 @@ public class UserController {
         dashboard.setReviewButtonListener(e -> showReviewView(dashboard, customer.getPcCafeId(), member));
         dashboard.setTimeChargeButtonListener(e -> showTimeChargeView(dashboard, customer, member));
         
-        // 💡 2. 로그아웃 리스너 수정 (사용한 시간만큼 DB에서 빼기)
         dashboard.setLogoutButtonListener(e -> {
-            dashboard.stopTimer(); // 타이머 정지
-            int usedTime = dashboard.getUsedMinutes(); // 화면에서 카운트한 '사용한 시간' 가져오기
+            dashboard.stopTimer(); // 1. 타이머 정지
+            int usedTime = dashboard.getUsedMinutes(); // 사용 시간 계산
             
-            // [회원일 경우] -> DB(pc_member)의 잔여 시간에서 '사용한 시간' 차감
+            // 2. 회원일 경우 DB 잔여시간 차감
             if (member != null && member.getMemberId() != null) {
-                // 이따가 PC_MemberService에 추가할 메서드입니다.
                 pcMemberService.deductUsedTime(member.getMemberId(), usedTime); 
             }
             
-            // [비회원/회원 공통] -> 현재 점유 중인 PC방 좌석 세션(customer) 삭제
+            // 3. 좌석 사용 로그 종료 및 세션 삭제
             customerService.checkOut(customer);
             
-            dashboard.dispose(); // 대시보드 끄기
-            showBranchSelection(); // 지점 선택 화면으로 복귀
+            // 4. 대시보드 화면 종료
+            dashboard.dispose(); 
+            
+            // 5. [핵심] 로그인 정보 및 세션 통신 완벽 초기화
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close(); // 자바 메모리에 물려있던 DB 커넥션을 끊어 초기화합니다.
+                    System.out.println("[UserController] 로그아웃 성공 - 세션 초기화 완료");
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            
+            // 6. 완전히 처음 로그인 화면(LoginController) 복귀
+            new controller.LoginController().start(); 
         });
 
         dashboard.setVisible(true);
