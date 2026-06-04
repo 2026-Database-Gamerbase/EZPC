@@ -571,11 +571,9 @@ public class UserController {
                         member.setRemainTime(member.getRemainTime() + addMinutes);
                     }
 
-                    // [핵심 2] 비회원/회원 공통 -> customer 테이블 및 메모리 업데이트
-                    int newRemain = customer.getRemainTime() + addMinutes;
-                    customer.setRemainTime(newRemain);
-                    CustomerDAO customerDao = new CustomerDAOImpl(conn);
-                    customerDao.updateRemainingTime(customer.getPcCafeId(), customer.getSeatNum(), newRemain);
+                    // [핵심 2] customer 메모리 업데이트
+                    // (DB customer.remain_time은 charge_by_customer 프로시저가 이미 증가시킴)
+                    customer.setRemainTime(customer.getRemainTime() + addMinutes);
 
                     // [핵심 3] 대시보드 실시간 갱신
                     ((UserMainDashboardView) parent).addTime(addMinutes);
