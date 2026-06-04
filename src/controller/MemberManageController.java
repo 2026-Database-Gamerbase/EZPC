@@ -54,19 +54,19 @@ public class MemberManageController {
         }
     }
 
-    // 좌측 회원 목록이랑 우측 등급표 한 번에 새로고침
+    // 좌측 회원 목록이랑 우측 등급표 한 번에 새로고침 
     public void refreshMemberAndGradeData() {
         try {
-            // 1. 회원 목록 세팅
-            List<PC_Member> allMembers = memberService.getAllUsers();
             boolean filterDormant = view.isDormantFilterSelected();
+            List<PC_Member> displayList;
+            
+            // 1. 휴면 체크표시 확인
+            if (filterDormant) {
+                displayList = memberService.getDormantMembers(); 
+            } else {
+                displayList = memberService.getAllUsers();
+            }
 
-            // 필터 켜져있으면 누적 5만원 미만만 보여줌
-            List<PC_Member> displayList = allMembers.stream()
-                .filter(m -> !filterDormant || m.getTotalPaymentAmount() < 50000)
-                .toList();
-
-            // 테이블에 넣을 배열 만들기
             Object[][] memberData = new Object[displayList.size()][5];
             for (int i = 0; i < displayList.size(); i++) {
                 PC_Member m = displayList.get(i);
@@ -74,16 +74,12 @@ public class MemberManageController {
                 memberData[i][1] = m.getMemberName();
                 memberData[i][2] = (m.getGradeType() != null) ? m.getGradeType().toUpperCase() : "BRONZE";
                 memberData[i][3] = String.format("%,d원", m.getTotalPaymentAmount());
-                
-                // 가입일 빼고 DB에 있는 잔여시간(remain_time)으로 교체
                 memberData[i][4] = m.getRemainTime() + "분"; 
             }
             view.setMemberTableData(memberData);
 
             // 2. 등급표 세팅
             List<Grade> gradeList = gradeService.getAllGrades();
-            
-            // 기준 금액 오름차순(BRONZE부터) 정렬
             gradeList.sort(Comparator.comparingInt(Grade::getGradeStandard));
 
             Object[][] gradeData = new Object[gradeList.size()][4];
@@ -91,7 +87,6 @@ public class MemberManageController {
                 Grade g = gradeList.get(i);
                 int discountPercent = (int) (g.getBenefit() * 100);
                 
-                // 좌측이랑 표기 맞추려고 대문자로 통일
                 gradeData[i][0] = g.getGradeType().toUpperCase(); 
                 gradeData[i][1] = String.format("%,d원", g.getGradeStandard());
                 gradeData[i][2] = discountPercent + "%";
