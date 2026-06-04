@@ -265,9 +265,7 @@ public class UserController {
 
                 boolean success = customerService.checkIn(newCustomer);
                 if (!success) {
-                    System.out.println("[UserController] checkIn 실패 - 지점: " + pcCafeId
-                        + ", 좌석: " + seatNum + ", 회원ID: " + memberId);
-                    JOptionPane.showMessageDialog(frame, "선택한 좌석을 점유할 수 없습니다. 다시 시도해주세요. (콘솔 확인)", "알림", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "선택한 좌석을 점유할 수 없습니다. 다시 시도해주세요.", "알림", JOptionPane.WARNING_MESSAGE);
                     showSeatSelection(pcCafeId);
                     frame.dispose();
                     return;
@@ -372,6 +370,18 @@ public class UserController {
         });
 
         dashboard.setVisible(true);
+
+        // 로그인/좌석 선택 직후 잔여 시간이 0분 이하라면 자동으로 충전 유도
+        if (customer.getRemainTime() <= 0) {
+            // 안내 팝업창 출력
+            JOptionPane.showMessageDialog(dashboard, 
+                "잔여시간이 없습니다.\n시간 충전 페이지로 이동합니다.", 
+                "시간 알림", 
+                JOptionPane.WARNING_MESSAGE);
+            
+            showTimeChargeView(dashboard, customer, member);
+        }
+        // =========================================================================
     }
 
     private void showFoodOrderView(JFrame parent, String pcCafeId, int seatNumber) {
@@ -591,7 +601,9 @@ public class UserController {
                     customer.setRemainTime(customer.getRemainTime() + addMinutes);
 
                     // [핵심 3] 대시보드 실시간 갱신
-                    ((UserMainDashboardView) parent).addTime(addMinutes);
+                    if (parent instanceof UserMainDashboardView) {
+                        ((UserMainDashboardView) parent).addTime(addMinutes);
+                    }
 
                     JOptionPane.showMessageDialog(dialog, addMinutes + "분 충전이 완료되었습니다!\n결제 금액: " + finalPrice + "원");
                     dialog.dispose();
