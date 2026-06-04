@@ -4,7 +4,9 @@ package view.user;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.*;
+import model.Ticket;
 import view.FontUtil;
 
 public class UserTimeChargeView extends JPanel {
@@ -19,10 +21,11 @@ public class UserTimeChargeView extends JPanel {
     private JButton cancelButton;
     private JLabel statusLabel;
 
-    // 💡 사용자 할인율을 임시 저장할 변수 추가
     private int currentDiscountRate = 0;
+    private List<Ticket> tickets;
 
-    public UserTimeChargeView() {
+    public UserTimeChargeView(List<Ticket> tickets) {
+        this.tickets = tickets;
         initializeUI();
     }
 
@@ -89,8 +92,13 @@ public class UserTimeChargeView extends JPanel {
         gbc.gridy = 3;
         centerPanel.add(timeOptionLabel, gbc);
         
-        String[] timeOptions = {"1시간 - 2,000원", "3시간 - 5,500원", "5시간 - 9,000원", "10시간 - 17,000원"};
-        timeOptionCombo = new JComboBox<>(timeOptions);
+        timeOptionCombo = new JComboBox<>();
+        for (Ticket t : tickets) {
+            int hours = t.getTicketTime() / 60;
+            int mins  = t.getTicketTime() % 60;
+            String label = (hours > 0 ? hours + "시간" : "") + (mins > 0 ? " " + mins + "분" : "");
+            timeOptionCombo.addItem(label.trim() + " - " + String.format("%,d", t.getPrice()) + "원");
+        }
         
         // 💡 콤보박스 값이 바뀔 때마다 가격을 다시 계산하도록 이벤트 추가
         timeOptionCombo.addActionListener(e -> updatePriceDisplay());
@@ -163,20 +171,17 @@ public class UserTimeChargeView extends JPanel {
 
     // 가격을 다시 계산하여 화면에 표시하는 메서드
     private void updatePriceDisplay() {
-        String selectedOption = (String) timeOptionCombo.getSelectedItem();
-        int basePrice = 0;
-
-        if (selectedOption != null) {
-            if (selectedOption.contains("1시간")) basePrice = 2000;
-            else if (selectedOption.contains("3시간")) basePrice = 5500;
-            else if (selectedOption.contains("5시간")) basePrice = 9000;
-            else if (selectedOption.contains("10시간")) basePrice = 17000;
-        }
-
+        Ticket t = getSelectedTicket();
+        if (t == null) return;
+        int basePrice     = t.getPrice();
         int discountAmount = basePrice * currentDiscountRate / 100;
-        int finalPrice = basePrice - discountAmount;
+        setPriceInfo(basePrice, discountAmount, basePrice - discountAmount);
+    }
 
-        setPriceInfo(basePrice, discountAmount, finalPrice);
+    // 현재 선택된 Ticket 객체 반환
+    public Ticket getSelectedTicket() {
+        int idx = timeOptionCombo.getSelectedIndex();
+        return (idx >= 0 && idx < tickets.size()) ? tickets.get(idx) : null;
     }
 
     // 사용자 정보 설정할 때 초기 가격 표시도 갱신

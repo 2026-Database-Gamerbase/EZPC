@@ -1,23 +1,29 @@
 package controller;
 
+import dao.ChargeDAO;
 import dao.CustomerDAO;
 import dao.EventScheduleDAO;
 import dao.FoodDAO;
+import dao.GradeDAO;
 import dao.LogDAO;
 import dao.OrderDAO;
 import dao.PC_MemberDAO;
 import dao.PcCafeDAO;
 import dao.ReviewDAO;
 import dao.StockDAO;
+import dao.TicketDAO;
+import daoImpl.ChargeDAOImpl;
 import daoImpl.CustomerDAOImpl;
 import daoImpl.EventScheduleDAOImpl;
 import daoImpl.FoodDAOImpl;
+import daoImpl.GradeDAOImpl;
 import daoImpl.LogDAOImpl;
 import daoImpl.OrderDAOImpl;
 import daoImpl.PC_MemberDAOImpl;
 import daoImpl.PcCafeDAOImpl;
 import daoImpl.ReviewDAOImpl;
 import daoImpl.StockDAOImpl;
+import daoImpl.TicketDAOImpl;
 import db.DatabaseConnector;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,10 +51,12 @@ import service.PC_MemberService;
 import service.PcCafeService;
 import service.ReviewService;
 import service.StockService;
-import dao.ChargeDAO;
-import daoImpl.ChargeDAOImpl;
 import model.Charge;
+import model.Grade;
+import model.Ticket;
 import service.ChargeService;
+import service.GradeService;
+import service.TicketService;
 import view.user.UserBranchSelectView;
 import view.user.UserFoodOrderView;
 import view.user.UserMainDashboardView;
@@ -70,6 +78,8 @@ public class UserController {
     private StockService stockService;
     private EventScheduleDAO eventScheduleDao;
     private ChargeService chargeService;
+    private GradeService gradeService;
+    private TicketService ticketService;
 
     public UserController(Connection conn, PC_Member member) {
         this.conn = conn;
@@ -101,6 +111,12 @@ public class UserController {
         
         ChargeDAO chargeDao = new ChargeDAOImpl(conn);
         this.chargeService = new ChargeService(chargeDao);
+
+        GradeDAO gradeDao = new GradeDAOImpl(conn);
+        this.gradeService = new GradeService(gradeDao);
+
+        TicketDAO ticketDao = new TicketDAOImpl(conn);
+        this.ticketService = new TicketService(ticketDao);
 
         this.pcCafeService = new PcCafeService(pcCafeDao);
         this.customerService = new CustomerService(conn, customerDao, logDao, memberDao);
@@ -495,75 +511,73 @@ public class UserController {
     private void showTimeChargeView(JFrame parent, Customer customer, PC_Member member) {
         try {
             ensureOpenConnection();
-            UserTimeChargeView chargeView = new UserTimeChargeView();
-            
-            // 모달 팝업으로 띄우기
+
+            // 1. ticket 테이블에서 시간권 목록 조회
+            List<Ticket> tickets = ticketService.getAllTickets();
+            if (tickets == null || tickets.isEmpty()) {
+                JOptionPane.showMessageDialog(parent, "등록된 시간권이 없습니다. 관리자에게 문의하세요.", "알림", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            UserTimeChargeView chargeView = new UserTimeChargeView(tickets);
+
             JDialog dialog = new JDialog(parent, "시간 충전", true);
             dialog.setContentPane(chargeView);
             dialog.setSize(450, 450);
             dialog.setLocationRelativeTo(parent);
 
-            // 1. 회원 정보 세팅 (비회원은 null 처리 방어)
+            // 2. 회원 정보 세팅 (비회원은 null 처리 방어)
             String userName = (member != null && member.getMemberName() != null) ? member.getMemberName() : "비회원";
             String grade = (member != null && member.getGradeType() != null) ? member.getGradeType() : "NONE";
-            
-            int tempDiscount = 0;
-            if ("실버".equals(grade))      tempDiscount = 5;
-            else if ("골드".equals(grade))      tempDiscount = 10;
-            else if ("다이아몬드".equals(grade)) tempDiscount = 15;
-            else if ("루비".equals(grade))      tempDiscount = 20;
 
-            final int discountRate = tempDiscount;
-
-            chargeView.setUserInfo(userName, grade, discountRate);
-
-            // 2. 결제 버튼 클릭 시 동작
-            chargeView.setPaymentButtonListener(e -> {
-                String selectedOption = chargeView.getSelectedTimeOption();
-                int addMinutes = 0;
-                int finalPrice = 0;
-
-                // 콤보박스에서 선택된 시간에 따라 분(minute)과 가격 파싱
-                if (selectedOption != null) {
-                    if (selectedOption.contains("1시간")) { addMinutes = 60; finalPrice = 2000; }
-                    else if (selectedOption.contains("3시간")) { addMinutes = 180; finalPrice = 5500; }
-                    else if (selectedOption.contains("5시간")) { addMinutes = 300; finalPrice = 9000; }
-                    else if (selectedOption.contains("10시간")) { addMinutes = 600; finalPrice = 17000; }
+            // 3. grade 테이블에서 할인율 조회 (benefit: 0.0~1.0)
+            int discountRate = 0;
+            try {
+                Grade gradeInfo = gradeService.getGrade(grade);
+                if (gradeInfo != null) {
+                    discountRate = (int) (gradeInfo.getBenefit() * 100);
                 }
+            } catch (Exception ex) {
+                System.out.println("[UserController] 등급 할인율 조회 실패, 0% 적용: " + ex.getMessage());
+            }
+            final int finalDiscountRate = discountRate;
 
-                // 할인율 반영
-                int discountAmount = finalPrice * discountRate / 100;
-                finalPrice = finalPrice - discountAmount;
+            chargeView.setUserInfo(userName, grade, finalDiscountRate);
+
+            // 4. 결제 버튼 클릭 시 동작
+            chargeView.setPaymentButtonListener(e -> {
+                Ticket selected = chargeView.getSelectedTicket();
+                if (selected == null) return;
+
+                int addMinutes = selected.getTicketTime();
+                int basePrice = selected.getPrice();
+                int discountAmount = basePrice * finalDiscountRate / 100;
+                int finalPrice = basePrice - discountAmount;
 
                 try {
-                	// Charge 객체를 만들어 결제 내역 세팅
+                    // Charge 객체를 만들어 결제 내역 세팅
                     Charge chargeLog = new Charge();
                     chargeLog.setPcCafeId(customer.getPcCafeId());
                     chargeLog.setSeatNum(customer.getSeatNum());
-                    
-                    // 비회원이면 memberId에 null이 들어갑니다.
                     chargeLog.setMemberId((member != null && member.getMemberId() != null) ? member.getMemberId() : null);
                     chargeLog.setTicketTime(addMinutes);
                     chargeLog.setChargePayAmount(finalPrice);
-                	
-                	chargeService.recordCharge(chargeLog);
-                	
+
+                    chargeService.recordCharge(chargeLog);
+
                     // [핵심 1] 회원일 경우 -> pc_member 테이블 업데이트 (영구 저장용)
                     if (member != null && member.getMemberId() != null) {
                         pcMemberService.chargeTime(member.getMemberId(), addMinutes, finalPrice);
-                        // 메모리 상의 회원 정보 잔여시간도 즉시 갱신
                         member.setRemainTime(member.getRemainTime() + addMinutes);
                     }
 
-                    // [핵심 2] 비회원/회원 공통 -> 현재 세션(customer) 테이블 및 메모리 업데이트 (일회용 저장)
+                    // [핵심 2] 비회원/회원 공통 -> customer 테이블 및 메모리 업데이트
                     int newRemain = customer.getRemainTime() + addMinutes;
-                    customer.setRemainTime(newRemain); // 메모리 갱신
-                    
-                    // 만들어두신 CustomerDAOImpl을 이용해 DB의 customer 테이블에도 시간 즉시 추가
+                    customer.setRemainTime(newRemain);
                     CustomerDAO customerDao = new CustomerDAOImpl(conn);
                     customerDao.updateRemainingTime(customer.getPcCafeId(), customer.getSeatNum(), newRemain);
 
-                    // [핵심 3] 대시보드(View) 텍스트 실시간 갱신 (늘어난 시간으로)
+                    // [핵심 3] 대시보드 실시간 갱신
                     ((UserMainDashboardView) parent).addTime(addMinutes);
 
                     JOptionPane.showMessageDialog(dialog, addMinutes + "분 충전이 완료되었습니다!\n결제 금액: " + finalPrice + "원");
@@ -575,9 +589,7 @@ public class UserController {
                 }
             });
 
-            // 취소 버튼
             chargeView.setCancelButtonListener(e -> dialog.dispose());
-
             dialog.setVisible(true);
 
         } catch (Exception e) {
