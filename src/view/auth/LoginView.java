@@ -15,6 +15,7 @@ public class LoginView extends JFrame {
     private JPasswordField passwordField;
     private JButton loginButton;
     private JButton signUpButton;
+    private JButton guestButton;
     private JLabel statusLabel;
 
     public LoginView() {
@@ -34,63 +35,87 @@ public class LoginView extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
 
-        // 제목
+        // 제목 (3열 전체 span)
         JLabel titleLabel = new JLabel("PC방 로그인");
         titleLabel.setFont(FontUtil.getKoreanFontBold(24));
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 3;
+        gbc.anchor = GridBagConstraints.CENTER;
         mainPanel.add(titleLabel, gbc);
 
         // ID 입력
         gbc.gridy = 1;
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         JLabel idLabel = new JLabel("ID:");
         idLabel.setFont(FontUtil.getKoreanFontPlain(14));
+        gbc.gridx = 0;
         mainPanel.add(idLabel, gbc);
+
         gbc.gridx = 1;
+        gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        idField = new JTextField(15);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        idField = new JTextField(20);
         idField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(idField, gbc);
 
         // 비밀번호 입력
         gbc.gridx = 0;
         gbc.gridy = 2;
+        gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.EAST;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
         JLabel pwLabel = new JLabel("Password:");
         pwLabel.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(pwLabel, gbc);
+
         gbc.gridx = 1;
+        gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        passwordField = new JPasswordField(15);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+        passwordField = new JPasswordField(20);
         passwordField.setFont(FontUtil.getKoreanFontPlain(14));
         mainPanel.add(passwordField, gbc);
 
         // 상태 메시지
         gbc.gridx = 0;
         gbc.gridy = 3;
-        gbc.gridwidth = 2;
+        gbc.gridwidth = 3;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
         statusLabel = new JLabel(" ");
         statusLabel.setFont(FontUtil.getKoreanFontPlain(12));
         statusLabel.setForeground(Color.RED);
         mainPanel.add(statusLabel, gbc);
 
-        // 로그인 버튼
+        // 버튼 3개 (로그인 / 회원가입 / 비회원)
         gbc.gridy = 4;
         gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+
+        gbc.gridx = 0;
         loginButton = new JButton("로그인");
         loginButton.setFont(FontUtil.getKoreanFontBold(14));
-        loginButton.setPreferredSize(new Dimension(100, 35));
         mainPanel.add(loginButton, gbc);
 
-        // 회원가입 버튼
         gbc.gridx = 1;
         signUpButton = new JButton("회원가입");
         signUpButton.setFont(FontUtil.getKoreanFontBold(14));
-        signUpButton.setPreferredSize(new Dimension(100, 35));
         mainPanel.add(signUpButton, gbc);
+
+        gbc.gridx = 2;
+        guestButton = new JButton("비회원");
+        guestButton.setFont(FontUtil.getKoreanFontBold(14));
+        mainPanel.add(guestButton, gbc);
 
         add(mainPanel);
     }
@@ -118,6 +143,11 @@ public class LoginView extends JFrame {
     // 회원가입 버튼 리스너 설정
     public void setSignUpButtonListener(ActionListener listener) {
         signUpButton.addActionListener(listener);
+    }
+
+    // 비회원 입장 버튼 리스너 설정
+    public void setGuestButtonListener(ActionListener listener) {
+        guestButton.addActionListener(listener);
     }
 
     // 입력값 초기화

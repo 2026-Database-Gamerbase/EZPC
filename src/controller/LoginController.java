@@ -57,6 +57,7 @@ public class LoginController {
         loginView = new LoginView(); //로그인 뷰 생성
         loginView.setLoginButtonListener(e -> handleLogin()); //로그인 버튼에 리스너 추가
         loginView.setSignUpButtonListener(e -> handleSignUp()); //회원가입 버튼에 리스너 추가
+        loginView.setGuestButtonListener(e -> handleGuestLogin()); //비회원 버튼에 리스너 추가
         loginView.setVisible(true);
     }
 
@@ -93,6 +94,21 @@ public class LoginController {
                 new UserController(roleConn, member).start();
             }
 
+        } catch (SQLException e) {
+            loginView.setStatusMessage("서버 오류가 발생했습니다.");
+            e.printStackTrace();
+        }
+    }
+
+    // 비회원 입장 처리
+    private void handleGuestLogin() {
+        try {
+            Connection roleConn = DatabaseConnector.getConnection("user");
+            if (authConn != null && !authConn.isClosed()) {
+                authConn.close();
+            }
+            loginView.dispose();
+            new UserController(roleConn, null).start();
         } catch (SQLException e) {
             loginView.setStatusMessage("서버 오류가 발생했습니다.");
             e.printStackTrace();
