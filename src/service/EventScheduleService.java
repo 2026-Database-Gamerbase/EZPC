@@ -46,7 +46,7 @@ public class EventScheduleService {
     private void validateEventPeriod(LocalDate startDate, LocalDate endDate) {
         // 종료일은 시작일보다 빠를 수 없음 / End date cannot be before start date.
         if (endDate.isBefore(startDate)) {
-            throw new IllegalArgumentException("Event end date cannot be before start date.");
+            throw new IllegalArgumentException("이벤트 종료일은 이벤트 시작일보다 앞설 수 없습니다.");
         }
     }
 }
