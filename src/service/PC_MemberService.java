@@ -48,18 +48,15 @@ public class PC_MemberService {
         PC_Member member = memberDao.findByID(memberId);
 
         if (member == null) {
-            System.out.println("로그인 실패: 존재하지 않는 아이디입니다.");
-            return null;
+            throw new RuntimeException("존재하지 않는 아이디입니다.");
         }
 
         if (!member.getMemberPassword().equals(password)) {
-            System.out.println("로그인 실패: 비밀번호가 일치하지 않습니다.");
-            return null;
+            throw new RuntimeException("비밀번호가 올바르지 않습니다.");
         }
 
         if (customerDao != null && customerDao.findByMemberId(memberId) != null) {
-            System.out.println("로그인 실패: 이미 다른 기기에서 이용 중인 계정입니다.");
-            return null;
+            throw new RuntimeException("이미 다른 기기에서 이용 중인 계정입니다.");
         }
 
         System.out.println(member.getMemberName() + "님 환영합니다!");
