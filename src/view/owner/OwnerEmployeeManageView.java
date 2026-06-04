@@ -43,7 +43,7 @@ public class OwnerEmployeeManageView extends JPanel {
         // ==========================================
         // 중앙: 직원 테이블
         // ==========================================
-        String[] columnNames = {"직원번호", "이름", "직급", "시급", "출근 상태", "고용일"};
+        String[] columnNames = {"직원번호", "이름", "직급", "시급", "출근 상태"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
