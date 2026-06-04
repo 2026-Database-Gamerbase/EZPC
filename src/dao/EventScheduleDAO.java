@@ -17,6 +17,8 @@ public interface EventScheduleDAO {
     
     double findCurrentOrderPaymentRate(String pcCafeId) throws SQLException;
 
+    double findCurrentChargePaymentRate(String pcCafeId) throws SQLException;
+
     void update(EventSchedule eventSchedule) throws SQLException;
 
     void deleteById(String eventType, String pcId, LocalDate eventStartDate) throws SQLException;
