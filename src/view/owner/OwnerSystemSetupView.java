@@ -29,6 +29,7 @@ public class OwnerSystemSetupView extends JPanel {
     private JLabel field2Label; private JTextField field2Input;
     private JLabel field3Label; private JTextField field3Input;
     private JLabel field4Label; private JTextField field4Input;
+    private JComboBox<String> eventTypeComboBox;
     
     private JButton saveButton;
     private JButton deleteButton;
@@ -55,7 +56,8 @@ public class OwnerSystemSetupView extends JPanel {
             "지점(PC방) 관리",
             "공통 음식 메뉴 관리",
             "공통 요금제 관리",
-            "이벤트 템플릿 관리"
+            "이벤트 템플릿 관리",
+            "이벤트 스케줄 관리"
         };
         categoryList = new JList<>(categories);
         categoryList.setFont(FontUtil.getKoreanFontBold(14));
@@ -109,6 +111,39 @@ public class OwnerSystemSetupView extends JPanel {
         
         field1Label = new JLabel("지점 코드:"); field1Label.setFont(FontUtil.getKoreanFontPlain(12));
         field1Input = new JTextField(8);      field1Input.setFont(FontUtil.getKoreanFontPlain(12));
+        eventTypeComboBox = new JComboBox<>();
+        eventTypeComboBox.setFont(FontUtil.getKoreanFontPlain(12));
+        eventTypeComboBox.setPreferredSize(new Dimension(120, 25));
+        eventTypeComboBox.setBackground(Color.WHITE);
+        eventTypeComboBox.setForeground(Color.BLACK);
+        eventTypeComboBox.setOpaque(true);
+        eventTypeComboBox.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
+            @Override
+            protected JButton createArrowButton() {
+                JButton button = super.createArrowButton();
+                button.setBackground(Color.WHITE);
+                button.setOpaque(true);
+                button.setBorder(BorderFactory.createLineBorder(new Color(120, 140, 160)));
+                return button;
+            }
+
+            @Override
+            public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) {
+                g.setColor(Color.WHITE);
+                g.fillRect(bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+        });
+        eventTypeComboBox.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                    boolean isSelected, boolean cellHasFocus) {
+                Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                component.setBackground(isSelected ? new Color(230, 240, 255) : Color.WHITE);
+                component.setForeground(Color.BLACK);
+                return component;
+            }
+        });
+        eventTypeComboBox.setVisible(false);
         
         field2Label = new JLabel("지점명:");   field2Label.setFont(FontUtil.getKoreanFontPlain(12));
         field2Input = new JTextField(10);     field2Input.setFont(FontUtil.getKoreanFontPlain(12));
@@ -121,7 +156,7 @@ public class OwnerSystemSetupView extends JPanel {
         field4Label.setVisible(false);
         field4Input.setVisible(false);
         
-        formPanel.add(field1Label); formPanel.add(field1Input);
+        formPanel.add(field1Label); formPanel.add(field1Input); formPanel.add(eventTypeComboBox);
         formPanel.add(field2Label); formPanel.add(field2Input);
         formPanel.add(field3Label); formPanel.add(field3Input);
         formPanel.add(field4Label); formPanel.add(field4Input);
@@ -184,10 +219,21 @@ public class OwnerSystemSetupView extends JPanel {
         return null;
     }
 
+    public String[] getSelectedRowValues() {
+        int row = dataTable.getSelectedRow();
+        if (row < 0) return null;
+
+        String[] values = new String[tableModel.getColumnCount()];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = String.valueOf(tableModel.getValueAt(row, i));
+        }
+        return values;
+    }
+
     // 폼 입력값 get (배열로 반환하여 Controller가 인덱스로 파싱)
     public String[] getFormInputs() {
         return new String[] {
-            field1Input.getText().trim(),
+            eventTypeComboBox.isVisible() ? String.valueOf(eventTypeComboBox.getSelectedItem()).trim() : field1Input.getText().trim(),
             field2Input.getText().trim(),
             field3Input.getText().trim(),
             field4Input.getText().trim()
@@ -199,6 +245,18 @@ public class OwnerSystemSetupView extends JPanel {
     // ==========================================
     public void setStatusMessage(String msg) {
         statusLabel.setText(msg);
+    }
+
+    public void setEventTypeOptions(String[] eventTypes) {
+        eventTypeComboBox.setModel(new DefaultComboBoxModel<>(eventTypes));
+        if (eventTypes != null && eventTypes.length > 0) {
+            eventTypeComboBox.setSelectedIndex(0);
+        }
+    }
+
+    public void setUseEventTypeComboBox(boolean useComboBox) {
+        field1Input.setVisible(!useComboBox);
+        eventTypeComboBox.setVisible(useComboBox);
     }
 
     // ==========================================
@@ -226,6 +284,7 @@ public class OwnerSystemSetupView extends JPanel {
     // 선택된 카테고리에 맞춰 테이블 컬럼명과 폼 라벨을 동적으로 변경
     public void setViewMode(String title, String[] columns, String[] labels) {
         currentCategoryTitle.setText(title);
+        setUseEventTypeComboBox(false);
         
         // 테이블 컬럼 재설정
         tableModel.setColumnIdentifiers(columns);
@@ -260,21 +319,37 @@ public class OwnerSystemSetupView extends JPanel {
     // 폼에 특정 데이터 주입 (테이블 행 클릭 시 호출)
     public void fillFormInputs(String[] values) {
         JTextField[] inputs = {field1Input, field2Input, field3Input, field4Input};
-        for (int i = 0; i < values.length && i < 4; i++) {
+        int startIndex = 0;
+        if (eventTypeComboBox.isVisible() && values.length > 0) {
+            eventTypeComboBox.setSelectedItem(values[0]);
+            startIndex = 1;
+        }
+        for (int i = startIndex; i < values.length && i < 4; i++) {
             inputs[i].setText(values[i]);
         }
         // 테이블 데이터를 불러왔을 때 = 수정 모드이므로 PK(field1) 수정 불가 처리
         field1Input.setEditable(false);
         field1Input.setBackground(Color.LIGHT_GRAY);
+        eventTypeComboBox.setEnabled(false);
+        if (eventTypeComboBox.isVisible()) {
+            field2Input.setEditable(false);
+            field2Input.setBackground(Color.LIGHT_GRAY);
+        }
     }
 
     public void clearForm() {
         field1Input.setText(""); field2Input.setText("");
         field3Input.setText(""); field4Input.setText("");
         dataTable.clearSelection();
+        if (eventTypeComboBox.getItemCount() > 0) {
+            eventTypeComboBox.setSelectedIndex(0);
+        }
 
         // 신규 추가 모드이므로 PK 입력 가능하게 롤백
         field1Input.setEditable(true);
         field1Input.setBackground(Color.WHITE);
+        field2Input.setEditable(true);
+        field2Input.setBackground(Color.WHITE);
+        eventTypeComboBox.setEnabled(true);
     }
 }

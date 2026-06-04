@@ -104,7 +104,7 @@ public class OwnerController {
             this.foodStockController = new FoodStockController(mainView.getFoodStockView(), stockService);
             this.employeeManageController = new EmployeeManageController(mainView.getEmployeeManageView(), employeeService);
             this.memberManageController = new MemberManageController(mainView.getMemberManageView(), pcMemberService, gradeService);
-            this.systemSetupController = new SystemSetupController(mainView.getSystemSetupView(), pcCafeService, foodService, ticketService, eventInfoService);
+            this.systemSetupController = new SystemSetupController(mainView.getSystemSetupView(), pcCafeService, foodService, ticketService, eventInfoService, eventScheduleService);
 
         } catch (Exception e) {
             System.err.println("[OwnerController] 의존성 초기화 실패");
@@ -169,6 +169,7 @@ public class OwnerController {
                 memberManageController.refreshMemberAndGradeData();
                 break;
             case 5: // 시스템 설정 
+                systemSetupController.setCurrentBranchId(selectedBranchId);
                 systemSetupController.refreshCurrentCategory();
                 break;
         }
