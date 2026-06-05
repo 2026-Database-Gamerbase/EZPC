@@ -122,16 +122,14 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 	//user 타입 회원만 조회
 	@Override
     public List<PC_Member> findAllUsers() {
-        // 회원 테이블(pc_member)과 최근 접속 기록(use_log)을 한 번에 묶어(LEFT JOIN) 속도를 대폭 향상시킵니다.
         String sql = """
-            SELECT p.*, u.last_visit 
+            SELECT p.*, 
+                   (SELECT login_time 
+                    FROM use_log u 
+                    WHERE u.member_id = p.member_id 
+                    ORDER BY login_time DESC 
+                    LIMIT 1) AS last_visit 
             FROM pc_member p 
-            LEFT JOIN (
-                SELECT member_id, MAX(login_time) AS last_visit 
-                FROM use_log 
-                WHERE member_id IS NOT NULL 
-                GROUP BY member_id
-            ) u ON p.member_id = u.member_id 
             WHERE p.member_type = 'user'
         """;
         List<PC_Member> members = new ArrayList<>();
@@ -141,7 +139,6 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 
             while (rs.next()) {
                 PC_Member m = mapRowToMember(rs);
-                // 🚀 로그인 시간을 기준으로 가져온 최근 방문일(last_visit) 세팅
                 m.setLastLogoutTime(rs.getString("last_visit")); 
                 members.add(m);
             }
@@ -250,19 +247,21 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
         }
     }
 
+	// 휴면 회원 조회
 	@Override
     public List<PC_Member> findDormantMembers() {
         String sql = """
-            SELECT p.*, u.last_visit 
-            FROM pc_member p
-            INNER JOIN (
-                SELECT member_id, MAX(login_time) AS last_visit
-                FROM use_log
-                WHERE member_id IS NOT NULL
-                GROUP BY member_id
-            ) u ON p.member_id = u.member_id
-            WHERE p.member_type = 'user'
-              AND u.last_visit <= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            SELECT * FROM (
+                SELECT p.*, 
+                       (SELECT login_time 
+                        FROM use_log u 
+                        WHERE u.member_id = p.member_id 
+                        ORDER BY login_time DESC 
+                        LIMIT 1) AS last_visit 
+                FROM pc_member p 
+                WHERE p.member_type = 'user'
+            ) AS t
+            WHERE t.last_visit <= DATE_SUB(NOW(), INTERVAL 30 DAY)
         """;
         
         List<PC_Member> members = new ArrayList<>();
@@ -272,7 +271,6 @@ public class PC_MemberDAOImpl implements PC_MemberDAO{
 
             while (rs.next()) {
                 PC_Member m = mapRowToMember(rs);
-                // 🚀 로그인 시간을 기준으로 가져온 최근 방문일(last_visit) 세팅
                 m.setLastLogoutTime(rs.getString("last_visit"));
                 members.add(m);
             }
