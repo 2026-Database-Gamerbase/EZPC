@@ -103,7 +103,7 @@ public class EmployeeManageController {
     // 신규 채용 (이름, 직급 콤보박스, 시급 입력 받기)
     private void handleHireEmployee() {
         JTextField nameField = new JTextField(10);
-        JComboBox<String> positionCombo = new JComboBox<>(new String[]{"매니저", "알바"});
+        JComboBox<String> positionCombo = new JComboBox<>(new String[]{"매니저", "아르바이트"});
         JSpinner wageSpinner = new JSpinner(new SpinnerNumberModel(10000, 0, 50000, 1000));
 
         JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
