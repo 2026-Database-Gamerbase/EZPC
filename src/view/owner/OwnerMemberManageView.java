@@ -46,6 +46,8 @@ public class OwnerMemberManageView extends JPanel {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setBackground(new Color(240, 240, 240));
 
+        splitPane.setResizeWeight(0.7);
+
         // ==========================================
         // 좌측: 회원 목록 패널 구성
         // ==========================================
@@ -64,7 +66,7 @@ public class OwnerMemberManageView extends JPanel {
         
         leftPanel.add(leftTopPanel, BorderLayout.NORTH);
 
-        String[] memberColumnNames = {"ID", "이름", "현재등급", "충전누적", "잔여시간"};
+        String[] memberColumnNames = {"ID", "이름", "현재등급", "충전누적", "잔여시간", "마지막 로그아웃 시간"};
         memberTableModel = new DefaultTableModel(memberColumnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -76,6 +78,15 @@ public class OwnerMemberManageView extends JPanel {
         memberTable.setFont(FontUtil.getKoreanFontPlain(12));
         memberTable.setRowHeight(25);
         memberTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        // 🚀 [추가] 표 '자체'의 시각적 영역(가로x세로)을 크게 확장합니다.
+        memberTable.setPreferredScrollableViewportSize(new Dimension(650, 500));
+        
+        // 🚀 [추가] 데이터(행) 개수가 적어도 표의 나머지 빈 영역이 공백으로 꽉 채워지도록 설정합니다.
+        memberTable.setFillsViewportHeight(true);
+
+        // 패널 자체에도 크기 힌트를 주어 레이아웃이 찌그러지지 않게 방지합니다.
+        leftPanel.setPreferredSize(new Dimension(650, 530));
 
         leftPanel.add(new JScrollPane(memberTable), BorderLayout.CENTER);
         splitPane.setLeftComponent(leftPanel);
@@ -143,7 +154,7 @@ public class OwnerMemberManageView extends JPanel {
         rightPanel.add(editGradePanel, BorderLayout.SOUTH);
 
         splitPane.setRightComponent(rightPanel);
-        splitPane.setDividerLocation(400);
+        splitPane.setDividerLocation(650);
 
         add(splitPane, BorderLayout.CENTER);
 
@@ -248,10 +259,7 @@ public class OwnerMemberManageView extends JPanel {
     // 상태 갱신용 메서드
     // ==========================================
     
-    /**
-     * DB 데이터로 회원 목록 표를 덮어씌웁니다.
-     * @param data Object[][] 형태의 배열 (ID, 이름, 현재등급, 누적금액, 가입일)
-     */
+    // DB 데이터로 회원 목록 표를 덮어씌웁니다.
     public void setMemberTableData(Object[][] data) {
         memberTableModel.setRowCount(0);
         if (data != null) {
@@ -261,10 +269,7 @@ public class OwnerMemberManageView extends JPanel {
         }
     }
 
-    /**
-     * DB 데이터로 등급 목록 표를 덮어씌웁니다.
-     * @param data Object[][] 형태의 배열 (등급명, 기준금액, 할인율, 혜택설명)
-     */
+    // DB 데이터로 등급 목록 표를 덮어씌웁니다.
     public void setGradeTableData(Object[][] data) {
         gradeTableModel.setRowCount(0);
         if (data != null) {

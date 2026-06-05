@@ -67,7 +67,7 @@ public class MemberManageController {
                 displayList = memberService.getAllUsers();
             }
 
-            Object[][] memberData = new Object[displayList.size()][5];
+            Object[][] memberData = new Object[displayList.size()][6];
             for (int i = 0; i < displayList.size(); i++) {
                 PC_Member m = displayList.get(i);
                 memberData[i][0] = m.getMemberId();
@@ -75,6 +75,14 @@ public class MemberManageController {
                 memberData[i][2] = (m.getGradeType() != null) ? m.getGradeType().toUpperCase() : "BRONZE";
                 memberData[i][3] = String.format("%,d원", m.getTotalPaymentAmount());
                 memberData[i][4] = m.getRemainTime() + "분"; 
+                
+                // 최근 로그아웃 시간 표시 (기록이 없으면 방문 기록 없음)
+                String logoutTime = m.getLastLogoutTime();
+                if (logoutTime != null && logoutTime.length() > 16) {
+                    memberData[i][5] = logoutTime.substring(0, 16); 
+                } else {
+                    memberData[i][5] = (logoutTime != null) ? logoutTime : "방문 기록 없음";
+                }
             }
             view.setMemberTableData(memberData);
 

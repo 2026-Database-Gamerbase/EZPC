@@ -8,6 +8,7 @@ public class PC_Member { //회원 테이블
 	private String gradeType; //등급, 외래키
 	private int totalPaymentAmount; //총 결제 금액
 	private String memberType; //회원 종류
+	private String lastLogoutTime; //마지막 로그아웃 시간
 	
 	public PC_Member() {} //기본 생성자
 
@@ -79,7 +80,13 @@ public class PC_Member { //회원 테이블
 		this.memberType = memberType;
 	}
 	
+	public String getLastLogoutTime() {
+        return lastLogoutTime;
+    }
 	
+    public void setLastLogoutTime(String lastLogoutTime) {
+        this.lastLogoutTime = lastLogoutTime;
+    }
 	
 	
 
