@@ -108,6 +108,7 @@ private static final String URL = "jdbc:mysql://IP주소/EZPC";
 
 `src/Main.java`를 실행합니다.
 
+---
 
 ## 📝 규칙
 
